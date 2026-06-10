@@ -32,6 +32,11 @@ window.MZ = window.MZ || {};
         MZ.audio.ensure();
         MZ.meta.abrirTienda();
       });
+      $('cta-stats').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.showStats();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -118,6 +123,52 @@ window.MZ = window.MZ || {};
       });
     },
 
+    // ---- Pantalla de stats: números de carrera, historia y censo de NPCs ----
+    showStats() {
+      const d = MZ.save.data;
+      // Hitos de la historia: capítulos del Bardo, romance, familia, final
+      const hitos = [
+        ['Historia del Bardo', Math.min(d.loreCap || 0, 7), 7],
+        ['Romance con Morena', Math.min(d.morena || 0, 3), 3],
+        ['Visitas a la Nona', Math.min(d.nona || 0, 3), 3],
+        ['Tato encontrado', d.nietoVisto ? 1 : 0, 1],
+        ['La Nona ya sabe', d.nonaSabe ? 1 : 0, 1],
+        ['El Bardo Fundador', d.fundadorVisto ? 1 : 0, 1],
+      ];
+      const done = hitos.reduce((a, h) => a + h[1], 0);
+      const total = hitos.reduce((a, h) => a + h[2], 0);
+      const pct = Math.round((done / total) * 100);
+      const conocidos = Object.keys(d.npcsConocidos || {}).length;
+      const npcTotal = Object.keys(MZ.NPC_DEFS).length;
+
+      const statsText =
+        `📖 HISTORIA: ${pct}% (${done}/${total} hitos)\n` +
+        hitos.map(h => '   ' + (h[1] >= h[2] ? '✔' : '○') + ' ' + h[0] + ' ' + h[1] + '/' + h[2]).join('\n') +
+        `\n\n👥 NPCs conocidos: ${conocidos}/${npcTotal}` +
+        `\n◈ Oro total recolectado: ${d.totalGold}` +
+        `\n\n⚔ Récord: nivel ${d.bestDepth} · Runs: ${d.runs} · Muertes: ${d.deaths}` +
+        `\n💀 Bajas: ${d.totalKills} · Jefes: ${d.jefesMuertos || 0} · 👣 Pasos: ${d.totalSteps}` +
+        `\n👻 Almas: ${d.almas || 0} · 🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length}`;
+
+      const logrosNode = () => ({
+        name: 'Logros', color: 0xffd700,
+        text: MZ.logros.defs.map(l => {
+          const ok = (d.logrosU || {})[l.id];
+          return (ok ? '🏆 ' : '🔒 ') + l.t + ' — ' + l.d;
+        }).join('\n'),
+        choices: [{ label: 'Volver', fn: statsNode }],
+      });
+      const statsNode = () => ({
+        name: 'Tu Carrera en la Mazmorra', color: 0x00e5ff,
+        text: statsText,
+        choices: [
+          { label: '🏆 Ver logros (' + MZ.logros.count() + '/' + MZ.logros.defs.length + ')', fn: logrosNode },
+          { label: 'Cerrar', fn: null },
+        ],
+      });
+      MZ.dialog.open(statsNode());
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -137,10 +188,12 @@ window.MZ = window.MZ || {};
       const P = S.player;
       $('hp').textContent = '❤ ' + Math.max(0, P.hp) + '/' + P.maxHp + (P.poison > 0 ? ' ☠' + P.poison : '');
       $('hp').style.color = P.poison > 0 ? '#66ff44' : '#ff4d6d';
-      $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '');
+      $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '') +
+        (S.mapPct != null ? ' · ' + S.mapPct + '%' : '');
+      MZ.refreshHeroSprite();
       $('gold').textContent = '◈ ' + P.gold;
-      const eq = [P.melee ? '🗡 ' + P.melee.name : '👊 Piñas'];
-      if (P.ranged) eq.push('🏹 ' + P.ranged.name + ' (alc ' + P.ranged.range + ')');
+      const eq = [P.melee ? '🗡 ' + P.melee.name + (P.melee.uses != null ? ' ×' + P.melee.uses : '') : '👊 Piñas'];
+      if (P.ranged) eq.push((P.ranged.aoe ? '💚 ' : '🏹 ') + P.ranged.name + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''));
       if (P.shield) eq.push('🛡 ' + P.shield.name);
       eq.push('ATK ' + P.atk + ' · DEF ' + P.def + ' · 👣 ' + (P.steps || 0));
       $('equip').textContent = eq.join('  ·  ');
@@ -161,8 +214,13 @@ window.MZ = window.MZ || {};
           `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
-      if (d.runs > 0) $('cta-shop').classList.remove('hidden');
-      else $('cta-shop').classList.add('hidden');
+      if (d.runs > 0) {
+        $('cta-shop').classList.remove('hidden');
+        $('cta-stats').classList.remove('hidden');
+      } else {
+        $('cta-shop').classList.add('hidden');
+        $('cta-stats').classList.add('hidden');
+      }
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;

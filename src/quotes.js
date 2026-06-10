@@ -163,6 +163,29 @@ window.MZ = window.MZ || {};
       'Veneno en las venas. Como el lunes, pero literal.',
       'Te envenenaron. Tomate algo, pero algo bueno esta vez.',
     ],
+    armaRota: [
+      'Se rompió {w}. De vuelta a las piñas, como los antiguos.',
+      '{w} dijo basta. Descansá en paz, fierro querido.',
+      'CRACK. {w} hecha pedazos. Buscá otra, rápido.',
+    ],
+    arcoVacio: [
+      'Última flecha. {w} ya es decoración: lo tirás.',
+      'Sin munición. {w} al tacho, a buscar otro.',
+      'Click. Click. Nada. Chau {w}.',
+    ],
+    bfgPickup: [
+      'LA BESTIA 9000. Una bala. UNA. Elegí bien el momento, soldado.',
+      'Levantaste La Bestia 9000. El dungeon contiene la respiración.',
+    ],
+    bfgDisparo: [
+      'BFFFFFG. La habitación quedó en silencio. Y verde.',
+      'UNA BALA. CERO SOBREVIVIENTES. Doom estaría orgulloso.',
+      'La Bestia habló. El dungeon escuchó.',
+    ],
+    bfgVacia: [
+      'La Bestia quedó vacía. Fue hermoso mientras duró.',
+      'Sin bala, La Bestia es un pisapapeles verde. La soltás con respeto.',
+    ],
     lootArma: [
       '{w}. Esto ya es otra cosa, eh.',
       'Equipaste: {w}. Ahora sí das un poco de miedo.',

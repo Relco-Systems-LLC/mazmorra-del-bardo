@@ -45,6 +45,7 @@ window.MZ = window.MZ || {};
     potion: { sprite: 'pocion', color: 0xff66ff, scale: 0.5 },
     weapon: { sprite: 'espada', color: 0x66ddff, scale: 0.55 },
     bow: { sprite: 'arco', color: 0xffaa66, scale: 0.55 },
+    bfg: { sprite: 'bfg', color: 0x33ff66, scale: 0.6 },
     armor: { sprite: 'escudo', color: 0x9d6bff, scale: 0.5 },
     mate: { sprite: 'mate', color: 0x88ff66, scale: 0.5 },
     mateLegendario: { sprite: 'mateOro', color: 0x00ffc8, scale: 0.6 },
@@ -91,7 +92,18 @@ window.MZ = window.MZ || {};
     if (g.atk != null) g.atk += bonus;
     if (g.def != null) g.def += Math.floor(bonus / 2);
     if (bonus > 0) g.name += ' +' + bonus;
+    // economía descartable: filo limitado y munición corta para recambio rápido
+    if (kind === 'melee') g.uses = 12 + tier * 3 + Math.floor(Math.random() * 6);
+    if (kind === 'ranged') g.ammo = 4 + Math.floor(tier / 2) + Math.floor(Math.random() * 3);
     return g;
+  };
+
+  // La Bestia 9000: una bala, una habitación menos.
+  MZ.genBFG = function (depth) {
+    return {
+      kind: 'ranged', name: 'La Bestia 9000', aoe: true,
+      atk: 30 + depth * 2, range: 7, ammo: 1,
+    };
   };
 
   // Recalcula stats efectivos del jugador a partir de base + equipo.

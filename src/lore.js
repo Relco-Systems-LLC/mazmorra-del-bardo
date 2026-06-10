@@ -40,12 +40,15 @@ window.MZ = window.MZ || {};
       out.push('nieto');
     }
     if (isBoss || depth < 2) return out;
+    out.push('mercader'); // Don Olivera tiene franquicia en todos los pisos
     if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
-    const pool = ['mercader', 'mercader', 'bardo', 'bardo'];
+    const pool = ['bardo', 'bardo'];
     if (depth >= 2) pool.push('tahur');
     if (depth >= 3) pool.push('nona');
     if (depth >= 4) pool.push('morena', 'morena');
     if (depth >= 5) pool.push('herrero');
+    if (depth >= 6) pool.push('critico');
+    if (depth >= 8) pool.push('djtigre');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
     const want = (Math.random() < 0.75 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
     for (let i = 0; i < want; i++) {
@@ -96,7 +99,7 @@ window.MZ = window.MZ || {};
       fn() {
         if (p.gold < cGomera) return mercaderMenu(npc, 'La gomera es un clásico, pero los clásicos se pagan.');
         p.gold -= cGomera;
-        p.ranged = { kind: 'ranged', name: 'Gomera de barrio', atk: 1 + Math.floor(d / 7), range: 3 };
+        p.ranged = { kind: 'ranged', name: 'Gomera de barrio', atk: 1 + Math.floor(d / 7), range: 3, ammo: 8 };
         npc.soldBow = true;
         MZ.audio.pickup(); MZ.ui.updateHUD();
         return mercaderMenu(npc, 'Rompí vidrios con esa desde los ocho años. Ahora rompé cráneos.');
@@ -493,6 +496,60 @@ window.MZ = window.MZ || {};
     ]));
   };
 
+  // ---- El Crítico: el único que sigue humano, y te reseña EL RUN ----
+  function criticoTalk() {
+    const p = P(), d = D(), depth = MZ.state.depth;
+    const estrellas = Math.min(5, 1 + Math.floor(depth / 8) + (p.kills > 15 ? 1 : 0) + (d.deaths < 5 ? 1 : 0));
+    const reseñas = [
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. El protagonista muestra carisma limitado pero insistencia admirable. ${p.kills} bajas al nivel ${depth}: correcto, no brillante."`,
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. Vi mejores entradas al nivel ${depth}, pero también vi ${d.deaths} muertes de este mismo actor, así que bajemos las expectativas."`,
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. El uso del ${p.melee ? p.melee.name : 'puño pelado'} es... una decisión artística. Audaz. Cuestionable. Como todo acá."`,
+    ];
+    return node('El Crítico', 0xccaa66,
+      'Sí, soy humano todavía. La maldición no me agarra: para maldecir a un crítico hace falta que PRIMERO le importe algo.\n\n¿Querés la reseña de tu run? Es gratis. La dignidad la pagás vos.',
+      [
+        {
+          label: 'Dale, reseñame', fn() {
+            const r = reseñas[Math.floor(Math.random() * reseñas.length)];
+            if (estrellas >= 4) { p.gold += 40; MZ.audio.gold(); MZ.ui.updateHUD(); }
+            return node('El Crítico', 0xccaa66,
+              r + (estrellas >= 4 ? '\n\n...Está bien, me gustó. Tomá 40 de oro del fondo de prensa. No se lo cuentes a nadie.' : '\n\nVolvé cuando tengas más nivel. Literal.'), null);
+          },
+        },
+        { label: 'Mi run no se toca', fn: () => node('El Crítico', 0xccaa66, 'Sensible al feedback. Anotado para la reseña final.', null) },
+      ]);
+  }
+
+  // ---- DJ Tigre: el DJ fantasma del Tiger Tiger ----
+  function djtigreTalk() {
+    const p = P();
+    return node('DJ Tigre', 0xff8800,
+      'EHHH, ¿QUÉ HACE LA GENTE? Bienvenido a la sucursal subterránea del Tiger Tiger. La última función nunca terminó, papá: acá abajo seguimos dándole.\n\n¿Te pongo un tema?',
+      [
+        {
+          label: 'Mandale power metal', fn() {
+            p.hp = p.maxHp; p.poison = 0;
+            const buff = Math.random() < 0.3;
+            if (buff) { p.baseAtk += 1; MZ.recalcStats(); }
+            MZ.audio.secret(); MZ.fx.flash(0.3, 0xff8800); MZ.ui.updateHUD();
+            MZ.easter.disco && MZ.fx.shake(3);
+            return node('DJ Tigre', 0xff8800,
+              buff
+                ? '*suena Helloween a un volumen ilegal*\n\n¡ESO! Curado entero Y con la sangre arriba: +1 ATK. El power metal es medicina, después del guiso de la Nona obvio.'
+                : '*suena Rata Blanca, la gente (los esqueletos) rugen*\n\nCurado entero, papá. La leyenda continúa. Volvé cuando quieras, la pista nunca cierra.', null);
+          },
+        },
+        {
+          label: 'Una lenta, vengo golpeado', fn() {
+            p.hp = p.maxHp; p.poison = 0;
+            MZ.audio.mate(); MZ.ui.updateHUD();
+            return node('DJ Tigre', 0xff8800,
+              '*suena una power ballad de Edguy*\n\nCurado entero. Llorá tranquilo que acá nadie juzga: los fantasmas también extrañan.', null);
+          },
+        },
+      ]);
+  }
+
   // ---- Tato, el nieto de la Nona: cierre de un arco de 20 años ----
   function nietoTalk() {
     const p = P();
@@ -528,6 +585,8 @@ window.MZ = window.MZ || {};
   // ---- El Bardo Fundador: nivel 50, la última función ----
   function fundadorTalk() {
     const p = P();
+    D().fundadorVisto = 1;
+    MZ.save.store();
     return node('El Bardo Fundador', 0xffd700,
       'Cincuenta niveles. Nadie había llegado tan lejos desde... bueno, desde nunca. Bravo. BRAVO.\n\nYo soy el que escribe esto, ¿sabés? Cada nivel, cada rata, cada frase picante que te tiró el narrador. Cien años escribiendo para un teatro vacío.\n\nY de golpe... público.',
       [
@@ -567,5 +626,7 @@ window.MZ = window.MZ || {};
     herrero: { talk: (npc) => herreroTalk(npc) },
     nieto: { talk: nietoTalk },
     fundador: { talk: fundadorTalk },
+    critico: { talk: criticoTalk },
+    djtigre: { talk: djtigreTalk },
   };
 })();

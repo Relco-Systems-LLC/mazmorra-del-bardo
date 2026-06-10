@@ -101,6 +101,7 @@
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
   <div class="cta hidden" id="cta-shop" style="border-color:#ffd700;text-shadow:0 0 8px #ffd700;box-shadow:0 0 16px rgba(255,215,0,.3);animation:none;font-size:13px;padding:9px 20px">&#128123; QUIOSCO DE LAS ALMAS</div>
+  <div class="cta hidden" id="cta-stats" style="border-color:#9d6bff;text-shadow:0 0 8px #9d6bff;box-shadow:0 0 16px rgba(157,107,255,.3);animation:none;font-size:13px;padding:9px 20px">&#128202; STATS</div>
   <div class="sub" style="margin-top:12px">
     <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
     <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
@@ -2513,6 +2514,91 @@ window.MZ = window.MZ || {};
         '...BB.BB....',
       ],
     },
+    heroePinas: {
+      pal: { H: 0x6b3e1f, P: 0xffd9b3, E: 0x111111, C: 0x00cfff, c: 0x0088aa, L: 0x223344, B: 0x553311 },
+      map: [
+        '...HHHHH....',
+        '..HHHHHHH...',
+        '..HPPPPPH...',
+        '..HPEPPEH...',
+        '..HPPPPPH...',
+        '...PPPPP....',
+        '..CCCCCCC...',
+        '.CcCCCCCcC..',
+        '.P.CCCCC.P..',
+        '...CCCCC....',
+        '...LL.LL....',
+        '...BB.BB....',
+      ],
+    },
+    heroeArco: {
+      pal: { H: 0x6b3e1f, P: 0xffd9b3, E: 0x111111, C: 0x00cfff, c: 0x0088aa, L: 0x223344, B: 0x553311, M: 0x8a5a2b, S: 0xcccccc },
+      map: [
+        '...HHHHH...S',
+        '..HHHHHHH.M.',
+        '..HPPPPPH.M.',
+        '..HPEPPEH.M.',
+        '..HPPPPPHM..',
+        '...PPPPP.M..',
+        '..CCCCCCCM..',
+        '.CcCCCCCcM..',
+        '.C.CCCCC.M..',
+        '...CCCCC..M.',
+        '...LL.LL..M.',
+        '...BB.BB...S',
+      ],
+    },
+    heroeBfg: {
+      pal: { H: 0x6b3e1f, P: 0xffd9b3, E: 0x111111, C: 0x00cfff, c: 0x0088aa, L: 0x223344, B: 0x553311, G: 0x33ff66, M: 0x2a2a33 },
+      map: [
+        '...HHHHH....',
+        '..HHHHHHH...',
+        '..HPPPPPH...',
+        '..HPEPPEH...',
+        '..HPPPPPH...',
+        '...PPPPP....',
+        '..CCCCCCMM..',
+        '.CcCCCCMGGM.',
+        '.C.CCCCMGGM.',
+        '...CCCC.MM..',
+        '...LL.LL....',
+        '...BB.BB....',
+      ],
+    },
+    critico: {
+      pal: { P: 0xd8c8a8, H: 0x888899, E: 0x111111, A: 0x222233, a: 0x333344, W: 0xffffff, N: 0xccaa66 },
+      map: [
+        '...HHHHHH...',
+        '..HHHHHHHH..',
+        '..HPPPPPPH..',
+        '..WEWPPWEW..',
+        '..HPPPPPPH..',
+        '...PPPPPP...',
+        '..AAAAAAAA..',
+        '.AAaAAAAaAA.',
+        '.AAAAAAAAAN.',
+        '.AaAAAAAaAN.',
+        '...AA..AA.N.',
+        '...AA..AA...',
+      ],
+    },
+    djtigre: {
+      pal: { P: 0xc8a878, N: 0x222233, E: 0x111111, A: 0xff8800, a: 0xcc6600, F: 0xff00ff, C: 0x00ffff },
+      map: [
+        '..N.NNNN.N..',
+        '..NNNNNNNN..',
+        '..NPPPPPPN..',
+        '..NPEPPEPN..',
+        '..NPPPPPPN..',
+        '...PPPPPP...',
+        '..AAAAAAAA..',
+        '.AAaAFCAaAA.',
+        '.AAAAFCAAAA.',
+        '.AaAAFCAAaA.',
+        '...AA..AA...',
+        '...AA..AA...',
+      ],
+    },
     rata: {
       pal: { R: 0x8a8a92, r: 0x6e6e76, P: 0xff9eb5, E: 0xff2244, W: 0xeeeeee },
       map: [
@@ -3014,6 +3100,20 @@ window.MZ = window.MZ || {};
         '...MMMM...',
       ],
     },
+    bfg: {
+      pal: { G: 0x33ff66, g: 0x1a8833, M: 0x2a2a33, m: 0x44444f, W: 0xccffdd },
+      map: [
+        '..........',
+        '.mMMMMMm..',
+        'MMGGGGMMM.',
+        'MGWGGGGMMm',
+        'MGGGGGGMMm',
+        'MMGGGGMMM.',
+        '.mMMMMMm..',
+        '...MM.MM..',
+        '...MM.MM..',
+      ],
+    },
     tequila: {
       pal: { V: [0x88ddcc, 0.85], v: 0x55aa99, A: 0xffe680, L: 0xddaa33, S: 0xffffff },
       map: [
@@ -3285,6 +3385,29 @@ window.MZ = window.MZ || {};
       'Envenenado. La poción decía "agitar antes de usar", no "desconfiar antes de usar".',
       'Veneno en las venas. Como el lunes, pero literal.',
       'Te envenenaron. Tomate algo, pero algo bueno esta vez.',
+    ],
+    armaRota: [
+      'Se rompió {w}. De vuelta a las piñas, como los antiguos.',
+      '{w} dijo basta. Descansá en paz, fierro querido.',
+      'CRACK. {w} hecha pedazos. Buscá otra, rápido.',
+    ],
+    arcoVacio: [
+      'Última flecha. {w} ya es decoración: lo tirás.',
+      'Sin munición. {w} al tacho, a buscar otro.',
+      'Click. Click. Nada. Chau {w}.',
+    ],
+    bfgPickup: [
+      'LA BESTIA 9000. Una bala. UNA. Elegí bien el momento, soldado.',
+      'Levantaste La Bestia 9000. El dungeon contiene la respiración.',
+    ],
+    bfgDisparo: [
+      'BFFFFFG. La habitación quedó en silencio. Y verde.',
+      'UNA BALA. CERO SOBREVIVIENTES. Doom estaría orgulloso.',
+      'La Bestia habló. El dungeon escuchó.',
+    ],
+    bfgVacia: [
+      'La Bestia quedó vacía. Fue hermoso mientras duró.',
+      'Sin bala, La Bestia es un pisapapeles verde. La soltás con respeto.',
     ],
     lootArma: [
       '{w}. Esto ya es otra cosa, eh.',
@@ -3657,9 +3780,12 @@ window.MZ = window.MZ || {};
       if (c) enemies.push({ type: 'barril', x: c.x, y: c.y });
     }
     if (rng.chance(0.7)) drop('potion');
-    if (depth % 3 === 0 && rng.chance(0.65)) drop('weapon');
+    // armas seguido: el filo se gasta y la munición es corta, hay que reponer
+    if (rng.chance(0.6)) drop('weapon');
+    if (rng.chance(0.35)) drop('weapon');
+    if (depth >= 2 && rng.chance(0.45)) drop('bow');
     if (depth % 4 === 0 && rng.chance(0.6)) drop('armor');
-    if (depth >= 2 && depth % 3 === 1 && rng.chance(0.5)) drop('bow');
+    if (depth >= 5 && rng.chance(0.05)) drop('bfg');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
@@ -3722,6 +3848,7 @@ window.MZ = window.MZ || {};
     potion: { sprite: 'pocion', color: 0xff66ff, scale: 0.5 },
     weapon: { sprite: 'espada', color: 0x66ddff, scale: 0.55 },
     bow: { sprite: 'arco', color: 0xffaa66, scale: 0.55 },
+    bfg: { sprite: 'bfg', color: 0x33ff66, scale: 0.6 },
     armor: { sprite: 'escudo', color: 0x9d6bff, scale: 0.5 },
     mate: { sprite: 'mate', color: 0x88ff66, scale: 0.5 },
     mateLegendario: { sprite: 'mateOro', color: 0x00ffc8, scale: 0.6 },
@@ -3768,7 +3895,18 @@ window.MZ = window.MZ || {};
     if (g.atk != null) g.atk += bonus;
     if (g.def != null) g.def += Math.floor(bonus / 2);
     if (bonus > 0) g.name += ' +' + bonus;
+    // economía descartable: filo limitado y munición corta para recambio rápido
+    if (kind === 'melee') g.uses = 12 + tier * 3 + Math.floor(Math.random() * 6);
+    if (kind === 'ranged') g.ammo = 4 + Math.floor(tier / 2) + Math.floor(Math.random() * 3);
     return g;
+  };
+
+  // La Bestia 9000: una bala, una habitación menos.
+  MZ.genBFG = function (depth) {
+    return {
+      kind: 'ranged', name: 'La Bestia 9000', aoe: true,
+      atk: 30 + depth * 2, range: 7, ammo: 1,
+    };
   };
 
   // Recalcula stats efectivos del jugador a partir de base + equipo.
@@ -3996,12 +4134,15 @@ window.MZ = window.MZ || {};
       out.push('nieto');
     }
     if (isBoss || depth < 2) return out;
+    out.push('mercader'); // Don Olivera tiene franquicia en todos los pisos
     if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
-    const pool = ['mercader', 'mercader', 'bardo', 'bardo'];
+    const pool = ['bardo', 'bardo'];
     if (depth >= 2) pool.push('tahur');
     if (depth >= 3) pool.push('nona');
     if (depth >= 4) pool.push('morena', 'morena');
     if (depth >= 5) pool.push('herrero');
+    if (depth >= 6) pool.push('critico');
+    if (depth >= 8) pool.push('djtigre');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
     const want = (Math.random() < 0.75 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
     for (let i = 0; i < want; i++) {
@@ -4052,7 +4193,7 @@ window.MZ = window.MZ || {};
       fn() {
         if (p.gold < cGomera) return mercaderMenu(npc, 'La gomera es un clásico, pero los clásicos se pagan.');
         p.gold -= cGomera;
-        p.ranged = { kind: 'ranged', name: 'Gomera de barrio', atk: 1 + Math.floor(d / 7), range: 3 };
+        p.ranged = { kind: 'ranged', name: 'Gomera de barrio', atk: 1 + Math.floor(d / 7), range: 3, ammo: 8 };
         npc.soldBow = true;
         MZ.audio.pickup(); MZ.ui.updateHUD();
         return mercaderMenu(npc, 'Rompí vidrios con esa desde los ocho años. Ahora rompé cráneos.');
@@ -4449,6 +4590,60 @@ window.MZ = window.MZ || {};
     ]));
   };
 
+  // ---- El Crítico: el único que sigue humano, y te reseña EL RUN ----
+  function criticoTalk() {
+    const p = P(), d = D(), depth = MZ.state.depth;
+    const estrellas = Math.min(5, 1 + Math.floor(depth / 8) + (p.kills > 15 ? 1 : 0) + (d.deaths < 5 ? 1 : 0));
+    const reseñas = [
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. El protagonista muestra carisma limitado pero insistencia admirable. ${p.kills} bajas al nivel ${depth}: correcto, no brillante."`,
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. Vi mejores entradas al nivel ${depth}, pero también vi ${d.deaths} muertes de este mismo actor, así que bajemos las expectativas."`,
+      `"${'★'.repeat(estrellas)}${'☆'.repeat(5 - estrellas)}. El uso del ${p.melee ? p.melee.name : 'puño pelado'} es... una decisión artística. Audaz. Cuestionable. Como todo acá."`,
+    ];
+    return node('El Crítico', 0xccaa66,
+      'Sí, soy humano todavía. La maldición no me agarra: para maldecir a un crítico hace falta que PRIMERO le importe algo.\n\n¿Querés la reseña de tu run? Es gratis. La dignidad la pagás vos.',
+      [
+        {
+          label: 'Dale, reseñame', fn() {
+            const r = reseñas[Math.floor(Math.random() * reseñas.length)];
+            if (estrellas >= 4) { p.gold += 40; MZ.audio.gold(); MZ.ui.updateHUD(); }
+            return node('El Crítico', 0xccaa66,
+              r + (estrellas >= 4 ? '\n\n...Está bien, me gustó. Tomá 40 de oro del fondo de prensa. No se lo cuentes a nadie.' : '\n\nVolvé cuando tengas más nivel. Literal.'), null);
+          },
+        },
+        { label: 'Mi run no se toca', fn: () => node('El Crítico', 0xccaa66, 'Sensible al feedback. Anotado para la reseña final.', null) },
+      ]);
+  }
+
+  // ---- DJ Tigre: el DJ fantasma del Tiger Tiger ----
+  function djtigreTalk() {
+    const p = P();
+    return node('DJ Tigre', 0xff8800,
+      'EHHH, ¿QUÉ HACE LA GENTE? Bienvenido a la sucursal subterránea del Tiger Tiger. La última función nunca terminó, papá: acá abajo seguimos dándole.\n\n¿Te pongo un tema?',
+      [
+        {
+          label: 'Mandale power metal', fn() {
+            p.hp = p.maxHp; p.poison = 0;
+            const buff = Math.random() < 0.3;
+            if (buff) { p.baseAtk += 1; MZ.recalcStats(); }
+            MZ.audio.secret(); MZ.fx.flash(0.3, 0xff8800); MZ.ui.updateHUD();
+            MZ.easter.disco && MZ.fx.shake(3);
+            return node('DJ Tigre', 0xff8800,
+              buff
+                ? '*suena Helloween a un volumen ilegal*\n\n¡ESO! Curado entero Y con la sangre arriba: +1 ATK. El power metal es medicina, después del guiso de la Nona obvio.'
+                : '*suena Rata Blanca, la gente (los esqueletos) rugen*\n\nCurado entero, papá. La leyenda continúa. Volvé cuando quieras, la pista nunca cierra.', null);
+          },
+        },
+        {
+          label: 'Una lenta, vengo golpeado', fn() {
+            p.hp = p.maxHp; p.poison = 0;
+            MZ.audio.mate(); MZ.ui.updateHUD();
+            return node('DJ Tigre', 0xff8800,
+              '*suena una power ballad de Edguy*\n\nCurado entero. Llorá tranquilo que acá nadie juzga: los fantasmas también extrañan.', null);
+          },
+        },
+      ]);
+  }
+
   // ---- Tato, el nieto de la Nona: cierre de un arco de 20 años ----
   function nietoTalk() {
     const p = P();
@@ -4484,6 +4679,8 @@ window.MZ = window.MZ || {};
   // ---- El Bardo Fundador: nivel 50, la última función ----
   function fundadorTalk() {
     const p = P();
+    D().fundadorVisto = 1;
+    MZ.save.store();
     return node('El Bardo Fundador', 0xffd700,
       'Cincuenta niveles. Nadie había llegado tan lejos desde... bueno, desde nunca. Bravo. BRAVO.\n\nYo soy el que escribe esto, ¿sabés? Cada nivel, cada rata, cada frase picante que te tiró el narrador. Cien años escribiendo para un teatro vacío.\n\nY de golpe... público.',
       [
@@ -4523,6 +4720,8 @@ window.MZ = window.MZ || {};
     herrero: { talk: (npc) => herreroTalk(npc) },
     nieto: { talk: nietoTalk },
     fundador: { talk: fundadorTalk },
+    critico: { talk: criticoTalk },
+    djtigre: { talk: djtigreTalk },
   };
 })();
 
@@ -4541,6 +4740,8 @@ window.MZ = window.MZ || {};
     tahur: { name: 'El Tahúr', sprite: 'tahur', color: 0xffd700, scale: 0.95 },
     herrero: { name: 'Fierrito', sprite: 'herrero', color: 0x9aa5b1, scale: 0.95 },
     nieto: { name: 'Tato, el Perdido Hace 20 Años', sprite: 'nieto', color: 0xc0c8d0, scale: 0.95 },
+    critico: { name: 'El Crítico', sprite: 'critico', color: 0xccaa66, scale: 0.95 },
+    djtigre: { name: 'DJ Tigre', sprite: 'djtigre', color: 0xff8800, scale: 0.95 },
     fundador: { name: 'El Bardo Fundador', sprite: 'fundador', color: 0xffd700, scale: 1.05 },
   };
 
@@ -4591,6 +4792,13 @@ window.MZ = window.MZ || {};
       return;
     }
     npc.talked = true;
+    // censo de NPCs conocidos (histórico, para la pantalla de stats)
+    const d = MZ.save.data;
+    d.npcsConocidos = d.npcsConocidos || {};
+    if (!d.npcsConocidos[npc.type]) {
+      d.npcsConocidos[npc.type] = 1;
+      MZ.save.store();
+    }
     MZ.audio.pickup();
     MZ.dialog.open(lore.talk(npc));
   };
@@ -4755,6 +4963,11 @@ window.MZ = window.MZ || {};
         MZ.audio.ensure();
         MZ.meta.abrirTienda();
       });
+      $('cta-stats').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.showStats();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -4841,6 +5054,52 @@ window.MZ = window.MZ || {};
       });
     },
 
+    // ---- Pantalla de stats: números de carrera, historia y censo de NPCs ----
+    showStats() {
+      const d = MZ.save.data;
+      // Hitos de la historia: capítulos del Bardo, romance, familia, final
+      const hitos = [
+        ['Historia del Bardo', Math.min(d.loreCap || 0, 7), 7],
+        ['Romance con Morena', Math.min(d.morena || 0, 3), 3],
+        ['Visitas a la Nona', Math.min(d.nona || 0, 3), 3],
+        ['Tato encontrado', d.nietoVisto ? 1 : 0, 1],
+        ['La Nona ya sabe', d.nonaSabe ? 1 : 0, 1],
+        ['El Bardo Fundador', d.fundadorVisto ? 1 : 0, 1],
+      ];
+      const done = hitos.reduce((a, h) => a + h[1], 0);
+      const total = hitos.reduce((a, h) => a + h[2], 0);
+      const pct = Math.round((done / total) * 100);
+      const conocidos = Object.keys(d.npcsConocidos || {}).length;
+      const npcTotal = Object.keys(MZ.NPC_DEFS).length;
+
+      const statsText =
+        `📖 HISTORIA: ${pct}% (${done}/${total} hitos)\n` +
+        hitos.map(h => '   ' + (h[1] >= h[2] ? '✔' : '○') + ' ' + h[0] + ' ' + h[1] + '/' + h[2]).join('\n') +
+        `\n\n👥 NPCs conocidos: ${conocidos}/${npcTotal}` +
+        `\n◈ Oro total recolectado: ${d.totalGold}` +
+        `\n\n⚔ Récord: nivel ${d.bestDepth} · Runs: ${d.runs} · Muertes: ${d.deaths}` +
+        `\n💀 Bajas: ${d.totalKills} · Jefes: ${d.jefesMuertos || 0} · 👣 Pasos: ${d.totalSteps}` +
+        `\n👻 Almas: ${d.almas || 0} · 🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length}`;
+
+      const logrosNode = () => ({
+        name: 'Logros', color: 0xffd700,
+        text: MZ.logros.defs.map(l => {
+          const ok = (d.logrosU || {})[l.id];
+          return (ok ? '🏆 ' : '🔒 ') + l.t + ' — ' + l.d;
+        }).join('\n'),
+        choices: [{ label: 'Volver', fn: statsNode }],
+      });
+      const statsNode = () => ({
+        name: 'Tu Carrera en la Mazmorra', color: 0x00e5ff,
+        text: statsText,
+        choices: [
+          { label: '🏆 Ver logros (' + MZ.logros.count() + '/' + MZ.logros.defs.length + ')', fn: logrosNode },
+          { label: 'Cerrar', fn: null },
+        ],
+      });
+      MZ.dialog.open(statsNode());
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -4860,10 +5119,12 @@ window.MZ = window.MZ || {};
       const P = S.player;
       $('hp').textContent = '❤ ' + Math.max(0, P.hp) + '/' + P.maxHp + (P.poison > 0 ? ' ☠' + P.poison : '');
       $('hp').style.color = P.poison > 0 ? '#66ff44' : '#ff4d6d';
-      $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '');
+      $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '') +
+        (S.mapPct != null ? ' · ' + S.mapPct + '%' : '');
+      MZ.refreshHeroSprite();
       $('gold').textContent = '◈ ' + P.gold;
-      const eq = [P.melee ? '🗡 ' + P.melee.name : '👊 Piñas'];
-      if (P.ranged) eq.push('🏹 ' + P.ranged.name + ' (alc ' + P.ranged.range + ')');
+      const eq = [P.melee ? '🗡 ' + P.melee.name + (P.melee.uses != null ? ' ×' + P.melee.uses : '') : '👊 Piñas'];
+      if (P.ranged) eq.push((P.ranged.aoe ? '💚 ' : '🏹 ') + P.ranged.name + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''));
       if (P.shield) eq.push('🛡 ' + P.shield.name);
       eq.push('ATK ' + P.atk + ' · DEF ' + P.def + ' · 👣 ' + (P.steps || 0));
       $('equip').textContent = eq.join('  ·  ');
@@ -4884,8 +5145,13 @@ window.MZ = window.MZ || {};
           `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
-      if (d.runs > 0) $('cta-shop').classList.remove('hidden');
-      else $('cta-shop').classList.add('hidden');
+      if (d.runs > 0) {
+        $('cta-shop').classList.remove('hidden');
+        $('cta-stats').classList.remove('hidden');
+      } else {
+        $('cta-shop').classList.add('hidden');
+        $('cta-stats').classList.add('hidden');
+      }
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;
@@ -5046,15 +5312,64 @@ window.MZ = window.MZ || {};
       const p2 = MZ.toPx(e.x, e.y);
       MZ.fx.trail(p2.x, p2.y, e.def.color);
     }
+    // el filo se gasta: arma rota = de vuelta a las piñas
+    if (P.melee && P.melee.uses != null) {
+      P.melee.uses--;
+      if (P.melee.uses <= 0) {
+        MZ.say('armaRota', { w: P.melee.name });
+        P.melee = null;
+        MZ.recalcStats();
+        MZ.audio.hurt();
+      }
+      MZ.ui.updateHUD();
+    }
   };
+
+  // La Bestia 9000: revienta todo enemigo a la vista en un radio enorme.
+  function fireBFG(target) {
+    const S = MZ.state, P = S.player, w = P.ranged;
+    const pp = MZ.toPx(P.x, P.y);
+    MZ.fx.flash(0.6, 0x33ff66);
+    MZ.fx.shake(16);
+    MZ.fx.slowmo(400);
+    MZ.audio.boss();
+    MZ.fx.ring(pp.x, pp.y, 0x33ff66, true);
+    for (const e of [...S.enemies]) {
+      if (e.dead) continue;
+      const d = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
+      if (d > w.range || !MZ.los(P.x, P.y, e.x, e.y)) continue;
+      MZ.fx.bolt(pp, MZ.toPx(e.x, e.y), 0x33ff66);
+      const ep = MZ.toPx(e.x, e.y);
+      MZ.fx.explode(ep.x, ep.y, 0x33ff66, 26, 4, 1.1);
+      e.hp -= w.atk;
+      e.awake = true;
+      MZ.fx.floatText(ep.x, ep.y - 10, String(w.atk), 0x33ff66, 18);
+      if (e.hp <= 0) MZ.killEnemy(e);
+    }
+    MZ.say('bfgDisparo', null, 3500);
+  }
 
   MZ.playerRangedAttack = function (e) {
     const P = MZ.state.player;
-    const crit = Math.random() < 0.1;
-    let dmg = P.ranged.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
-    if (crit) dmg *= 2;
-    MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
-    hitEnemy(e, dmg, crit);
+    const w = P.ranged;
+    if (w.aoe) {
+      fireBFG(e);
+    } else {
+      const crit = Math.random() < 0.1;
+      let dmg = w.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
+      if (crit) dmg *= 2;
+      MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
+      hitEnemy(e, dmg, crit);
+    }
+    // munición: sin balas, el arma se descarta
+    if (w.ammo != null) {
+      w.ammo--;
+      if (w.ammo <= 0) {
+        MZ.say(w.aoe ? 'bfgVacia' : 'arcoVacio', { w: w.name });
+        P.ranged = null;
+      }
+      MZ.ui.updateHUD();
+    }
   };
 
   MZ.killEnemy = function (e) {
@@ -5102,12 +5417,13 @@ window.MZ = window.MZ || {};
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
-    // Drops: los monstruos sueltan loot en el piso.
+    // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-    } else if (Math.random() < 0.22) {
+      if (Math.random() < 0.15) MZ.spawnItemAt('bfg', e.x + 1, e.y);
+    } else if (Math.random() < 0.3) {
       const r = Math.random();
-      const type = r < 0.4 ? 'gold' : r < 0.65 ? 'potion' : r < 0.78 ? 'weapon' : r < 0.88 ? 'bow' : r < 0.96 ? 'armor' : 'mate';
+      const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
     } else if (Math.random() < 0.14) {
       // corazón: vida directa, más probable si venís golpeado
@@ -5350,9 +5666,24 @@ window.MZ = window.MZ || {};
   };
 
   let playerSpr = null;
+  let heroShape = null;     // el sprite de forma del héroe (cambia con el arma)
+  let heroTexName = '';
   let camX = 0, camY = 0;
   let pulseT = 0;
   let touch = null; // posición global del dedo mientras está apoyado
+
+  // El héroe se ve según lo que empuña: BFG > espada > arco > piñas.
+  MZ.refreshHeroSprite = function () {
+    if (!heroShape || !S.player) return;
+    const P = S.player;
+    const name = P.ranged && P.ranged.aoe ? 'heroeBfg'
+      : P.melee ? 'heroe'
+      : P.ranged ? 'heroeArco'
+      : 'heroePinas';
+    if (name === heroTexName) return;
+    heroTexName = name;
+    heroShape.texture = PIX[name];
+  };
 
   // ---- Helpers globales ----
   MZ.toPx = (x, y) => ({ x: x * TILE + TILE / 2, y: y * TILE + TILE / 2 });
@@ -5564,8 +5895,17 @@ window.MZ = window.MZ || {};
       return en;
     });
 
+    // Total de piso transitable, para el % de mapa recorrido.
+    L.floorTotal = 0;
+    for (let i = 0; i < L.w * L.h; i++) {
+      if (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS) L.floorTotal++;
+    }
+
     // Jugador: si resumimos, donde estaba; si no, en la entrada.
     playerSpr = entitySprite({ sprite: 'heroe', color: 0x00e5ff, scale: 0.95 }, playerLayer);
+    heroShape = playerSpr.children[1];
+    heroTexName = 'heroe';
+    MZ.refreshHeroSprite();
     if (!restore) { S.player.x = L.entrance.x; S.player.y = L.entrance.y; }
     const pp = MZ.toPx(S.player.x, S.player.y);
     playerSpr.position.set(pp.x, pp.y);
@@ -5648,6 +5988,12 @@ window.MZ = window.MZ || {};
     S.npcs.forEach(dimItem);
     const si = L.stairs.y * L.w + L.stairs.x;
     L.stairsSpr.visible = !!S.explored[si];
+    // % del mapa recorrido (solo piso transitable)
+    let seen = 0;
+    for (let i = 0; i < L.w * L.h; i++) {
+      if (S.explored[i] && (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS)) seen++;
+    }
+    S.mapPct = L.floorTotal ? Math.round((seen / L.floorTotal) * 100) : 0;
   }
   MZ.updateVisibility = updateVisibility;
 
@@ -5721,13 +6067,14 @@ window.MZ = window.MZ || {};
       }
       case 'weapon': {
         const w = MZ.genGear('melee', S.depth);
-        if (w.atk > (P.melee ? P.melee.atk : 0)) {
+        // recambio rápido: agarrás si es mejor, si estás a piñas, o si tu filo agoniza
+        if (!P.melee || w.atk >= P.melee.atk || P.melee.uses <= 4) {
           P.melee = w;
           MZ.recalcStats();
           MZ.audio.pickup();
-          MZ.say('lootArma', { w: w.name });
+          MZ.say('lootArma', { w: w.name + ' (' + w.uses + ' filos)' });
         } else {
-          const g = 5 + w.atk * 5;
+          const g = 5 + w.atk * 4;
           P.gold += g;
           MZ.audio.gold();
           MZ.say('lootRepetido', { g });
@@ -5736,16 +6083,23 @@ window.MZ = window.MZ || {};
       }
       case 'bow': {
         const w = MZ.genGear('ranged', S.depth);
-        if (!P.ranged || w.atk > P.ranged.atk) {
+        if (!P.ranged || (!P.ranged.aoe && (w.atk >= P.ranged.atk || P.ranged.ammo <= 1))) {
           P.ranged = w;
           MZ.audio.pickup();
-          MZ.say('lootArma', { w: w.name + ' (alcance ' + w.range + ')' });
+          MZ.say('lootArma', { w: w.name + ' (' + w.ammo + ' tiros)' });
         } else {
-          const g = 5 + w.atk * 5;
+          const g = 5 + w.atk * 4;
           P.gold += g;
           MZ.audio.gold();
           MZ.say('lootRepetido', { g });
         }
+        break;
+      }
+      case 'bfg': {
+        P.ranged = MZ.genBFG(S.depth);
+        MZ.audio.boss();
+        MZ.fx.flash(0.35, 0x33ff66);
+        MZ.say('bfgPickup', null, 4000);
         break;
       }
       case 'armor': {

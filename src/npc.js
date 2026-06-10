@@ -11,6 +11,8 @@ window.MZ = window.MZ || {};
     tahur: { name: 'El Tahúr', sprite: 'tahur', color: 0xffd700, scale: 0.95 },
     herrero: { name: 'Fierrito', sprite: 'herrero', color: 0x9aa5b1, scale: 0.95 },
     nieto: { name: 'Tato, el Perdido Hace 20 Años', sprite: 'nieto', color: 0xc0c8d0, scale: 0.95 },
+    critico: { name: 'El Crítico', sprite: 'critico', color: 0xccaa66, scale: 0.95 },
+    djtigre: { name: 'DJ Tigre', sprite: 'djtigre', color: 0xff8800, scale: 0.95 },
     fundador: { name: 'El Bardo Fundador', sprite: 'fundador', color: 0xffd700, scale: 1.05 },
   };
 
@@ -61,6 +63,13 @@ window.MZ = window.MZ || {};
       return;
     }
     npc.talked = true;
+    // censo de NPCs conocidos (histórico, para la pantalla de stats)
+    const d = MZ.save.data;
+    d.npcsConocidos = d.npcsConocidos || {};
+    if (!d.npcsConocidos[npc.type]) {
+      d.npcsConocidos[npc.type] = 1;
+      MZ.save.store();
+    }
     MZ.audio.pickup();
     MZ.dialog.open(lore.talk(npc));
   };

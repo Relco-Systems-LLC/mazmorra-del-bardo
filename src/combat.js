@@ -51,15 +51,64 @@ window.MZ = window.MZ || {};
       const p2 = MZ.toPx(e.x, e.y);
       MZ.fx.trail(p2.x, p2.y, e.def.color);
     }
+    // el filo se gasta: arma rota = de vuelta a las piñas
+    if (P.melee && P.melee.uses != null) {
+      P.melee.uses--;
+      if (P.melee.uses <= 0) {
+        MZ.say('armaRota', { w: P.melee.name });
+        P.melee = null;
+        MZ.recalcStats();
+        MZ.audio.hurt();
+      }
+      MZ.ui.updateHUD();
+    }
   };
+
+  // La Bestia 9000: revienta todo enemigo a la vista en un radio enorme.
+  function fireBFG(target) {
+    const S = MZ.state, P = S.player, w = P.ranged;
+    const pp = MZ.toPx(P.x, P.y);
+    MZ.fx.flash(0.6, 0x33ff66);
+    MZ.fx.shake(16);
+    MZ.fx.slowmo(400);
+    MZ.audio.boss();
+    MZ.fx.ring(pp.x, pp.y, 0x33ff66, true);
+    for (const e of [...S.enemies]) {
+      if (e.dead) continue;
+      const d = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
+      if (d > w.range || !MZ.los(P.x, P.y, e.x, e.y)) continue;
+      MZ.fx.bolt(pp, MZ.toPx(e.x, e.y), 0x33ff66);
+      const ep = MZ.toPx(e.x, e.y);
+      MZ.fx.explode(ep.x, ep.y, 0x33ff66, 26, 4, 1.1);
+      e.hp -= w.atk;
+      e.awake = true;
+      MZ.fx.floatText(ep.x, ep.y - 10, String(w.atk), 0x33ff66, 18);
+      if (e.hp <= 0) MZ.killEnemy(e);
+    }
+    MZ.say('bfgDisparo', null, 3500);
+  }
 
   MZ.playerRangedAttack = function (e) {
     const P = MZ.state.player;
-    const crit = Math.random() < 0.1;
-    let dmg = P.ranged.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
-    if (crit) dmg *= 2;
-    MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
-    hitEnemy(e, dmg, crit);
+    const w = P.ranged;
+    if (w.aoe) {
+      fireBFG(e);
+    } else {
+      const crit = Math.random() < 0.1;
+      let dmg = w.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
+      if (crit) dmg *= 2;
+      MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
+      hitEnemy(e, dmg, crit);
+    }
+    // munición: sin balas, el arma se descarta
+    if (w.ammo != null) {
+      w.ammo--;
+      if (w.ammo <= 0) {
+        MZ.say(w.aoe ? 'bfgVacia' : 'arcoVacio', { w: w.name });
+        P.ranged = null;
+      }
+      MZ.ui.updateHUD();
+    }
   };
 
   MZ.killEnemy = function (e) {
@@ -107,12 +156,13 @@ window.MZ = window.MZ || {};
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
-    // Drops: los monstruos sueltan loot en el piso.
+    // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-    } else if (Math.random() < 0.22) {
+      if (Math.random() < 0.15) MZ.spawnItemAt('bfg', e.x + 1, e.y);
+    } else if (Math.random() < 0.3) {
       const r = Math.random();
-      const type = r < 0.4 ? 'gold' : r < 0.65 ? 'potion' : r < 0.78 ? 'weapon' : r < 0.88 ? 'bow' : r < 0.96 ? 'armor' : 'mate';
+      const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
     } else if (Math.random() < 0.14) {
       // corazón: vida directa, más probable si venís golpeado

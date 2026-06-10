@@ -82,9 +82,24 @@ window.MZ = window.MZ || {};
   };
 
   let playerSpr = null;
+  let heroShape = null;     // el sprite de forma del héroe (cambia con el arma)
+  let heroTexName = '';
   let camX = 0, camY = 0;
   let pulseT = 0;
   let touch = null; // posición global del dedo mientras está apoyado
+
+  // El héroe se ve según lo que empuña: BFG > espada > arco > piñas.
+  MZ.refreshHeroSprite = function () {
+    if (!heroShape || !S.player) return;
+    const P = S.player;
+    const name = P.ranged && P.ranged.aoe ? 'heroeBfg'
+      : P.melee ? 'heroe'
+      : P.ranged ? 'heroeArco'
+      : 'heroePinas';
+    if (name === heroTexName) return;
+    heroTexName = name;
+    heroShape.texture = PIX[name];
+  };
 
   // ---- Helpers globales ----
   MZ.toPx = (x, y) => ({ x: x * TILE + TILE / 2, y: y * TILE + TILE / 2 });
@@ -296,8 +311,17 @@ window.MZ = window.MZ || {};
       return en;
     });
 
+    // Total de piso transitable, para el % de mapa recorrido.
+    L.floorTotal = 0;
+    for (let i = 0; i < L.w * L.h; i++) {
+      if (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS) L.floorTotal++;
+    }
+
     // Jugador: si resumimos, donde estaba; si no, en la entrada.
     playerSpr = entitySprite({ sprite: 'heroe', color: 0x00e5ff, scale: 0.95 }, playerLayer);
+    heroShape = playerSpr.children[1];
+    heroTexName = 'heroe';
+    MZ.refreshHeroSprite();
     if (!restore) { S.player.x = L.entrance.x; S.player.y = L.entrance.y; }
     const pp = MZ.toPx(S.player.x, S.player.y);
     playerSpr.position.set(pp.x, pp.y);
@@ -380,6 +404,12 @@ window.MZ = window.MZ || {};
     S.npcs.forEach(dimItem);
     const si = L.stairs.y * L.w + L.stairs.x;
     L.stairsSpr.visible = !!S.explored[si];
+    // % del mapa recorrido (solo piso transitable)
+    let seen = 0;
+    for (let i = 0; i < L.w * L.h; i++) {
+      if (S.explored[i] && (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS)) seen++;
+    }
+    S.mapPct = L.floorTotal ? Math.round((seen / L.floorTotal) * 100) : 0;
   }
   MZ.updateVisibility = updateVisibility;
 
@@ -453,13 +483,14 @@ window.MZ = window.MZ || {};
       }
       case 'weapon': {
         const w = MZ.genGear('melee', S.depth);
-        if (w.atk > (P.melee ? P.melee.atk : 0)) {
+        // recambio rápido: agarrás si es mejor, si estás a piñas, o si tu filo agoniza
+        if (!P.melee || w.atk >= P.melee.atk || P.melee.uses <= 4) {
           P.melee = w;
           MZ.recalcStats();
           MZ.audio.pickup();
-          MZ.say('lootArma', { w: w.name });
+          MZ.say('lootArma', { w: w.name + ' (' + w.uses + ' filos)' });
         } else {
-          const g = 5 + w.atk * 5;
+          const g = 5 + w.atk * 4;
           P.gold += g;
           MZ.audio.gold();
           MZ.say('lootRepetido', { g });
@@ -468,16 +499,23 @@ window.MZ = window.MZ || {};
       }
       case 'bow': {
         const w = MZ.genGear('ranged', S.depth);
-        if (!P.ranged || w.atk > P.ranged.atk) {
+        if (!P.ranged || (!P.ranged.aoe && (w.atk >= P.ranged.atk || P.ranged.ammo <= 1))) {
           P.ranged = w;
           MZ.audio.pickup();
-          MZ.say('lootArma', { w: w.name + ' (alcance ' + w.range + ')' });
+          MZ.say('lootArma', { w: w.name + ' (' + w.ammo + ' tiros)' });
         } else {
-          const g = 5 + w.atk * 5;
+          const g = 5 + w.atk * 4;
           P.gold += g;
           MZ.audio.gold();
           MZ.say('lootRepetido', { g });
         }
+        break;
+      }
+      case 'bfg': {
+        P.ranged = MZ.genBFG(S.depth);
+        MZ.audio.boss();
+        MZ.fx.flash(0.35, 0x33ff66);
+        MZ.say('bfgPickup', null, 4000);
         break;
       }
       case 'armor': {
