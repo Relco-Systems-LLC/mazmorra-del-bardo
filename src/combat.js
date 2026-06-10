@@ -130,6 +130,75 @@ window.MZ = window.MZ || {};
     MZ.say('bfgDisparo', null, 3500);
   }
 
+  const cheb2 = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
+
+  // Lanzar una granada a la casilla (tx,ty). Devuelve true si se lanzó.
+  MZ.throwGrenade = function (kind, tx, ty) {
+    const S = MZ.state, P = S.player;
+    const g = MZ.GRENADES[kind];
+    if (!g || (P.granadas[kind] || 0) <= 0) return false;
+    const dist = cheb2(P.x, P.y, tx, ty);
+    if (dist < 1 || dist > g.range) return false; // fuera de alcance
+    P.granadas[kind]--;
+    const tp = MZ.toPx(tx, ty);
+    MZ.fx.explode(tp.x, tp.y, g.color, 28, 3.5, 1.1);
+    MZ.fx.ring(tp.x, tp.y, g.color, true);
+    MZ.fx.shake(7);
+    MZ.audio.kill();
+
+    if (g.fire) {
+      // molotov: enciende tiles en radio y dura unos turnos
+      for (let y = ty - g.radius; y <= ty + g.radius; y++)
+        for (let x = tx - g.radius; x <= tx + g.radius; x++) {
+          if (!MZ.passable(x, y)) continue;
+          if (!S.fuegos.some(f => f.x === x && f.y === y)) S.fuegos.push({ x, y, turns: g.fire });
+        }
+      MZ.fx.flash(0.25, 0xff7722);
+    } else {
+      // frag / stun: efecto inmediato en radio
+      const dmg = g.dmg ? g.dmg(S.depth) : 0;
+      for (const e of [...S.enemies]) {
+        if (e.dead) continue;
+        if (cheb2(e.x, e.y, tx, ty) > g.radius) continue;
+        e.awake = true;
+        if (g.stun) e.stun = Math.max(e.stun || 0, g.stun);
+        if (dmg) {
+          e.hp -= dmg;
+          const ep = MZ.toPx(e.x, e.y);
+          MZ.fx.floatText(ep.x, ep.y - 10, g.stun ? '✨' : String(dmg), g.color, 14);
+          if (e.hp <= 0) { MZ.killEnemy(e); continue; }
+        }
+      }
+      // el jugador también come la explosión si está en el radio
+      if (cheb2(P.x, P.y, tx, ty) <= g.radius && dmg && P.hp > 0) {
+        MZ.hurtPlayer(Math.max(1, Math.floor(dmg / 2)), 'tu propia granada', 'vos mismo');
+      }
+    }
+    MZ.codex.discover('arsenal', kind === 'frag' ? 'granadaFrag' : kind === 'molotov' ? 'granadaMolotov' : 'granadaStun');
+    MZ.ui.updateHUD();
+    return true;
+  };
+
+  // Tick de los tiles de fuego (lo llama endTurn). Daña a quien esté parado.
+  MZ.tickFuegos = function () {
+    const S = MZ.state, P = S.player;
+    if (!S.fuegos || !S.fuegos.length) return;
+    for (const e of [...S.enemies]) {
+      if (e.dead) continue;
+      if (S.fuegos.some(f => f.x === e.x && f.y === e.y)) {
+        e.hp -= 2 + Math.floor(S.depth / 3);
+        const ep = MZ.toPx(e.x, e.y);
+        MZ.fx.floatText(ep.x, ep.y - 8, '🔥', 0xff7722, 11);
+        if (e.hp <= 0) MZ.killEnemy(e);
+      }
+    }
+    if (P.hp > 0 && S.fuegos.some(f => f.x === P.x && f.y === P.y)) {
+      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'el fuego', 'trampa');
+    }
+    for (const f of S.fuegos) f.turns--;
+    S.fuegos = S.fuegos.filter(f => f.turns > 0);
+  };
+
   MZ.playerRangedAttack = function (e) {
     const P = MZ.state.player;
     const w = P.ranged;
@@ -371,6 +440,7 @@ window.MZ = window.MZ || {};
         if (e.hp <= 0) { MZ.killEnemy(e); continue; }
       }
       if (e.def.static) continue; // los barriles no opinan
+      if (e.stun > 0) { e.stun--; continue; } // aturdido por una granada
       if (e.def.slow) { e._t = !e._t; if (e._t) continue; }
       const d = cheb(e, P);
       if (!e.awake) {

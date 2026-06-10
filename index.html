@@ -58,6 +58,25 @@
     color: #7fd4e0; font-size: 11px; line-height: 1.5; pointer-events: none; z-index: 5;
     text-shadow: 0 0 6px rgba(0,229,255,.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
+  #btn-aim {
+    position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px); right: 12px;
+    z-index: 7; width: 58px; height: 58px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+    background: rgba(8,12,22,.82); border: 2px solid rgba(0,229,255,.55);
+    box-shadow: 0 0 14px rgba(0,229,255,.3); user-select: none;
+  }
+  #btn-aim.aiming { border-color: #ff5577; box-shadow: 0 0 18px rgba(255,85,119,.5); background: rgba(30,8,12,.85); }
+  #aimbar {
+    position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); left: 50%;
+    transform: translateX(-50%); z-index: 7; display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; max-width: 92vw;
+  }
+  .aimchip {
+    background: rgba(8,12,22,.85); border: 1px solid rgba(0,229,255,.4); border-radius: 10px;
+    padding: 7px 11px; font-size: 14px; color: #cfe9ff; text-shadow: 0 0 6px rgba(0,229,255,.4);
+  }
+  .aimchip.sel { border-color: #ffd700; color: #ffe680; box-shadow: 0 0 12px rgba(255,215,0,.4); }
+  .aimchip.empty { opacity: .4; }
   #fps {
     position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); right: 10px;
     color: #555; font-size: 11px; pointer-events: none; z-index: 5;
@@ -92,6 +111,8 @@
   <span id="depth">NIVEL 1</span>
   <span><span id="gold">&#9672; 0</span>&nbsp;&nbsp;<span id="btn-pause" style="color:#7fd4e0;padding:0 4px">&#10074;&#10074;</span></span>
 </div>
+<div id="aimbar" class="hidden"></div>
+<div id="btn-aim" class="hidden">&#128694;</div>
 <div id="toast"></div>
 <div id="equip" class="hidden"></div>
 <div id="fps"></div>

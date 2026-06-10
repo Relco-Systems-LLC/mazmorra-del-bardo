@@ -71,6 +71,12 @@ window.MZ = window.MZ || {};
         e.preventDefault();
         MZ.pauseGame();
       });
+      // Botón de modo caminar ⇄ apuntar.
+      $('btn-aim').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.toggleAimMode();
+      });
       $('cta-resume').addEventListener('pointerdown', e => {
         e.stopPropagation();
         e.preventDefault();
@@ -313,8 +319,39 @@ window.MZ = window.MZ || {};
         const nom = { berserk: 'BERSERK', midas: 'MIDAS', fantasmal: 'FANTASMAL ' + Math.max(0, P.efectoTurnos), iman: 'IMÁN' }[P.efecto];
         if (nom) eq.push('✨ ' + nom);
       }
+      const gr = P.granadas || {};
+      const gtot = (gr.frag || 0) + (gr.molotov || 0) + (gr.stun || 0);
+      if (gtot) eq.push('💣' + gtot);
       eq.push('ATK ' + P.atk + ' · DEF ' + P.def + ' · 👣 ' + (P.steps || 0));
       $('equip').textContent = eq.join('  ·  ');
+      this.updateAimbar();
+    },
+
+    // Botón de modo + barra de selección de arma a distancia (solo en modo apuntar).
+    updateAimbar() {
+      const S = MZ.state;
+      const btn = $('btn-aim'), bar = $('aimbar');
+      if (!S || !S.playing) { btn.classList.add('hidden'); bar.classList.add('hidden'); return; }
+      btn.classList.remove('hidden');
+      btn.innerHTML = S.aimMode ? '&#127919;' : '&#128694;'; // 🎯 / 🚶
+      btn.classList.toggle('aiming', !!S.aimMode);
+      if (!S.aimMode) { bar.classList.add('hidden'); return; }
+      const P = S.player;
+      bar.classList.remove('hidden');
+      bar.innerHTML = '';
+      const chips = [];
+      chips.push({ sel: 'ranged', label: (P.ranged ? (P.ranged.aoe ? '💚' : P.ranged.rapido ? '🔫' : '🏹') : '🚫') + ' ' + (P.ranged ? (P.ranged.ammo != null ? '●' + P.ranged.ammo : '∞') : 'sin arma'), empty: !P.ranged });
+      for (const k of MZ.GRENADE_KEYS) {
+        const g = MZ.GRENADES[k], n = (P.granadas && P.granadas[k]) || 0;
+        chips.push({ sel: k, label: g.icon + ' ' + n, empty: n <= 0 });
+      }
+      for (const c of chips) {
+        const el = document.createElement('div');
+        el.className = 'aimchip' + (P.aimSel === c.sel ? ' sel' : '') + (c.empty ? ' empty' : '');
+        el.textContent = c.label;
+        el.addEventListener('pointerdown', ev => { ev.stopPropagation(); ev.preventDefault(); MZ.selectAim(c.sel); });
+        bar.appendChild(el);
+      }
     },
 
     toast(msg, ms = 2600) {
@@ -350,6 +387,8 @@ window.MZ = window.MZ || {};
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
       $('minimap').classList.add('hidden');
+      $('btn-aim').classList.add('hidden');
+      $('aimbar').classList.add('hidden');
     },
 
     showDeath(quote, statsHtml) {
@@ -359,6 +398,8 @@ window.MZ = window.MZ || {};
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
       $('minimap').classList.add('hidden');
+      $('btn-aim').classList.add('hidden');
+      $('aimbar').classList.add('hidden');
       deathShownAt = Date.now();
     },
 

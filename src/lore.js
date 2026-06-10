@@ -83,6 +83,18 @@ window.MZ = window.MZ || {};
         return mercaderMenu(npc, 'Salud. Si te cae mal, yo no te vendí nada.');
       },
     });
+    const cGranada = Math.ceil((18 + d) * k);
+    choices.push({
+      label: `💣 Pack de granadas (frag ×2) — ${cGranada} oro`,
+      fn() {
+        if (p.gold < cGranada) return mercaderMenu(npc, 'Las granadas no se fían, pibe. Traé el oro.');
+        p.gold -= cGranada;
+        p.granadas.frag = (p.granadas.frag || 0) + 2;
+        MZ.codex.discover('arsenal', 'granadaFrag');
+        MZ.audio.pickup(); MZ.ui.updateHUD();
+        return mercaderMenu(npc, 'Dos granadas de frag. No las guardes en el bolsillo de atrás, ¿eh?');
+      },
+    });
     if (MZ.state.mapaVenta && !MZ.state.mapaActivo) choices.push({
       label: `🗺 Mapa del nivel (minimapa) — ${cMapa} oro`,
       fn() {

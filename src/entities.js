@@ -57,7 +57,20 @@ window.MZ = window.MZ || {};
     tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
     mapa: { sprite: 'mapa', color: 0xe8d8a0, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
+    granadaFrag: { sprite: 'granadaFrag', color: 0x3a7d44, scale: 0.5 },
+    granadaMolotov: { sprite: 'granadaMolotov', color: 0xff7722, scale: 0.5 },
+    granadaStun: { sprite: 'granadaStun', color: 0xffe14d, scale: 0.5 },
   };
+
+  // ---- Lanzables (consumibles que se acumulan). Alcance máx y efecto por tipo. ----
+  MZ.GRENADES = {
+    frag:    { item: 'granadaFrag',    nombre: 'Granada de frag', icon: '💣', color: 0x3a7d44, range: 4, radius: 1, dmg: (d) => 8 + d },
+    molotov: { item: 'granadaMolotov', nombre: 'Molotov',         icon: '🔥', color: 0xff7722, range: 3, radius: 1, fire: 3 },
+    stun:    { item: 'granadaStun',    nombre: 'Aturdidora',      icon: '✨', color: 0xffe14d, range: 5, radius: 2, stun: 2, dmg: (d) => 2 + Math.floor(d / 4) },
+  };
+  MZ.GRENADE_KEYS = ['frag', 'molotov', 'stun'];
+  // item del piso -> tipo de granada
+  MZ.GRENADE_BY_ITEM = { granadaFrag: 'frag', granadaMolotov: 'molotov', granadaStun: 'stun' };
 
   // ---- Equipo con nombre y stats: el loot escala con la profundidad ----
   MZ.GEAR = {
@@ -74,7 +87,9 @@ window.MZ = window.MZ || {};
       { name: 'Gomera de barrio', atk: 1, range: 3 },
       { name: 'Arco corto', atk: 2, range: 4 },
       { name: 'Ballesta abandonada', atk: 3, range: 5 },
+      { name: 'Ametralladora oxidada', atk: 2, range: 5, rapido: true },
       { name: 'Arco del Coliseo', atk: 5, range: 6 },
+      { name: 'Ametralladora del Gremio', atk: 3, range: 6, rapido: true },
     ],
     shield: [
       { name: 'Tapa de olla', def: 1 },
@@ -117,7 +132,8 @@ window.MZ = window.MZ || {};
     if (bonus > 0) g.name += ' +' + bonus;
     // economía descartable: filo limitado y munición corta para recambio rápido
     if (kind === 'melee') g.uses = 12 + tier * 3 + Math.floor(Math.random() * 6);
-    if (kind === 'ranged') g.ammo = 4 + Math.floor(tier / 2) + Math.floor(Math.random() * 3);
+    if (kind === 'ranged') g.ammo = g.rapido ? 20 + tier * 4 + Math.floor(Math.random() * 10) // ametralladora: ráfaga, mucha bala
+      : 4 + Math.floor(tier / 2) + Math.floor(Math.random() * 3);
     return g;
   };
 

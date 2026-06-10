@@ -21,11 +21,13 @@ window.MZ = window.MZ || {};
   const world = new PIXI.Container();
   const mapLayer = new PIXI.Container();
   const itemLayer = new PIXI.Container();
+  const fireLayer = new PIXI.Container();
   const npcLayer = new PIXI.Container();
   const enemyLayer = new PIXI.Container();
   const playerLayer = new PIXI.Container();
+  const aimLayer = new PIXI.Container();
   const fxLayer = new PIXI.Container();
-  world.addChild(mapLayer, itemLayer, npcLayer, enemyLayer, playerLayer, fxLayer);
+  world.addChild(mapLayer, itemLayer, fireLayer, npcLayer, enemyLayer, playerLayer, aimLayer, fxLayer);
   app.stage.addChild(world);
   MZ.world = world;
 
@@ -99,6 +101,41 @@ window.MZ = window.MZ || {};
   let camX = 0, camY = 0;
   let pulseT = 0;
   let touch = null; // posición global del dedo mientras está apoyado
+  let fireSprites = [];     // sprites de los tiles de fuego (molotov)
+  let aimReticle = null;    // mira del modo apuntar
+
+  // Sincroniza los sprites de fuego con S.fuegos.
+  function renderFuegos() {
+    const fs = S.fuegos || [];
+    while (fireSprites.length > fs.length) { const s = fireSprites.pop(); s.destroy(); }
+    while (fireSprites.length < fs.length) {
+      const s = new PIXI.Sprite(PIX.fuego);
+      s.anchor.set(0.5);
+      s.scale.set((TILE * 0.95) / PIX.fuego.width);
+      fireLayer.addChild(s);
+      fireSprites.push(s);
+    }
+    for (let i = 0; i < fs.length; i++) {
+      const p = MZ.toPx(fs[i].x, fs[i].y);
+      fireSprites[i].position.set(p.x, p.y);
+    }
+  }
+
+  // Muestra/oculta la mira en (tx,ty); col según en rango o no.
+  function showReticle(tx, ty, ok) {
+    if (!aimReticle) {
+      aimReticle = new PIXI.Sprite(PIX.reticle);
+      aimReticle.anchor.set(0.5);
+      aimReticle.blendMode = 'add';
+      aimReticle.scale.set((TILE * 0.95) / PIX.reticle.width);
+      aimLayer.addChild(aimReticle);
+    }
+    aimReticle.visible = true;
+    aimReticle.tint = ok ? 0x66ff88 : 0xff3344;
+    const p = MZ.toPx(tx, ty);
+    aimReticle.position.set(p.x, p.y);
+  }
+  function hideReticle() { if (aimReticle) aimReticle.visible = false; }
 
   // El héroe se ve según lo que empuña: BFG > espada > arco > piñas.
   MZ.refreshHeroSprite = function () {
@@ -223,6 +260,7 @@ window.MZ = window.MZ || {};
       evento: S.evento || null,
       mapaActivo: !!S.mapaActivo,
       mapaVenta: !!S.mapaVenta,
+      fuegos: (S.fuegos || []).map(f => ({ ...f })),
       explored: Array.from(S.explored).join(''),
       quests: JSON.parse(JSON.stringify(MZ.quests.run)),
     };
@@ -267,10 +305,12 @@ window.MZ = window.MZ || {};
   function buildLevel(restore) {
     MZ.easter.endLevel();
     MZ.fx.clear();
-    for (const l of [mapLayer, itemLayer, npcLayer, enemyLayer, playerLayer]) {
+    for (const l of [mapLayer, itemLayer, fireLayer, npcLayer, enemyLayer, playerLayer, aimLayer]) {
       l.removeChildren().forEach(c => c.destroy({ children: true }));
     }
     S.glows = [];
+    fireSprites = [];
+    aimReticle = null;
     touch = null;
     S.gen = (S.gen || 0) + 1; // invalida loops de turno en curso (revivir reconstruye el nivel)
 
@@ -291,6 +331,7 @@ window.MZ = window.MZ || {};
       S.mapaVenta = Math.random() < 0.30;
       if (S.player) { S.player.efecto = null; S.player.efectoTurnos = 0; }
     }
+    S.fuegos = restore && restore.fuegos ? restore.fuegos.map(f => ({ ...f })) : [];
 
     // Grietas ya rotas en la partida guardada: aplicar antes de crear sprites.
     S.brokenCracks = restore ? restore.cracks.slice() : [];
@@ -525,6 +566,7 @@ window.MZ = window.MZ || {};
   // ---- Turnos ----
   function endTurn() {
     MZ.enemiesTurn();
+    if (S.playing) { MZ.tickFuegos(); renderFuegos(); }
     const P = S.player;
     if (S.playing && P.poison > 0) {
       P.poison--;
@@ -601,8 +643,20 @@ window.MZ = window.MZ || {};
 
     MZ.fx.sparkle(p.x, p.y, it.def.color);
     // bestiario: descubrir el objeto al levantarlo
-    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa' };
+    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa', granadaFrag: 'granadaFrag', granadaMolotov: 'granadaMolotov', granadaStun: 'granadaStun' };
     if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
+    // granadas: van al stock (no reemplazan arma)
+    const gk = MZ.GRENADE_BY_ITEM[it.type];
+    if (gk) {
+      const got = 1 + (Math.random() < 0.4 ? 1 : 0);
+      P.granadas[gk] = (P.granadas[gk] || 0) + got;
+      MZ.audio.pickup();
+      MZ.fx.floatText(p.x, p.y - 8, '+' + got + ' ' + MZ.GRENADES[gk].icon, MZ.GRENADES[gk].color, 13);
+      if (it.spr) { it.spr.destroy(); it.spr = null; }
+      S.items = S.items.filter(x => x !== it);
+      MZ.ui.updateHUD();
+      return;
+    }
     switch (it.type) {
       case 'gold':
         P.gold += it.amount;
@@ -867,6 +921,17 @@ window.MZ = window.MZ || {};
       nextLevel();
       return true;
     }
+    // Iniciativa: si te moviste pegado a un enemigo despierto, tirás el dado por
+    // el primer golpe (antes te movías y comías el ataque sin chance).
+    if (S.playing) {
+      const adj = S.enemies.find(e => !e.dead && e.awake && !e.def.static &&
+        Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y)) === 1);
+      if (adj && Math.random() < 0.5) {
+        const ap = MZ.toPx(P.x, P.y);
+        MZ.fx.floatText(ap.x, ap.y - 20, '¡primero!', 0x66ff88, 12);
+        MZ.playerAttack(adj);
+      }
+    }
     endTurn();
     return true;
   }
@@ -908,15 +973,18 @@ window.MZ = window.MZ || {};
       x: 0, y: 0, hp: 20, maxHp: 20,
       baseAtk: 1, baseDef: 0, atk: 0, def: 0,
       melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
+      granadas: { frag: 0, molotov: 0, stun: 0 }, aimSel: 'ranged', // lanzables
       gold: 0, kills: 0, streak: 0, steps: 0, vidas: 7, // como los gatos
     };
     MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
+    if (!S.player.granadas) S.player.granadas = { frag: 0, molotov: 0, stun: 0 };
     MZ.recalcStats();
     MZ.codex.discover('arsenal', 'pinas'); // con lo que arrancás
     if (S.player.melee) MZ.codex.discover('arsenal', MZ.codex.weaponId(S.player.melee));
     MZ.quests.reset();
     S.playing = true;
     S.dialogOpen = false;
+    S.aimMode = false;
     const d = MZ.save.data;
     d.runs++;
     d.run = null; // pisa cualquier partida guardada
@@ -937,8 +1005,11 @@ window.MZ = window.MZ || {};
     MZ.recalcStats();
     MZ.quests.run = JSON.parse(JSON.stringify(run.quests || {}));
     if (S.player.vidas == null) S.player.vidas = 7; // saves viejos
+    if (!S.player.granadas) S.player.granadas = { frag: 0, molotov: 0, stun: 0 };
+    if (!S.player.aimSel) S.player.aimSel = 'ranged';
     S.playing = true;
     S.dialogOpen = false;
+    S.aimMode = false;
     MZ.ui.hideScreens();
     buildLevel(run);
   };
@@ -975,12 +1046,16 @@ window.MZ = window.MZ || {};
       MZ.fx.shake(8);
       MZ.audio.mate();
       MZ.say('revivir', { v: P.vidas, oro: perdido }, 4500);
-      buildLevel(); // piso nuevo, mismo S.depth
+      // nivel genuinamente nuevo: genLevel es determinístico, hay que cambiar el seed
+      S.runSeed = (Math.random() * 0x7fffffff) | 0;
+      buildLevel(); // piso nuevo (otro mapa), mismo S.depth
       return;
     }
 
     // sin vidas: muerte real
     S.playing = false;
+    S.aimMode = false;
+    hideReticle();
     const p = MZ.toPx(S.player.x, S.player.y);
     MZ.fx.explode(p.x, p.y, 0x00e5ff, 50, 4, 1.3);
     MZ.fx.ring(p.x, p.y, 0x00e5ff, true);
@@ -1011,20 +1086,76 @@ window.MZ = window.MZ || {};
     }, 1000);
   };
 
-  // ---- Input táctil: D-pad relativo, mantener apretado para caminar ----
+  // ---- Modo apuntar: calcular la casilla objetivo desde la posición del dedo ----
+  let aimPointer = null;       // posición global del dedo en modo apuntar
+  let aimFireTimer = 0;        // cadencia de ráfaga
+
+  MZ.toggleAimMode = function () {
+    if (!S.playing) return;
+    S.aimMode = !S.aimMode;
+    touch = null; aimPointer = null;
+    hideReticle();
+    MZ.ui.updateAimbar();
+  };
+  MZ.selectAim = function (sel) { if (S.player) { S.player.aimSel = sel; MZ.ui.updateAimbar(); } };
+
+  // objetivo según el dedo: para ranged snapea al enemigo; para granada la casilla clampeada.
+  function aimTarget() {
+    if (!aimPointer) return null;
+    const P = S.player;
+    const wp = world.toLocal({ x: aimPointer.x, y: aimPointer.y });
+    let tx = Math.floor(wp.x / TILE), ty = Math.floor(wp.y / TILE);
+    if (P.aimSel === 'ranged') {
+      const w = P.ranged;
+      if (!w) return { tx, ty, ok: false, kind: 'ranged' };
+      const rng = w.range;
+      let best = null, bestD = 1e9;
+      for (const e of S.enemies) {
+        if (e.dead) continue;
+        const dC = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
+        if (dC > rng || !MZ.los(P.x, P.y, e.x, e.y)) continue;
+        const dp = Math.abs(e.x - tx) + Math.abs(e.y - ty);
+        if (dp < bestD) { bestD = dp; best = e; }
+      }
+      if (best) return { tx: best.x, ty: best.y, ok: true, kind: 'ranged', enemy: best };
+      return { tx, ty, ok: false, kind: 'ranged' };
+    }
+    // granada: clamp al alcance máximo del tipo
+    const g = MZ.GRENADES[P.aimSel];
+    const dx = tx - P.x, dy = ty - P.y;
+    const dC = Math.max(Math.abs(dx), Math.abs(dy));
+    if (dC > g.range) { const k = g.range / dC; tx = P.x + Math.round(dx * k); ty = P.y + Math.round(dy * k); }
+    const ok = (P.granadas[P.aimSel] || 0) > 0 && MZ.inBounds(tx, ty) && Math.max(Math.abs(tx - P.x), Math.abs(ty - P.y)) >= 1;
+    return { tx, ty, ok, kind: 'grenade' };
+  }
+
+  // ---- Input táctil: D-pad para caminar; modo apuntar para disparar/lanzar ----
   app.stage.eventMode = 'static';
   app.stage.hitArea = app.screen;
   app.stage.on('pointerdown', ev => {
     MZ.audio.ensure();
-    if (S.paused) return;
+    if (S.paused || S.dialogOpen) return;
+    if (S.aimMode) { aimPointer = { x: ev.global.x, y: ev.global.y }; aimFireTimer = 999; return; }
     if (rangedTapCheck(ev.global.x, ev.global.y)) return;
     touch = { x: ev.global.x, y: ev.global.y };
     S.stepTimer = 999; // primer paso inmediato
   });
   app.stage.on('pointermove', ev => {
+    if (S.aimMode) { if (aimPointer) { aimPointer.x = ev.global.x; aimPointer.y = ev.global.y; } return; }
     if (touch) { touch.x = ev.global.x; touch.y = ev.global.y; }
   });
-  const endTouch = () => { touch = null; };
+  const endTouch = () => {
+    if (S.aimMode && aimPointer) {
+      const t = aimTarget();
+      // granada: se lanza al soltar
+      if (t && t.kind === 'grenade' && t.ok) {
+        if (MZ.throwGrenade(S.player.aimSel, t.tx, t.ty)) { MZ.ui.updateAimbar(); endTurn(); }
+      }
+      aimPointer = null; hideReticle();
+      return;
+    }
+    touch = null;
+  };
   app.stage.on('pointerup', endTouch);
   app.stage.on('pointerupoutside', endTouch);
 
@@ -1048,11 +1179,32 @@ window.MZ = window.MZ || {};
     const dt = tk.deltaMS * MZ.timeScale;
 
     if (S.playing && !S.dialogOpen && !S.paused) {
-      S.stepTimer += dt;
-      if (touch && S.stepTimer >= STEP_MS) {
-        S.stepTimer = 0;
-        const dir = dirFromTouch();
-        if (dir) tryMove(dir[0], dir[1]);
+      if (S.aimMode) {
+        // mostrar mira y, si es ranged, disparar en ráfaga mientras se mantiene
+        if (aimPointer) {
+          const t = aimTarget();
+          if (t) {
+            showReticle(t.tx, t.ty, t.ok);
+            if (t.kind === 'ranged' && t.ok && t.enemy) {
+              const cad = S.player.ranged && S.player.ranged.rapido ? 120 : 320;
+              aimFireTimer += dt;
+              if (aimFireTimer >= cad) {
+                aimFireTimer = 0;
+                if (S.player.ranged && (S.player.ranged.ammo == null || S.player.ranged.ammo > 0) && !t.enemy.dead) {
+                  MZ.playerRangedAttack(t.enemy);
+                  endTurn();
+                }
+              }
+            }
+          }
+        } else hideReticle();
+      } else {
+        S.stepTimer += dt;
+        if (touch && S.stepTimer >= STEP_MS) {
+          S.stepTimer = 0;
+          const dir = dirFromTouch();
+          if (dir) tryMove(dir[0], dir[1]);
+        }
       }
       S.idleMs += tk.deltaMS;
       if (S.idleMs > 20000 && !S.idleWarned) {

@@ -206,6 +206,22 @@ window.MZ = window.MZ || {};
         'Oro y un poco de cura para el que se anima a abrirlo.',
         'Ojo: 15% de las veces tiene dientes y se llama Mimic.',
         'La codicia y el riesgo viven en la misma cajita.' ] },
+      { id: 'ametralladora', nombre: 'Ametralladora', sprite: 'ametralladora', color: 0x88909c, lore: [
+        'Disparable de ráfaga: mantené apretado en modo apuntar y escupe plomo.',
+        'Poco daño por bala pero muchísima munición. La cantidad tiene su propia calidad.',
+        'Para cuando "una flecha bien puesta" no alcanza y querés barrer el pasillo.' ] },
+      { id: 'granadaFrag', nombre: 'Granada de Frag', sprite: 'granadaFrag', color: 0x3a7d44, lore: [
+        'Lanzable: la tirás a una casilla (alcance 4) y revienta todo en radio 1.',
+        'Cuidado con tirarla cerca tuyo: la esquirla no distingue amigos.',
+        'Consumible que se acumula. La clásica que nunca falla.' ] },
+      { id: 'granadaMolotov', nombre: 'Molotov', sprite: 'granadaMolotov', color: 0xff7722, lore: [
+        'Lanzable (alcance 3): enciende el piso y el fuego dura varios turnos.',
+        'Ideal para cortar un pasillo o cocinar a los que te persiguen.',
+        'El fuego también te quema a vos si te parás encima, eh.' ] },
+      { id: 'granadaStun', nombre: 'Aturdidora', sprite: 'granadaStun', color: 0xffe14d, lore: [
+        'Lanzable de mayor alcance (5): aturde todo en radio 2, pierden turnos.',
+        'Poco daño, mucho control: el flashbang del pozo.',
+        'Tirala y aprovechá los turnos gratis para pegar o escapar.' ] },
       { id: 'mapa', nombre: 'Mapa del Nivel', sprite: 'mapa', color: 0xe8d8a0, lore: [
         'Un pergamino que despliega el minimapa del piso entero.',
         'Marca lo que ya recorriste y lo que te falta por explorar.',
@@ -260,6 +276,7 @@ window.MZ = window.MZ || {};
       if (w.traicionero) return 'punal';
       if (w.rebote) return 'gomeraBat';
       if (w.grito) return 'microfono';
+      if (w.rapido) return 'ametralladora';
       return w.kind === 'ranged' ? 'arco' : 'espada';
     },
   };

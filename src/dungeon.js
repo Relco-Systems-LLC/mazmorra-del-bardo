@@ -203,6 +203,10 @@ window.MZ = window.MZ || {};
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
     if (rng.chance(0.2)) drop('mapa');
+    // granadas (lanzables): caen seguido para que junten stock
+    if (rng.chance(0.22)) drop('granadaFrag');
+    if (depth >= 3 && rng.chance(0.16)) drop('granadaMolotov');
+    if (depth >= 4 && rng.chance(0.16)) drop('granadaStun');
     if (rng.chance(0.012)) drop('mateLegendario');
     if (secret) items.push({ type: 'chest', x: secret.room.x, y: secret.room.y, amount: 40 + depth * 3 });
 
