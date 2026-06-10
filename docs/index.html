@@ -2565,6 +2565,17 @@ window.MZ = window.MZ || {};
         '...BB.BB....',
       ],
     },
+    escudoMini: {
+      pal: { B: 0xffd700, A: 0x9d6bff, a: 0x6a44b8 },
+      map: [
+        'BBBBBB',
+        'BAAaAB',
+        'BAaAAB',
+        'BAAAAB',
+        '.BAAB.',
+        '..BB..',
+      ],
+    },
     critico: {
       pal: { P: 0xd8c8a8, H: 0x888899, E: 0x111111, A: 0x222233, a: 0x333344, W: 0xffffff, N: 0xccaa66 },
       map: [
@@ -3250,6 +3261,7 @@ window.MZ = window.MZ || {};
       'Nivel {n}. El dungeon ni se enteró de que viniste.',
       'Tranqui, perder también es un estilo de juego.',
       'Moriste como en Helbreath: con el inventario lleno y la dignidad vacía.',
+      'Fuiste derrotado. Y en tu cabeza suena la musiquita de derrota del Age of Empires.',
       'Ni un amistoso le ganás vos. La Scaloneta llorando desde USA.',
       'Te fuiste antes del primer tema. Ni en el Tiger Tiger duraban tan poco.',
     ],
@@ -3261,6 +3273,7 @@ window.MZ = window.MZ || {};
       'Eso dolió hasta acá.',
       'Chau, que descanse.',
       'Limpito. Sin testigos.',
+      'Wololo. Ah no, eso era convertirlos. Bueno, esto es más definitivo.',
     ],
     critico: [
       '¡CRÍTICO! ¿Y esa potencia de dónde salió?',
@@ -3280,6 +3293,7 @@ window.MZ = window.MZ || {};
       'Oro. Bueno, algo es algo.',
       'Otra poción dudosa. Vos tomala igual, total...',
       'Monedas sueltas. Ni para el bondi.',
+      'Oro insuficiente... ah no, pará, algo entró. Igual: necesitamos más oro.',
     ],
     jefeIntro: [
       'Uh, llegó el jefe. Y vos sin currículum.',
@@ -3299,6 +3313,7 @@ window.MZ = window.MZ || {};
       'Mientras lo pensás, los esqueletos cobran por hora.',
       'Tomate tu tiempo, total el aburrimiento era el enemigo, ¿no?',
       '¿Estás scrolleando otra app? Acá. Ojos acá.',
+      '"¿Qué? ¿Eh? ¿Órdenes?" — parecés aldeano del Age esperando un click.',
     ],
     danioGrande: [
       '¿Eso fue esquivar o ponerle el pecho?',
@@ -3311,6 +3326,7 @@ window.MZ = window.MZ || {};
       'Bajando... acá ya ni el wifi llega.',
       'Nivel {n}. ¿Quién te manda?',
       'Más abajo. El alquiler acá debe ser regalado.',
+      'Nivel {n}. Avanzaste a la Edad de los Castillos. Más o menos.',
     ],
     racha: [
       'Racha de {k}. Andá a comprar un Quini.',
@@ -3407,6 +3423,7 @@ window.MZ = window.MZ || {};
     ruletaGana: [
       'Click. Cámara vacía. El Tahúr te paga el triple con cara de piedra: "la próxima gira más rápido el tambor".',
       'Sobreviviste a la ruleta. Triple de oro y una historia para contar arriba. Si llegás.',
+      'Ganaste. El Tahúr paga, murmura "11" y se ríe solo de un chiste de hace mil años.',
     ],
     ruletaPierde: [
       'BANG... era de fogueo. Pero el susto te dejó en 1 HP igual. El Tahúr llora de risa.',
@@ -4406,6 +4423,7 @@ window.MZ = window.MZ || {};
     '¿Y los demás? La Nona cocinaba para el elenco: su guiso resucitaba giras enteras. El Tahúr era el productor: se jugó la recaudación en el Tiger Tiger... tres veces. Fierrito hacía la utilería: la única espada de verdad en un teatro lleno de espadas de cartón.',
     'Morena era la actriz principal, ¿sabías? La maldición no la tocó: ella YA era bruja, lo del teatro era hobby. El hada y el mago, pero al revés: acá el mago se fue y el hada se quedó cobrando entrada. Esperanza enviudó del primer Encargado... y del segundo. Empezamos a sospechar en el tercero.',
     'Última verdad, y no se la conté a nadie: el dungeon se regenera porque el Bardo sigue escribiendo niveles ahí abajo. Vos no estás explorando, querido. Estás siendo escrito. Como un GM loco de Helbreath que no suelta el server. ...¿Un mate?',
+    'Yapa histórica: antes del teatro, esto era un fuerte. Los planos pedían un Castillo: 650 de piedra. La piedra nunca alcanzó, obvio. Por eso todo se cae a pedazos: quisimos llegar a la Edad Imperial con economía de Edad Oscura.',
   ];
 
   function bardoTalk() {
@@ -4433,6 +4451,8 @@ window.MZ = window.MZ || {};
       'Consejo de viejo: a las víboras pegales de lejos. Y a los críticos de teatro también.',
       'Si ves una pared con una grieta, pateala. La arquitectura de acá es puro decorado, te lo digo yo que armaba la escenografía.',
       'El Pombero existe. Una vez me afanó la púa y el termo. La púa la repuse, el termo todavía lo lloro.',
+      'Un monje pasó una vez gritando WOLOLO. Tres esqueletos se cambiaron de bando y se fueron con él. Nunca más los vimos. Pensalo.',
+      'Dicen que si tocás siete veces el oro del marcador, aparece Robin Hood. Dicen, eh. Yo no probé nada.',
       'Hay una rata blanca dando vueltas por los niveles. No es una rata más: dicen que si la encontrás, suena un solo de guitarra y llueve oro. Mujer amante, la leyenda continúa.',
       'Yo iba a ir al mundial, ¿sabés? USA 26, la Scaloneta, todo armado. Pero el dungeon no te da vacaciones. Si la ves levantar la copa, gritá un gol por mí.',
       'Anoche soñé que tocaba con Helloween en Cancún. Tobias Sammet de invitado, tequila en el escenario. Desperté acá, con un esqueleto mirándome. La vida es injusta, querido.',
@@ -4829,7 +4849,7 @@ window.MZ = window.MZ || {};
   }
 
   MZ.LORE = {
-    mercader: { talk: (npc) => mercaderMenu(npc, ['Pasá, pasá. Todo lo que ves se cayó de un camión. El camión de otra mazmorra.', '¿Qué hacés, pibe? Mercadería fresca... bueno, fresca para estar en un pozo maldito.', 'Don Olivera, para servirte. Acepto oro. No acepto quejas ni devoluciones.'][Math.floor(Math.random() * 3)]) },
+    mercader: { talk: (npc) => mercaderMenu(npc, ['Pasá, pasá. Todo lo que ves se cayó de un camión. El camión de otra mazmorra.', '¿Qué hacés, pibe? Mercadería fresca... bueno, fresca para estar en un pozo maldito.', 'Don Olivera, para servirte. Acepto oro. No acepto quejas ni devoluciones.', 'Necesitamos más oro. Vos, yo, todos. Es la economía, pibe: desde el Age que es así.'][Math.floor(Math.random() * 4)]) },
     morena: { talk: morenaTalk },
     bardo: { talk: bardoTalk },
     rodrigo: { talk: rodrigoTalk },
@@ -5097,6 +5117,14 @@ window.MZ = window.MZ || {};
         e.stopPropagation();
         MZ.easter.tapHp();
       });
+      $('gold').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        MZ.easter.tapGold();
+      });
+      $('depth').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        MZ.easter.tapDepth();
+      });
       // Menú de pausa.
       $('btn-pause').addEventListener('pointerdown', e => {
         e.stopPropagation();
@@ -5320,6 +5348,8 @@ window.MZ = window.MZ || {};
   let hue = 0;
   let taps = 0;
   let firstTap = 0;
+  let goldTaps = 0, goldT0 = 0;
+  let depthTaps = 0, depthT0 = 0;
 
   MZ.easter = {
     tapHp() {
@@ -5330,6 +5360,38 @@ window.MZ = window.MZ || {};
         taps = 0;
         this.disco();
       }
+    },
+
+    // Cheat AoE2: 7 taps al oro = ROBIN HOOD (+100 oro, una vez por run)
+    tapGold() {
+      const S = MZ.state;
+      if (!S.playing || !S.player) return;
+      const now = Date.now();
+      if (now - goldT0 > 3000) { goldTaps = 0; goldT0 = now; }
+      if (++goldTaps < 7 || S.player.cheatRobin) return;
+      goldTaps = 0;
+      S.player.cheatRobin = true;
+      S.player.gold += 100;
+      MZ.ui.toast('🏹 ROBIN HOOD — +100 de oro. El Age te formó, se nota.', 4000);
+      MZ.audio.gold();
+      MZ.fx.flash(0.25, 0xffd700);
+      MZ.ui.updateHUD();
+    },
+
+    // Cheat AoE2: 7 taps al nivel = HOW DO YOU TURN THIS ON (la Bestia, una por run)
+    tapDepth() {
+      const S = MZ.state;
+      if (!S.playing || !S.player) return;
+      const now = Date.now();
+      if (now - depthT0 > 3000) { depthTaps = 0; depthT0 = now; }
+      if (++depthTaps < 7 || S.player.cheatCobra) return;
+      depthTaps = 0;
+      S.player.cheatCobra = true;
+      S.player.ranged = MZ.genBFG(S.depth);
+      MZ.ui.toast('🚗 HOW DO YOU TURN THIS ON — La Bestia 9000 en tus manos.', 4500);
+      MZ.audio.boss();
+      MZ.fx.flash(0.35, 0x33ff66);
+      MZ.ui.updateHUD();
     },
 
     disco() {
@@ -5875,6 +5937,7 @@ window.MZ = window.MZ || {};
 
   let playerSpr = null;
   let heroShape = null;     // el sprite de forma del héroe (cambia con el arma)
+  let heroShield = null;    // overlay de escudo (visible si tenés uno)
   let heroTexName = '';
   let camX = 0, camY = 0;
   let pulseT = 0;
@@ -5888,6 +5951,7 @@ window.MZ = window.MZ || {};
       : P.melee ? 'heroe'
       : P.ranged ? 'heroeArco'
       : 'heroePinas';
+    if (heroShield) heroShield.visible = !!P.shield;
     if (name === heroTexName) return;
     heroTexName = name;
     heroShape.texture = PIX[name];
@@ -6144,6 +6208,13 @@ window.MZ = window.MZ || {};
     playerSpr = entitySprite({ sprite: 'heroe', color: 0x00e5ff, scale: 0.95 }, playerLayer);
     heroShape = playerSpr.children[1];
     heroTexName = 'heroe';
+    // escudo al brazo: aparece cuando equipás uno
+    heroShield = new PIXI.Sprite(PIX.escudoMini);
+    heroShield.anchor.set(0.5);
+    heroShield.scale.set((TILE * 0.38) / 6);
+    heroShield.position.set(-TILE * 0.3, TILE * 0.1);
+    heroShield.visible = false;
+    playerSpr.addChild(heroShield);
     MZ.refreshHeroSprite();
     if (!restore) { S.player.x = L.entrance.x; S.player.y = L.entrance.y; }
     const pp = MZ.toPx(S.player.x, S.player.y);

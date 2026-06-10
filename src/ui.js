@@ -47,6 +47,14 @@ window.MZ = window.MZ || {};
         e.stopPropagation();
         MZ.easter.tapHp();
       });
+      $('gold').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        MZ.easter.tapGold();
+      });
+      $('depth').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        MZ.easter.tapDepth();
+      });
       // Menú de pausa.
       $('btn-pause').addEventListener('pointerdown', e => {
         e.stopPropagation();

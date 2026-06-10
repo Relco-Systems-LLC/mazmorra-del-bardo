@@ -83,6 +83,7 @@ window.MZ = window.MZ || {};
 
   let playerSpr = null;
   let heroShape = null;     // el sprite de forma del héroe (cambia con el arma)
+  let heroShield = null;    // overlay de escudo (visible si tenés uno)
   let heroTexName = '';
   let camX = 0, camY = 0;
   let pulseT = 0;
@@ -96,6 +97,7 @@ window.MZ = window.MZ || {};
       : P.melee ? 'heroe'
       : P.ranged ? 'heroeArco'
       : 'heroePinas';
+    if (heroShield) heroShield.visible = !!P.shield;
     if (name === heroTexName) return;
     heroTexName = name;
     heroShape.texture = PIX[name];
@@ -352,6 +354,13 @@ window.MZ = window.MZ || {};
     playerSpr = entitySprite({ sprite: 'heroe', color: 0x00e5ff, scale: 0.95 }, playerLayer);
     heroShape = playerSpr.children[1];
     heroTexName = 'heroe';
+    // escudo al brazo: aparece cuando equipás uno
+    heroShield = new PIXI.Sprite(PIX.escudoMini);
+    heroShield.anchor.set(0.5);
+    heroShield.scale.set((TILE * 0.38) / 6);
+    heroShield.position.set(-TILE * 0.3, TILE * 0.1);
+    heroShield.visible = false;
+    playerSpr.addChild(heroShield);
     MZ.refreshHeroSprite();
     if (!restore) { S.player.x = L.entrance.x; S.player.y = L.entrance.y; }
     const pp = MZ.toPx(S.player.x, S.player.y);

@@ -7,6 +7,8 @@ window.MZ = window.MZ || {};
   let hue = 0;
   let taps = 0;
   let firstTap = 0;
+  let goldTaps = 0, goldT0 = 0;
+  let depthTaps = 0, depthT0 = 0;
 
   MZ.easter = {
     tapHp() {
@@ -17,6 +19,38 @@ window.MZ = window.MZ || {};
         taps = 0;
         this.disco();
       }
+    },
+
+    // Cheat AoE2: 7 taps al oro = ROBIN HOOD (+100 oro, una vez por run)
+    tapGold() {
+      const S = MZ.state;
+      if (!S.playing || !S.player) return;
+      const now = Date.now();
+      if (now - goldT0 > 3000) { goldTaps = 0; goldT0 = now; }
+      if (++goldTaps < 7 || S.player.cheatRobin) return;
+      goldTaps = 0;
+      S.player.cheatRobin = true;
+      S.player.gold += 100;
+      MZ.ui.toast('🏹 ROBIN HOOD — +100 de oro. El Age te formó, se nota.', 4000);
+      MZ.audio.gold();
+      MZ.fx.flash(0.25, 0xffd700);
+      MZ.ui.updateHUD();
+    },
+
+    // Cheat AoE2: 7 taps al nivel = HOW DO YOU TURN THIS ON (la Bestia, una por run)
+    tapDepth() {
+      const S = MZ.state;
+      if (!S.playing || !S.player) return;
+      const now = Date.now();
+      if (now - depthT0 > 3000) { depthTaps = 0; depthT0 = now; }
+      if (++depthTaps < 7 || S.player.cheatCobra) return;
+      depthTaps = 0;
+      S.player.cheatCobra = true;
+      S.player.ranged = MZ.genBFG(S.depth);
+      MZ.ui.toast('🚗 HOW DO YOU TURN THIS ON — La Bestia 9000 en tus manos.', 4500);
+      MZ.audio.boss();
+      MZ.fx.flash(0.35, 0x33ff66);
+      MZ.ui.updateHUD();
     },
 
     disco() {

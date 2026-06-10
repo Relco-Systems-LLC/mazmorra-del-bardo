@@ -210,6 +210,7 @@ window.MZ = window.MZ || {};
     '¿Y los demás? La Nona cocinaba para el elenco: su guiso resucitaba giras enteras. El Tahúr era el productor: se jugó la recaudación en el Tiger Tiger... tres veces. Fierrito hacía la utilería: la única espada de verdad en un teatro lleno de espadas de cartón.',
     'Morena era la actriz principal, ¿sabías? La maldición no la tocó: ella YA era bruja, lo del teatro era hobby. El hada y el mago, pero al revés: acá el mago se fue y el hada se quedó cobrando entrada. Esperanza enviudó del primer Encargado... y del segundo. Empezamos a sospechar en el tercero.',
     'Última verdad, y no se la conté a nadie: el dungeon se regenera porque el Bardo sigue escribiendo niveles ahí abajo. Vos no estás explorando, querido. Estás siendo escrito. Como un GM loco de Helbreath que no suelta el server. ...¿Un mate?',
+    'Yapa histórica: antes del teatro, esto era un fuerte. Los planos pedían un Castillo: 650 de piedra. La piedra nunca alcanzó, obvio. Por eso todo se cae a pedazos: quisimos llegar a la Edad Imperial con economía de Edad Oscura.',
   ];
 
   function bardoTalk() {
@@ -237,6 +238,8 @@ window.MZ = window.MZ || {};
       'Consejo de viejo: a las víboras pegales de lejos. Y a los críticos de teatro también.',
       'Si ves una pared con una grieta, pateala. La arquitectura de acá es puro decorado, te lo digo yo que armaba la escenografía.',
       'El Pombero existe. Una vez me afanó la púa y el termo. La púa la repuse, el termo todavía lo lloro.',
+      'Un monje pasó una vez gritando WOLOLO. Tres esqueletos se cambiaron de bando y se fueron con él. Nunca más los vimos. Pensalo.',
+      'Dicen que si tocás siete veces el oro del marcador, aparece Robin Hood. Dicen, eh. Yo no probé nada.',
       'Hay una rata blanca dando vueltas por los niveles. No es una rata más: dicen que si la encontrás, suena un solo de guitarra y llueve oro. Mujer amante, la leyenda continúa.',
       'Yo iba a ir al mundial, ¿sabés? USA 26, la Scaloneta, todo armado. Pero el dungeon no te da vacaciones. Si la ves levantar la copa, gritá un gol por mí.',
       'Anoche soñé que tocaba con Helloween en Cancún. Tobias Sammet de invitado, tequila en el escenario. Desperté acá, con un esqueleto mirándome. La vida es injusta, querido.',
@@ -633,7 +636,7 @@ window.MZ = window.MZ || {};
   }
 
   MZ.LORE = {
-    mercader: { talk: (npc) => mercaderMenu(npc, ['Pasá, pasá. Todo lo que ves se cayó de un camión. El camión de otra mazmorra.', '¿Qué hacés, pibe? Mercadería fresca... bueno, fresca para estar en un pozo maldito.', 'Don Olivera, para servirte. Acepto oro. No acepto quejas ni devoluciones.'][Math.floor(Math.random() * 3)]) },
+    mercader: { talk: (npc) => mercaderMenu(npc, ['Pasá, pasá. Todo lo que ves se cayó de un camión. El camión de otra mazmorra.', '¿Qué hacés, pibe? Mercadería fresca... bueno, fresca para estar en un pozo maldito.', 'Don Olivera, para servirte. Acepto oro. No acepto quejas ni devoluciones.', 'Necesitamos más oro. Vos, yo, todos. Es la economía, pibe: desde el Age que es así.'][Math.floor(Math.random() * 4)]) },
     morena: { talk: morenaTalk },
     bardo: { talk: bardoTalk },
     rodrigo: { talk: rodrigoTalk },

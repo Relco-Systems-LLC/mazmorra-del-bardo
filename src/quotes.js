@@ -14,6 +14,7 @@ window.MZ = window.MZ || {};
       'Nivel {n}. El dungeon ni se enteró de que viniste.',
       'Tranqui, perder también es un estilo de juego.',
       'Moriste como en Helbreath: con el inventario lleno y la dignidad vacía.',
+      'Fuiste derrotado. Y en tu cabeza suena la musiquita de derrota del Age of Empires.',
       'Ni un amistoso le ganás vos. La Scaloneta llorando desde USA.',
       'Te fuiste antes del primer tema. Ni en el Tiger Tiger duraban tan poco.',
     ],
@@ -25,6 +26,7 @@ window.MZ = window.MZ || {};
       'Eso dolió hasta acá.',
       'Chau, que descanse.',
       'Limpito. Sin testigos.',
+      'Wololo. Ah no, eso era convertirlos. Bueno, esto es más definitivo.',
     ],
     critico: [
       '¡CRÍTICO! ¿Y esa potencia de dónde salió?',
@@ -44,6 +46,7 @@ window.MZ = window.MZ || {};
       'Oro. Bueno, algo es algo.',
       'Otra poción dudosa. Vos tomala igual, total...',
       'Monedas sueltas. Ni para el bondi.',
+      'Oro insuficiente... ah no, pará, algo entró. Igual: necesitamos más oro.',
     ],
     jefeIntro: [
       'Uh, llegó el jefe. Y vos sin currículum.',
@@ -63,6 +66,7 @@ window.MZ = window.MZ || {};
       'Mientras lo pensás, los esqueletos cobran por hora.',
       'Tomate tu tiempo, total el aburrimiento era el enemigo, ¿no?',
       '¿Estás scrolleando otra app? Acá. Ojos acá.',
+      '"¿Qué? ¿Eh? ¿Órdenes?" — parecés aldeano del Age esperando un click.',
     ],
     danioGrande: [
       '¿Eso fue esquivar o ponerle el pecho?',
@@ -75,6 +79,7 @@ window.MZ = window.MZ || {};
       'Bajando... acá ya ni el wifi llega.',
       'Nivel {n}. ¿Quién te manda?',
       'Más abajo. El alquiler acá debe ser regalado.',
+      'Nivel {n}. Avanzaste a la Edad de los Castillos. Más o menos.',
     ],
     racha: [
       'Racha de {k}. Andá a comprar un Quini.',
@@ -171,6 +176,7 @@ window.MZ = window.MZ || {};
     ruletaGana: [
       'Click. Cámara vacía. El Tahúr te paga el triple con cara de piedra: "la próxima gira más rápido el tambor".',
       'Sobreviviste a la ruleta. Triple de oro y una historia para contar arriba. Si llegás.',
+      'Ganaste. El Tahúr paga, murmura "11" y se ríe solo de un chiste de hace mil años.',
     ],
     ruletaPierde: [
       'BANG... era de fogueo. Pero el susto te dejó en 1 HP igual. El Tahúr llora de risa.',

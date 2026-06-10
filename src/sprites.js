@@ -71,6 +71,17 @@ window.MZ = window.MZ || {};
         '...BB.BB....',
       ],
     },
+    escudoMini: {
+      pal: { B: 0xffd700, A: 0x9d6bff, a: 0x6a44b8 },
+      map: [
+        'BBBBBB',
+        'BAAaAB',
+        'BAaAAB',
+        'BAAAAB',
+        '.BAAB.',
+        '..BB..',
+      ],
+    },
     critico: {
       pal: { P: 0xd8c8a8, H: 0x888899, E: 0x111111, A: 0x222233, a: 0x333344, W: 0xffffff, N: 0xccaa66 },
       map: [
