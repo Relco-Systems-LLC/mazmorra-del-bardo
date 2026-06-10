@@ -64,8 +64,9 @@
   }
   #dialog {
     position: fixed; left: 8px; right: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
-    z-index: 8; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
+    z-index: 12; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
     border-radius: 14px; padding: 14px; box-shadow: 0 0 24px rgba(177, 76, 255, .3);
+    max-height: 70vh; overflow-y: auto;
   }
   #dlg-name { font-weight: bold; font-size: 15px; margin-bottom: 6px; text-shadow: 0 0 8px currentColor; }
   #dlg-text { color: #ddd; font-size: 14px; line-height: 1.55; margin-bottom: 12px; white-space: pre-line; }
@@ -99,6 +100,7 @@
   <div class="stats" id="start-stats"></div>
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
+  <div class="cta hidden" id="cta-shop" style="border-color:#ffd700;text-shadow:0 0 8px #ffd700;box-shadow:0 0 16px rgba(255,215,0,.3);animation:none;font-size:13px;padding:9px 20px">&#128123; QUIOSCO DE LAS ALMAS</div>
   <div class="sub" style="margin-top:12px">
     <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
     <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
@@ -2630,6 +2632,108 @@ window.MZ = window.MZ || {};
         '............',
       ],
     },
+    rataBlanca: {
+      pal: { R: 0xf5f5ff, r: 0xd0d0e8, P: 0xffb6c1, E: 0x4488ff, W: 0xffffff },
+      map: [
+        '............',
+        '............',
+        '............',
+        '..RR....RR..',
+        '.RPPR..RPPR.',
+        '.RRRRRRRRRr.',
+        'RRERRRRRRRrP',
+        'RRRRRRRRRr.P',
+        'RWRRRRRRRr.P',
+        '.RRr.RRr...P',
+        '...........P',
+        '............',
+      ],
+    },
+    golem: {
+      pal: { S: 0x8d99ae, s: 0x5c6678, E: 0xffa500, M: 0x3d4456 },
+      map: [
+        '..SSSSSSSS..',
+        '.SSSSSSSSSS.',
+        '.SSESSSSESS.',
+        '.SSSSSSSSSS.',
+        '.SsSSMMSSsS.',
+        'SSSSSSSSSSSS',
+        'SsSSSSSSSSsS',
+        'SsSSsSSsSSsS',
+        'SSSSSSSSSSSS',
+        '.SSSs..sSSS.',
+        '.SSS....SSS.',
+        '.sss....sss.',
+      ],
+    },
+    vampiro: {
+      pal: { N: 0x1a1a2e, P: 0xe8e0d8, E: 0xff2222, C: 0x8b0000, c: 0x5c0000, W: 0xffffff },
+      map: [
+        '...NNNNNN...',
+        '..NNNNNNNN..',
+        '..NPPPPPPN..',
+        '..NPEPPEPN..',
+        '..NPPPPPPN..',
+        '...PWPPWP...',
+        '..CCCCCCCC..',
+        '.CCcCCCCcCC.',
+        '.CCCCCCCCCC.',
+        '.CcCCCCCCcC.',
+        '..CCCCCCCC..',
+        '...CC..CC...',
+      ],
+    },
+    payaso: {
+      pal: { B: 0xffffff, R: 0xff2244, E: 0x111111, V: 0x44cc44, A: 0x3366ff, Y: 0xffdd00 },
+      map: [
+        '..R..Y..A...',
+        '...BBBBBB...',
+        '..BBBBBBBB..',
+        '..BEBBBBEB..',
+        '..BBBRRBBB..',
+        '...BRRRRB...',
+        '..VVVVVVVV..',
+        '.VAVAVAVAVA.',
+        '.VVVVVVVVVV.',
+        '..VVVVVVVV..',
+        '...VV..VV...',
+        '..YY....YY..',
+      ],
+    },
+    nieto: {
+      pal: { H: 0x6b3e1f, P: 0xffd9b3, E: 0x111111, A: 0xc0c8d0, a: 0x8a96a4, L: 0x223344 },
+      map: [
+        '...HHHHH....',
+        '..HHHHHHH...',
+        '..HPPPPPH...',
+        '..HPEPPEH...',
+        '..HPPPPPH...',
+        '...PPPPP....',
+        '..AAAAAAA...',
+        '.AAaAAAaAA..',
+        '.AAAAAAAAA..',
+        '.AaAAAAAaA..',
+        '...LL.LL....',
+        '...AA.AA....',
+      ],
+    },
+    fundador: {
+      pal: { F: 0xffd700, H: 0xe8e8e8, P: 0xffd9b3, E: 0x111111, W: 0xfff8dc, C: 0xb8860b, L: 0xa0522d, l: 0x7a3d20 },
+      map: [
+        '......F.....',
+        '...HHHHF....',
+        '..HHHHHH....',
+        '...PPPPP....',
+        '...PEPPE....',
+        '...WPPPW....',
+        '..WWWWWW....',
+        '...WWWW..L..',
+        '..CCCCC.lL..',
+        '.CCCCCC.lL..',
+        '..CCCC..l...',
+        '...C..C.....',
+      ],
+    },
     pombero: {
       pal: { S: 0xc9a14a, s: 0x9a7836, P: 0xb07a4a, E: 0x111111, F: 0x3b2b20, f: 0x2a1d15 },
       map: [
@@ -2750,7 +2854,72 @@ window.MZ = window.MZ || {};
         '.NNNNNNNNNN.',
       ],
     },
+    nona: {
+      pal: { P: 0xf0c8a0, H: 0xe8e8e8, E: 0x333333, V: 0x8866aa, v: 0x664488, A: 0xffffff, L: 0x553311 },
+      map: [
+        '...HHHHHH...',
+        '..HHHHHHHH..',
+        '..HPPPPPPH..',
+        '..HPEPPEPH..',
+        '..HPPPPPPH..',
+        '...PPLLPP...',
+        '..VVVVVVVV..',
+        '.VVAVVVVAVV.',
+        '.VVVVVVVVVV.',
+        '.VvVVVVVVvV.',
+        '..VVVVVVVV..',
+        '..VVV..VVV..',
+      ],
+    },
+    tahur: {
+      pal: { N: 0x222230, P: 0xd8a878, E: 0x111111, B: 0xcc2244, C: 0x333344, c: 0x222233, W: 0xffffff, G: 0xffd700 },
+      map: [
+        '...NNNNNN...',
+        '..NNNNNNNN..',
+        '...PPPPPP...',
+        '...PEPPEP...',
+        '...PPPPPP...',
+        '...PPBBPP...',
+        '..CCCCCCCC..',
+        '.CCWCCCCWCC.',
+        '.CcCCGGCCcC.',
+        '.CCCCCCCCCC.',
+        '...CC..CC...',
+        '...CC..CC...',
+      ],
+    },
+    herrero: {
+      pal: { P: 0xc88858, H: 0x442211, E: 0x111111, D: 0x556677, d: 0x445566, M: 0x8a5a2b, A: 0x9aa5b1 },
+      map: [
+        '...HHHHHH..A',
+        '..HHHHHHH..A',
+        '...PPPPPP..A',
+        '...PEPPEP..A',
+        '...PPPPPP.AA',
+        '...PPPPPP.MA',
+        '..DDDDDDD.M.',
+        '.DDdDDDDdDM.',
+        '.DDDDDDDDDM.',
+        '.DdDDDDDdDM.',
+        '...DD..DD...',
+        '...DD..DD...',
+      ],
+    },
     // ---- Ítems ----
+    corazon: {
+      pal: { R: 0xff3355, r: 0xcc1133, W: 0xff99aa },
+      map: [
+        '..RR..RR..',
+        '.RWRR.RRR.',
+        'RWWRRRRRRr',
+        'RWRRRRRRRr',
+        'RRRRRRRRRr',
+        '.RRRRRRRr.',
+        '..RRRRRr..',
+        '...RRRr...',
+        '....Rr....',
+      ],
+    },
     moneda: {
       pal: { G: 0xffd700, g: 0xb8860b, W: 0xfff2b3 },
       map: [
@@ -2843,6 +3012,20 @@ window.MZ = window.MZ || {};
         '..MmMMmM..',
         '..MMMMMM..',
         '...MMMM...',
+      ],
+    },
+    tequila: {
+      pal: { V: [0x88ddcc, 0.85], v: 0x55aa99, A: 0xffe680, L: 0xddaa33, S: 0xffffff },
+      map: [
+        '....SS....',
+        '....LL....',
+        '....VV....',
+        '...VAAV...',
+        '...VAAV...',
+        '..VAAAAV..',
+        '..VAAAAV..',
+        '..vAAAAv..',
+        '...vvvv...',
       ],
     },
     cofre: {
@@ -2953,6 +3136,9 @@ window.MZ = window.MZ || {};
       'Spoiler: el héroe muere al final. Y al principio. Y en el medio.',
       'Nivel {n}. El dungeon ni se enteró de que viniste.',
       'Tranqui, perder también es un estilo de juego.',
+      'Moriste como en Helbreath: con el inventario lleno y la dignidad vacía.',
+      'Ni un amistoso le ganás vos. La Scaloneta llorando desde USA.',
+      'Te fuiste antes del primer tema. Ni en el Tiger Tiger duraban tan poco.',
     ],
     matar: [
       "Tomá pa' vos.",
@@ -3017,6 +3203,19 @@ window.MZ = window.MZ || {};
       'Racha de {k}. Andá a comprar un Quini.',
       '{k} seguidos sin que te toquen. Bueno, tampoco te la creas.',
       'Imparable. ¿Quién sos y qué hiciste con el de antes?',
+      'Racha de {k}. Modo Scaloneta: que no te la cuenten.',
+    ],
+    rataBlanca: [
+      '¡LA RATA BLANCA! Suena un solo de guitarra a lo lejos... y llueve oro. La leyenda continúa.',
+      'Cazaste a la Rata Blanca. Mujer amante de la fortuna: mirá ese oro.',
+    ],
+    tequila: [
+      'Tequila del dungeon. Cura el cuerpo, factura el hígado. Salud.',
+      'Un shot y adentro. Mañana lo lamentás, hoy sos inmortal.',
+      '¡TEQUILA! Como en Cancún, pero con esqueletos mirando.',
+    ],
+    logro: [
+      '🏆 LOGRO: {t}',
     ],
     volver: [
       '¿Otra vez vos? Bueno, pasá.',
@@ -3066,6 +3265,21 @@ window.MZ = window.MZ || {};
       'El altar estaba de mal humor. Como todo acá.',
       'Le rezaste al altar equivocado, genio.',
       'El altar te miró y dijo "no". Y encima te maldijo.',
+    ],
+    pocionBuena: [
+      'Poción fresca. +{h} HP. Hoy zafaste.',
+      'Rica. Gusto a frutilla con química dudosa. +{h} HP.',
+      'La poción era de las buenas. Anotá la fecha: no pasa seguido.',
+    ],
+    pocionMala: [
+      'VENCIDA. ¿La fecha? ¿Quién mira la fecha? Vos no, claro.',
+      'Esa poción tenía más años que el dungeon. A llorarla.',
+      'Gusto raro... muy raro... uy. UY.',
+    ],
+    corazon: [
+      'Un corazón. +{h} HP. Mejor no preguntar de quién era.',
+      '+{h} HP. Late todavía. Asco, pero funciona.',
+      'Corazón fresco. La dieta del aventurero es ASÍ.',
     ],
     veneno: [
       'Envenenado. La poción decía "agitar antes de usar", no "desconfiar antes de usar".',
@@ -3122,7 +3336,7 @@ window.MZ = window.MZ || {};
   const KEY = 'mazmorra_bardo_v1';
   const DB = 'mazmorra_bardo';
   const STORE = 'kv';
-  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, totalSteps: 0, run: null };
+  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, nona: 0, totalSteps: 0, run: null };
   let data = { ...defaults };
   let db = null;
 
@@ -3420,6 +3634,10 @@ window.MZ = window.MZ || {};
       const c = takeCell();
       if (c) enemies.push({ type: 'pombero', x: c.x, y: c.y });
     }
+    if (!isBoss && rng.chance(0.015)) { // La Rata Blanca: la leyenda continúa
+      const c = takeCell();
+      if (c) enemies.push({ type: 'rataBlanca', x: c.x, y: c.y });
+    }
 
     // Ítems.
     const items = [];
@@ -3444,6 +3662,7 @@ window.MZ = window.MZ || {};
     if (depth >= 2 && depth % 3 === 1 && rng.chance(0.5)) drop('bow');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
+    if (rng.chance(0.1)) drop('tequila');
     if (rng.chance(0.012)) drop('mateLegendario');
     if (secret) items.push({ type: 'chest', x: secret.room.x, y: secret.room.y, amount: 40 + depth * 3 });
 
@@ -3467,6 +3686,10 @@ window.MZ = window.MZ || {};
     fantasma: { name: 'Fantasma', sprite: 'fantasma', color: 0xa0c4ff, scale: 0.8, ghost: true, hp: 7, atk: 3, gold: 5, minDepth: 5 },
     arquero: { name: 'Arquero Maldito', sprite: 'arquero', color: 0xccffaa, scale: 0.85, ranged: 5, hp: 8, atk: 3, gold: 6, minDepth: 6 },
     ojo: { name: 'Ojo Maldito', sprite: 'ojo', color: 0xffa500, scale: 0.7, ranged: 4, hp: 8, atk: 3, gold: 6, minDepth: 8 },
+    golem: { name: 'Gólem de Utilería', sprite: 'golem', color: 0x8d99ae, scale: 1.1, hp: 22, atk: 5, gold: 12, slow: true, minDepth: 12 },
+    vampiro: { name: 'Vampiro de Palco', sprite: 'vampiro', color: 0xff2222, scale: 0.9, hp: 14, atk: 4, gold: 14, vampiro: true, minDepth: 16 },
+    payaso: { name: 'Payaso del Entreacto', sprite: 'payaso', color: 0xff2244, scale: 0.9, hp: 12, atk: 4, gold: 16, ranged: 4, poison: 2, minDepth: 20 },
+    rataBlanca: { name: 'La Rata Blanca', sprite: 'rataBlanca', color: 0xffffff, scale: 0.7, hp: 10, atk: 2, gold: 60, rataBlanca: true, rare: true, minDepth: 1 },
     pombero: { name: 'El Pombero', sprite: 'pombero', color: 0x00ff88, scale: 0.85, pombero: true, hp: 14, atk: 1, gold: 0, rare: true, minDepth: 1 },
     boss: { name: 'Jefe', sprite: 'jefe', color: 0xff2266, scale: 1.6, hp: 28, atk: 4, gold: 20, boss: true, rare: true, minDepth: 1 },
     barril: { name: 'Barril explosivo', sprite: 'barril', color: 0xffa500, scale: 0.8, hp: 3, atk: 0, gold: 0, static: true, explode: true, rare: true, minDepth: 1 },
@@ -3505,6 +3728,8 @@ window.MZ = window.MZ || {};
     chest: { sprite: 'cofre', color: 0xffd700, scale: 0.65 },
     anillo: { sprite: 'anillo', color: 0x00e5ff, scale: 0.5 },
     pinchos: { sprite: 'pinchos', color: 0x607d8b, scale: 0.7 },
+    heart: { sprite: 'corazon', color: 0xff3355, scale: 0.45 },
+    tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
   };
 
@@ -3556,6 +3781,179 @@ window.MZ = window.MZ || {};
 
 </script>
 <script>
+// Logros persistentes + economía de almas + tienda de mejoras permanentes.
+// Esto es lo que convierte runs de 20 minutos en semanas de vicio.
+window.MZ = window.MZ || {};
+(() => {
+  const D = () => MZ.save.data;
+
+  // ---- Logros: id, título, condición sobre (stats persistentes, evento) ----
+  const LOGROS = [
+    { id: 'sangre', t: 'Primera Sangre', d: 'Matá tu primer monstruo' },
+    { id: 'kills100', t: 'Centurión', d: '100 bajas históricas' },
+    { id: 'kills1000', t: 'Genocida de Utilería', d: '1000 bajas históricas' },
+    { id: 'nivel5', t: 'Turista', d: 'Llegá al nivel 5' },
+    { id: 'nivel10', t: 'Inquilino', d: 'Llegá al nivel 10' },
+    { id: 'nivel20', t: 'Residente Permanente', d: 'Llegá al nivel 20' },
+    { id: 'nivel30', t: 'Leyenda del Subsuelo', d: 'Llegá al nivel 30' },
+    { id: 'nivel50', t: 'La Última Función', d: 'Llegá al nivel 50' },
+    { id: 'oro1000', t: 'Tesorero', d: '1000 de oro juntado histórico' },
+    { id: 'oro10000', t: 'Magnate del Pozo', d: '10000 de oro histórico' },
+    { id: 'muertes10', t: 'Cliente Frecuente', d: 'Morí 10 veces' },
+    { id: 'muertes50', t: 'Abono Anual', d: 'Morí 50 veces' },
+    { id: 'pombero', t: 'Cazafantasmas Criollo', d: 'Cazá al Pombero' },
+    { id: 'rataBlanca', t: 'Mujer Amante', d: 'Encontrá a la Rata Blanca' },
+    { id: 'disco', t: 'Fiebre de Sábado', d: 'Activá el modo disco' },
+    { id: 'mateLeg', t: 'Cebador Sagrado', d: 'Tomá el Mate Legendario' },
+    { id: 'morena', t: 'Corazón de Bruja', d: 'Enamorá a Morena' },
+    { id: 'nona', t: 'Nieto Postizo', d: 'Visitá 3 veces a la Nona' },
+    { id: 'nieto', t: 'Reencuentro', d: 'Encontrá al nieto de la Nona' },
+    { id: 'lore', t: 'Memoria del Teatro', d: 'Escuchá toda la historia del Bardo' },
+    { id: 'racha10', t: 'Intocable', d: 'Racha de 10 sin recibir daño' },
+    { id: 'tequila', t: 'Spring Break', d: 'Tomate un tequila' },
+    { id: 'pasos5000', t: 'Maratonista de Catacumba', d: '5000 pasos históricos' },
+    { id: 'jefe5', t: 'Matajefes', d: 'Matá 5 jefes (histórico)' },
+  ];
+
+  MZ.logros = {
+    defs: LOGROS,
+
+    count() {
+      const u = D().logrosU || {};
+      return Object.keys(u).length;
+    },
+
+    unlock(id) {
+      const d = D();
+      d.logrosU = d.logrosU || {};
+      if (d.logrosU[id]) return;
+      d.logrosU[id] = 1;
+      MZ.save.store();
+      const def = LOGROS.find(l => l.id === id);
+      if (def && MZ.ui) {
+        MZ.ui.toast('🏆 LOGRO: ' + def.t, 3500);
+        if (MZ.audio) MZ.audio.secret();
+        if (MZ.fx && MZ.state && MZ.state.player) MZ.fx.flash(0.25, 0xffd700);
+      }
+    },
+
+    // Llamar tras eventos clave; chequea todo lo barato de chequear.
+    check(evento) {
+      const d = D(), S = MZ.state;
+      const kills = d.totalKills + (S && S.player ? S.player.kills : 0);
+      const oro = d.totalGold + (S && S.player ? S.player.gold : 0);
+      const pasos = d.totalSteps + (S && S.player ? S.player.steps : 0);
+      if (kills >= 1) this.unlock('sangre');
+      if (kills >= 100) this.unlock('kills100');
+      if (kills >= 1000) this.unlock('kills1000');
+      if (oro >= 1000) this.unlock('oro1000');
+      if (oro >= 10000) this.unlock('oro10000');
+      if (pasos >= 5000) this.unlock('pasos5000');
+      if (d.deaths >= 10) this.unlock('muertes10');
+      if (d.deaths >= 50) this.unlock('muertes50');
+      if (d.bestDepth >= 5) this.unlock('nivel5');
+      if (d.bestDepth >= 10) this.unlock('nivel10');
+      if (d.bestDepth >= 20) this.unlock('nivel20');
+      if (d.bestDepth >= 30) this.unlock('nivel30');
+      if (d.bestDepth >= 50) this.unlock('nivel50');
+      if ((d.morena || 0) >= 3) this.unlock('morena');
+      if ((d.nona || 0) >= 3) this.unlock('nona');
+      if ((d.loreCap || 0) >= 7) this.unlock('lore');
+      if ((d.jefesMuertos || 0) >= 5) this.unlock('jefe5');
+      if (S && S.player && S.player.streak >= 10) this.unlock('racha10');
+      // eventos puntuales
+      if (evento === 'pombero') this.unlock('pombero');
+      if (evento === 'rataBlanca') this.unlock('rataBlanca');
+      if (evento === 'disco') this.unlock('disco');
+      if (evento === 'mateLeg') this.unlock('mateLeg');
+      if (evento === 'tequila') this.unlock('tequila');
+      if (evento === 'nieto') this.unlock('nieto');
+    },
+  };
+
+  // ---- Tienda de almas: mejoras permanentes entre runs ----
+  // Las almas se ganan al morir: profundidad y bajas del run.
+  const MEJORAS = [
+    { id: 'vida', t: 'Sangre de Gólem', d: '+2 HP máximo inicial', max: 10, base: 25 },
+    { id: 'fuerza', t: 'Puños del Mundial', d: '+1 ATK base inicial', max: 5, base: 60 },
+    { id: 'cuero', t: 'Piel de Vampiro', d: '+1 DEF base inicial', max: 3, base: 90 },
+    { id: 'viatico', t: 'Viático del Gremio', d: '+30 de oro inicial', max: 5, base: 30 },
+    { id: 'cuchillo', t: 'Cuchillo Heredado', d: 'Empezás con el cuchillo de asado', max: 1, base: 50 },
+    { id: 'petaca', t: 'Petaca de Tequila', d: 'Empezás con un tequila encima (auto al 30% HP)', max: 1, base: 80 },
+  ];
+
+  MZ.meta = {
+    defs: MEJORAS,
+
+    nivel(id) { return (D().mejoras || {})[id] || 0; },
+
+    costo(m) { return m.base * (this.nivel(m.id) + 1); },
+
+    comprar(id) {
+      const d = D();
+      const m = MEJORAS.find(x => x.id === id);
+      if (!m) return false;
+      const lvl = this.nivel(id);
+      if (lvl >= m.max) return false;
+      const c = this.costo(m);
+      if ((d.almas || 0) < c) return false;
+      d.almas -= c;
+      d.mejoras = d.mejoras || {};
+      d.mejoras[id] = lvl + 1;
+      MZ.save.store();
+      return true;
+    },
+
+    // Aplica las mejoras compradas al jugador recién nacido (lo llama newRun).
+    aplicar(P) {
+      P.maxHp += this.nivel('vida') * 2;
+      P.hp = P.maxHp;
+      P.baseAtk += this.nivel('fuerza');
+      P.baseDef += this.nivel('cuero');
+      P.gold += this.nivel('viatico') * 30;
+      if (this.nivel('cuchillo')) P.melee = { kind: 'melee', name: 'Cuchillo heredado', atk: 1 };
+      if (this.nivel('petaca')) P.petaca = true;
+    },
+
+    // Almas ganadas por un run terminado.
+    cosecha(depth, kills) {
+      return Math.max(1, Math.floor(depth * 2 + kills * 0.5));
+    },
+
+    // Menú de la tienda con el sistema de diálogo.
+    abrirTienda() {
+      const d = D();
+      const self = this;
+      function menu(msg) {
+        const choices = MEJORAS.map(m => {
+          const lvl = self.nivel(m.id);
+          if (lvl >= m.max) return { label: '✔ ' + m.t + ' (MAX)', fn: () => menu('Eso ya está al mango, crack.') };
+          const c = self.costo(m);
+          return {
+            label: m.t + ' [' + lvl + '/' + m.max + '] — ' + c + ' almas',
+            fn() {
+              if (self.comprar(m.id)) {
+                if (MZ.audio) MZ.audio.pickup();
+                return menu(m.d + '. Comprado. Te quedan ' + (d.almas || 0) + ' almas.');
+              }
+              return menu('No te alcanza. Morí más seguido, que las almas no crecen en los árboles.');
+            },
+          };
+        });
+        choices.push({ label: 'Listo, me voy', fn: null });
+        return {
+          name: 'El Quiosco de las Almas', color: 0x00ffc8,
+          text: msg + '\n\nAlmas: ' + (d.almas || 0) + ' 👻 (se cosechan al morir: profundidad y bajas pagan)',
+          choices,
+        };
+      }
+      MZ.dialog.open(menu('Bienvenido al Quiosco. Acá la muerte es moneda: cada run que termina, deja algo. Las mejoras quedan PARA SIEMPRE.'));
+    },
+  };
+})();
+
+</script>
+<script>
 // Lore escrito a mano: NPCs con historia, quests secundarias, romance y picante.
 window.MZ = window.MZ || {};
 (() => {
@@ -3590,12 +3988,20 @@ window.MZ = window.MZ || {};
   MZ.pickNpcsForLevel = function (depth, isBoss) {
     const Q = MZ.quests.run;
     const out = [];
+    if (depth === 50) { out.push('fundador'); return out; } // la última función
     if (Q.anillo && Q.anillo.stage === 'tengo') out.push('rodrigo');
     if (Q.venganza && Q.venganza.stage === 'cumplida' && !isBoss) out.push('esperanza');
+    // el nieto de la Nona: aparece una sola vez (histórico), bien abajo, si la conocés
+    if (!isBoss && depth >= 12 && (D().nona || 0) >= 2 && !D().nietoVisto && Math.random() < 0.3) {
+      out.push('nieto');
+    }
     if (isBoss || depth < 2) return out;
     if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
     const pool = ['mercader', 'mercader', 'bardo', 'bardo'];
+    if (depth >= 2) pool.push('tahur');
+    if (depth >= 3) pool.push('nona');
     if (depth >= 4) pool.push('morena', 'morena');
+    if (depth >= 5) pool.push('herrero');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
     const want = (Math.random() < 0.75 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
     for (let i = 0; i < want; i++) {
@@ -3699,7 +4105,7 @@ window.MZ = window.MZ || {};
       ]);
 
     if (s === 2) return node('Morena', 0xff4cf0,
-      'Quedate un rato. Las velas están prendidas, la puerta tiene tranca, y los esqueletos hoy no miran.',
+      'Quedate un rato. Las velas están prendidas, la puerta tiene tranca, hay tequila del bueno —del que traje de Cancún, no preguntes cómo— y los esqueletos hoy no miran.',
       [
         {
           label: 'Quedarse 😏', fn() {
@@ -3747,11 +4153,13 @@ window.MZ = window.MZ || {};
 
   // ---- Anselmo el Bardo: la historia del dungeon en 5 capítulos ----
   const CAPITULOS = [
-    '¿Sabés dónde estás parado, pibe? Esto era el Gran Teatro Subterráneo del Bardo Fundador. Mil butacas, terciopelo, acomodadores con moñito. Después... bueno, después pasó lo que pasó.',
-    'El Bardo Fundador quería público infinito. Hizo un pacto: su alma a cambio de funciones eternas. Spoiler: la letra chica decía "el público te va a querer matar". Nunca firmes sin leer, querido.',
-    '¿Los monstruos? Críticos de teatro, maldecidos para siempre por panear la obra equivocada. La rata escribía para el diario La Mazmorra. El slime tenía un blog. Al fantasma lo echaron de la radio.',
+    '¿Sabés dónde estás parado, pibe? Esto era el Gran Teatro Subterráneo del Bardo Fundador. Mil butacas, terciopelo, acomodadores con moñito. Yo toqué acá de soporte de Rata Blanca, te juro. Después... bueno, después pasó lo que pasó.',
+    'El Bardo Fundador quería público infinito. Hizo un pacto: su alma a cambio de funciones eternas. Spoiler: la letra chica decía "el público te va a querer matar". Como dice Helloween: keeper of the seven keys... y este abrió las siete puertas equivocadas, el animal.',
+    '¿Los monstruos? Críticos maldecidos por panear la obra equivocada. La rata escribía para el diario La Mazmorra. El slime tenía un blog. Al fantasma lo echaron de la radio por pasar Edguy a las cuatro de la tarde. Injusto, si me preguntás: Vain Glory Opera es para toda hora.',
     'Los jefes de cada cinco pisos eran empresarios teatrales. El Encargado cortaba los sándwiches de miga al medio... a lo largo. Por eso está maldito. Y la verdad, hace bien.',
-    'Última verdad, y no se la conté a nadie: el dungeon se regenera porque el Bardo sigue escribiendo niveles ahí abajo. Vos no estás explorando, querido. Estás siendo escrito. ...¿Un mate?',
+    '¿Y los demás? La Nona cocinaba para el elenco: su guiso resucitaba giras enteras. El Tahúr era el productor: se jugó la recaudación en el Tiger Tiger... tres veces. Fierrito hacía la utilería: la única espada de verdad en un teatro lleno de espadas de cartón.',
+    'Morena era la actriz principal, ¿sabías? La maldición no la tocó: ella YA era bruja, lo del teatro era hobby. El hada y el mago, pero al revés: acá el mago se fue y el hada se quedó cobrando entrada. Esperanza enviudó del primer Encargado... y del segundo. Empezamos a sospechar en el tercero.',
+    'Última verdad, y no se la conté a nadie: el dungeon se regenera porque el Bardo sigue escribiendo niveles ahí abajo. Vos no estás explorando, querido. Estás siendo escrito. Como un GM loco de Helbreath que no suelta el server. ...¿Un mate?',
   ];
 
   function bardoTalk() {
@@ -3779,6 +4187,10 @@ window.MZ = window.MZ || {};
       'Consejo de viejo: a las víboras pegales de lejos. Y a los críticos de teatro también.',
       'Si ves una pared con una grieta, pateala. La arquitectura de acá es puro decorado, te lo digo yo que armaba la escenografía.',
       'El Pombero existe. Una vez me afanó la púa y el termo. La púa la repuse, el termo todavía lo lloro.',
+      'Hay una rata blanca dando vueltas por los niveles. No es una rata más: dicen que si la encontrás, suena un solo de guitarra y llueve oro. Mujer amante, la leyenda continúa.',
+      'Yo iba a ir al mundial, ¿sabés? USA 26, la Scaloneta, todo armado. Pero el dungeon no te da vacaciones. Si la ves levantar la copa, gritá un gol por mí.',
+      'Anoche soñé que tocaba con Helloween en Cancún. Tobias Sammet de invitado, tequila en el escenario. Desperté acá, con un esqueleto mirándome. La vida es injusta, querido.',
+      '¿Sabías que abajo del nivel 30 hay una pista de baile? Quedó del Tiger Tiger original. Los fantasmas todavía hacen la fila para entrar. Algunos hábitos no mueren ni muertos.',
     ];
     return node('Anselmo el Bardo', 0x66aaff, yapas[Math.floor(Math.random() * yapas.length)], null);
   }
@@ -3910,12 +4322,207 @@ window.MZ = window.MZ || {};
     return node('Esperanza, la Viuda', 0xff2255, 'Nos vemos el viernes, ¿no? No te hagas el desentendido.', null);
   }
 
+  // ---- La Nona: te alimenta, te bardea con amor, y su historia crece con las visitas ----
+  function nonaTalk() {
+    const p = P(), visitas = D().nona || 0;
+    // cierre del arco: le contaste del nieto
+    if (D().nietoVisto && !D().nonaSabe) {
+      D().nonaSabe = 1; MZ.save.store();
+      p.hp = p.maxHp; p.maxHp += 5; p.hp = p.maxHp; p.poison = 0;
+      MZ.audio.mate(); MZ.fx.flash(0.3, 0xb088dd); MZ.ui.updateHUD();
+      return node('La Nona', 0xb088dd,
+        '¿...Tato? ¿Viste a mi Tato? ¿Está vivo? ¿Está comiendo bien?\n\n*revuelve el guiso para disimular que llora*\n\nVeinte años, querido. Veinte años con el plato puesto en la mesa.\n\nTomá. Guiso doble. Y esto es para vos: la receta de la fuerza de la familia. (+5 HP máx, curado entero)\n\nSi lo ves de nuevo... decile que el guiso está donde siempre.', null);
+    }
+    const guiso = () => {
+      D().nona = visitas + 1; MZ.save.store();
+      p.hp = p.maxHp; p.poison = 0;
+      if (visitas === 2) { p.maxHp += 3; p.hp = p.maxHp; }
+      MZ.audio.mate(); MZ.ui.updateHUD();
+    };
+    const textos = [
+      '¿Y vos quién sos? Ay, no importa, estás flaco. Sentate que hay guiso. EN ESTA CASA NADIE EXPLORA CON LA PANZA VACÍA.',
+      'Volviste. Sabía. Todos vuelven donde se come bien. Mi nieto también bajó a esta mazmorra, ¿sabés? Hace veinte años. Seguro anda por el nivel ochenta, es muy dedicado.',
+      'Hoy te cuento algo: el Bardo Fundador venía a comer acá todos los domingos. Un día me quiso pagar con un poema. Le di con la cuchara de palo. Pagó con oro, como la gente. (+3 HP máx, ya sos de la familia)',
+      'Comé y escuchá: si ves a mi nieto ahí abajo —alto, lindo, con armadura— decile que la nona no está enojada. Mentira, decile que está RE enojada. Veinte años sin escribir, el muy turro.',
+    ];
+    const idx = Math.min(visitas, textos.length - 1);
+    return node('La Nona', 0xb088dd, textos[idx], [
+      {
+        label: visitas === 0 ? 'Sentarse a comer' : 'El guiso, Nona, el guiso',
+        fn() {
+          guiso();
+          return node('La Nona', 0xb088dd,
+            visitas >= 3
+              ? 'Curado entero. Y llevate un tupper, que allá abajo no se consigue nada decente.'
+              : 'Curado entero. ¿Viste? Mejor que cualquier poción esa porquería violeta que venden por ahí.', null);
+        },
+      },
+      { label: 'No tengo hambre (mentira)', fn: () => node('La Nona', 0xb088dd, '¿No tenés hambre? A ver, mirame a los ojos... Lo que yo decía: flaco Y mentiroso. Andá, andá a tu mazmorra.', null) },
+    ]);
+  }
+
+  // ---- El Tahúr: doble o nada, con dados cargados de carisma ----
+  function tahurTalk() {
+    const p = P();
+    const apostar = (monto) => {
+      p.gold -= monto;
+      const gana = Math.random() < 0.48; // la casa siempre tiene ventaja, obvio
+      if (gana) {
+        p.gold += monto * 2;
+        MZ.audio.gold(); MZ.ui.updateHUD();
+        return node('El Tahúr', 0xffd700,
+          'Doble seis. GANASTE. Tomá tu plata... y andate antes de que me arrepienta. Esto no me pasaba desde la noche que perdí el Tiger Tiger entero a los dados. Linda época.', null);
+      }
+      MZ.audio.hurt(); MZ.ui.updateHUD();
+      return node('El Tahúr', 0xffd700,
+        'Uy. Dos y uno. La mesa lo lamenta profundamente (yo no). Te invitaría un tequila de consuelo, pero el último me lo tomé en el 98. Volvé con más... optimismo.', null);
+    };
+    const choices = [];
+    if (p.gold >= 20) choices.push({ label: 'Apostar 20 de oro', fn: () => apostar(20) });
+    if (p.gold >= 100) choices.push({ label: 'Apostar 100 (a lo grande)', fn: () => apostar(100) });
+    if (p.gold > 0 && p.gold < 20) choices.push({ label: 'Apostar lo que tengo (' + p.gold + ')', fn: () => apostar(p.gold) });
+    choices.push({ label: 'Con el juego no, gracias', fn: () => node('El Tahúr', 0xffd700, 'Un hombre sabio. Aburrido, pero sabio. Igual acá te espero: todos vuelven a la mesa.', null) });
+    return node('El Tahúr', 0xffd700,
+      p.gold > 0
+        ? 'Pero mirá quién llegó: oro fresco. Digo, un aventurero. Doble o nada, reglas de la casa: vos ponés la plata, yo pongo los dados. ¿Qué puede salir mal?'
+        : 'Sin oro no hay juego, amigo. Andá a sacudir unos esqueletos y volvé, que la mesa no cierra nunca.',
+      choices);
+  }
+
+  // ---- Fierrito el herrero: mejoras de equipo que el mercader no hace ----
+  function herreroTalk(npc) {
+    const p = P(), d = MZ.state.depth;
+    const cVeneno = 45 + d * 2, cEscudo = 35 + d * 2, cTemple = 30 + d * 2;
+    const menu = (text) => {
+      const choices = [];
+      if (p.melee && !p.melee.veneno && !npc.didVeneno) choices.push({
+        label: `Untar ${p.melee.name} con veneno — ${cVeneno} oro`,
+        fn() {
+          if (p.gold < cVeneno) return menu('Sin oro no hay química, maestro.');
+          p.gold -= cVeneno; p.melee.veneno = true; npc.didVeneno = true;
+          MZ.audio.pickup(); MZ.ui.updateHUD();
+          return menu('Listo. Receta de la abuela de un cocodrilo. No lo lamas.');
+        },
+      });
+      if (p.shield && !npc.didEscudo) choices.push({
+        label: `Reforzar ${p.shield.name} (DEF +1) — ${cEscudo} oro`,
+        fn() {
+          if (p.gold < cEscudo) return menu('El hierro está carísimo. Culpa de los jefes, que acaparan todo.');
+          p.gold -= cEscudo; p.shield.def += 1; MZ.recalcStats(); npc.didEscudo = true;
+          MZ.audio.pickup(); MZ.ui.updateHUD();
+          return menu('Reforzado. Ahora aguanta hasta un casamiento de familia.');
+        },
+      });
+      if (p.melee && !npc.didTemple) choices.push({
+        label: `Templar ${p.melee.name} (ATK +1) — ${cTemple} oro`,
+        fn() {
+          if (p.gold < cTemple) return menu('¿Templar gratis? Ni a mi vieja.');
+          p.gold -= cTemple; p.melee.atk += 1; MZ.recalcStats(); npc.didTemple = true;
+          MZ.audio.pickup(); MZ.ui.updateHUD();
+          return menu('Templada al rojo. Cortás un suspiro al medio.');
+        },
+      });
+      if (!p.melee) choices.push({ label: '(Estás a piñas: conseguí un arma primero)', fn: () => menu('¿A piñas? Respeto. Pero traeme un fierro y hablamos en serio.') });
+      choices.push({ label: 'Sigo viaje', fn: null });
+      return node('Fierrito', 0x9aa5b1, text, choices);
+    };
+    return menu('Fierrito, herrero. Antes hacía espadas de utilería para el teatro. Ahora hago de las otras. Irónico, ¿no? ¿Qué te mejoro?');
+  }
+
+  // ---- Intro narrada al inicio de cada partida ----
+  const INTROS = [
+    'Hace cien años, esto era el Gran Teatro Subterráneo del Bardo Fundador. Mil butacas. Terciopelo. Acomodadores con moñito.\n\nHoy es un pozo maldito lleno de críticos de teatro convertidos en monstruos.\n\nY vos bajás igual, porque el viaje a Cancún quedó en "lo vemos el año que viene". Respeto.',
+    'Podrías estar en USA siguiendo a la Scaloneta campeona, banderazo, hotel, todo.\n\nPero no. Estás acá, bajando a un pozo maldito con un cuchillo de asado.\n\nBueno, esto también es defender la copa, si lo pensás con cariño. Bajá.',
+    'El Bardo Fundador vendió su alma por funciones eternas. La letra chica decía que el público lo iba a querer matar para siempre.\n\nVos sos el público.\n\nLa función está por empezar. Y de telonera: la oscuridad eterna. Bajá.',
+    'Capítulo {r} de tu desgracia.\n\nLa mazmorra se reescribió esta noche: niveles nuevos, monstruos con hambre, oro sin dueño. Como un server de Helbreath recién wipeado, pero acá el PK sos vos.\n\nLo único que no cambia: vos, bajando otra vez como si la última no hubiera terminado mal.',
+    'Aviso del Gremio de Bardos: la gestión no se hace responsable por muertes, envenenamientos, corazones rotos por brujas, deudas con el Tahúr, ni resacas de tequila del nivel 7.\n\nFirme acá abajo... bueno, con bajar alcanza. Suerte, crack.',
+    'Esto era una noche de Tiger Tiger: luces, humo, la previa eterna.\n\nDespués alguien gritó "¡última canción!" hace cien años y nunca terminó.\n\nAbajo todavía suena. Bajá y fijate quién quedó en la pista.',
+  ];
+
+  MZ.showIntro = function () {
+    const runs = D().runs || 1;
+    // la primera vez siempre la fundacional; después rota
+    const i = runs <= 1 ? 0 : 1 + Math.floor(Math.random() * (INTROS.length - 1));
+    const text = INTROS[i].replaceAll('{r}', runs);
+    MZ.dialog.open(node('El Bardo (narrador)', 0x66aaff, text, [
+      { label: runs <= 1 ? 'Bajar a la mazmorra' : 'Bajar de una vez', fn: null },
+    ]));
+  };
+
+  // ---- Tato, el nieto de la Nona: cierre de un arco de 20 años ----
+  function nietoTalk() {
+    const p = P();
+    return node('Tato, el Perdido Hace 20 Años', 0xc0c8d0,
+      '¿Vos... vos venís de arriba? ¿En serio? Yo bajé hace veinte años a buscar fama y... me perdí. El dungeon se regenera, ¿viste? Nunca encontré la salida.\n\nPará. ¿Conocés a mi nona? ¿ESTÁ BIEN? ¿Sigue haciendo el guiso?',
+      [
+        {
+          label: 'Está bien. Y está RE enojada.', fn() {
+            MZ.save.data.nietoVisto = 1;
+            MZ.save.store();
+            MZ.logros.check('nieto');
+            p.maxHp += 4; p.hp = Math.min(p.maxHp, p.hp + 4);
+            p.gold += 60;
+            MZ.recalcStats(); MZ.audio.secret(); MZ.ui.updateHUD();
+            return node('Tato, el Perdido Hace 20 Años', 0xc0c8d0,
+              'Veinte años y sigue enojada... sí, es ella. Tomá: mi reserva de oro y mi amuleto, ya no los necesito. Voy a subir. Voy a ir a comer ese guiso aunque me cueste la vida.\n\n(+4 HP máx, +60 oro)\n\nDecile que voy. Que ponga un plato más.', null);
+          },
+        },
+        {
+          label: '¿Veinte años y no encontraste la SALIDA?', fn() {
+            MZ.save.data.nietoVisto = 1;
+            MZ.save.store();
+            MZ.logros.check('nieto');
+            p.gold += 60;
+            MZ.audio.gold(); MZ.ui.updateHUD();
+            return node('Tato, el Perdido Hace 20 Años', 0xc0c8d0,
+              '¡EL DUNGEON SE REGENERA! ¡No es tan fácil! ...Bueno, sí, también me quedé jugando al Helbreath en una sala secreta que tiene wifi. VEINTE AÑOS SE PASAN VOLANDO, ¿OK?\n\nTomá 60 de oro y no me juzgues.', null);
+          },
+        },
+      ]);
+  }
+
+  // ---- El Bardo Fundador: nivel 50, la última función ----
+  function fundadorTalk() {
+    const p = P();
+    return node('El Bardo Fundador', 0xffd700,
+      'Cincuenta niveles. Nadie había llegado tan lejos desde... bueno, desde nunca. Bravo. BRAVO.\n\nYo soy el que escribe esto, ¿sabés? Cada nivel, cada rata, cada frase picante que te tiró el narrador. Cien años escribiendo para un teatro vacío.\n\nY de golpe... público.',
+      [
+        {
+          label: 'La función estuvo buenísima, maestro', fn() {
+            p.maxHp += 10; p.hp = p.maxHp;
+            p.baseAtk += 2; p.gold += 500;
+            MZ.recalcStats(); MZ.audio.secret(); MZ.ui.updateHUD();
+            MZ.fx.flash(0.5, 0xffd700);
+            MZ.logros.check();
+            return node('El Bardo Fundador', 0xffd700,
+              '*se seca una lágrima con la capa*\n\nTomá: la Bendición del Fundador. +10 HP máx, +2 ATK, 500 de oro. El teatro es tuyo, pibe.\n\nAh, ¿la salida? No existe. Pero el aplauso tampoco se termina: de acá para abajo es función continuada. Seguí bajando, estrella.', null);
+          },
+        },
+        {
+          label: 'Cien años bardeándome... ¿y AHORA sos amable?', fn() {
+            p.maxHp += 10; p.hp = p.maxHp;
+            p.baseAtk += 2; p.gold += 500;
+            MZ.recalcStats(); MZ.audio.secret(); MZ.ui.updateHUD();
+            MZ.fx.flash(0.5, 0xffd700);
+            MZ.logros.check();
+            return node('El Bardo Fundador', 0xffd700,
+              'El bardeo ES amor, querido. ¿Quién te acompañó cincuenta niveles? ¿Quién te dijo "F" en cada muerte? Eso es compromiso artístico.\n\nTomá la Bendición igual: +10 HP máx, +2 ATK, 500 de oro. Y seguí bajando, que el teatro no se termina nunca... como el bardeo.', null);
+          },
+        },
+      ]);
+  }
+
   MZ.LORE = {
     mercader: { talk: (npc) => mercaderMenu(npc, ['Pasá, pasá. Todo lo que ves se cayó de un camión. El camión de otra mazmorra.', '¿Qué hacés, pibe? Mercadería fresca... bueno, fresca para estar en un pozo maldito.', 'Don Olivera, para servirte. Acepto oro. No acepto quejas ni devoluciones.'][Math.floor(Math.random() * 3)]) },
     morena: { talk: morenaTalk },
     bardo: { talk: bardoTalk },
     rodrigo: { talk: rodrigoTalk },
     esperanza: { talk: esperanzaTalk },
+    nona: { talk: nonaTalk },
+    tahur: { talk: tahurTalk },
+    herrero: { talk: (npc) => herreroTalk(npc) },
+    nieto: { talk: nietoTalk },
+    fundador: { talk: fundadorTalk },
   };
 })();
 
@@ -3930,6 +4537,11 @@ window.MZ = window.MZ || {};
     bardo: { name: 'Anselmo el Bardo', sprite: 'bardo', color: 0x66aaff, scale: 0.95 },
     rodrigo: { name: 'Rodrigo el Perdido', sprite: 'rodrigo', color: 0x9aa5b1, scale: 0.95 },
     esperanza: { name: 'Esperanza, la Viuda', sprite: 'esperanza', color: 0xff2255, scale: 0.95 },
+    nona: { name: 'La Nona', sprite: 'nona', color: 0xb088dd, scale: 0.95 },
+    tahur: { name: 'El Tahúr', sprite: 'tahur', color: 0xffd700, scale: 0.95 },
+    herrero: { name: 'Fierrito', sprite: 'herrero', color: 0x9aa5b1, scale: 0.95 },
+    nieto: { name: 'Tato, el Perdido Hace 20 Años', sprite: 'nieto', color: 0xc0c8d0, scale: 0.95 },
+    fundador: { name: 'El Bardo Fundador', sprite: 'fundador', color: 0xffd700, scale: 1.05 },
   };
 
   const $ = id => document.getElementById(id);
@@ -4137,6 +4749,12 @@ window.MZ = window.MZ || {};
         MZ.audio.ensure();
         MZ.newRun();
       });
+      $('cta-shop').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.audio.ensure();
+        MZ.meta.abrirTienda();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -4262,9 +4880,12 @@ window.MZ = window.MZ || {};
     showStart() {
       const d = MZ.save.data;
       $('start-stats').innerHTML = (d.runs > 0
-        ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>Pasos caminados: ${d.totalSteps}`
+        ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>` +
+          `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
+      if (d.runs > 0) $('cta-shop').classList.remove('hidden');
+      else $('cta-shop').classList.add('hidden');
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;
@@ -4330,6 +4951,7 @@ window.MZ = window.MZ || {};
       MZ.say('disco');
       MZ.audio.mate();
       MZ.fx.flash(0.3, 0xff00ff);
+      MZ.logros.check('disco');
     },
 
     update(dt) {
@@ -4487,16 +5109,26 @@ window.MZ = window.MZ || {};
       const r = Math.random();
       const type = r < 0.4 ? 'gold' : r < 0.65 ? 'potion' : r < 0.78 ? 'weapon' : r < 0.88 ? 'bow' : r < 0.96 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
+    } else if (Math.random() < 0.14) {
+      // corazón: vida directa, más probable si venís golpeado
+      MZ.spawnItemAt('heart', e.x, e.y);
+    } else if (P.hp < P.maxHp * 0.35 && Math.random() < 0.25) {
+      MZ.spawnItemAt('heart', e.x, e.y); // piedad del dungeon
     }
 
     if (e.boss) {
       MZ.say('jefeMuerto');
       MZ.fx.slowmo(350);
       MZ.quests.onBossKill();
+      const d = MZ.save.data;
+      d.jefesMuertos = (d.jefesMuertos || 0) + 1;
+      MZ.save.store();
     }
     else if (e.def.pombero) MZ.say('pomberoMuerto');
+    else if (e.def.rataBlanca) { MZ.say('rataBlanca', null, 4000); MZ.fx.flash(0.35, 0xffffff); }
     else if (P.streak === 5) MZ.say('racha', { k: P.streak });
     else if (Math.random() < 0.18) MZ.say('matar');
+    MZ.logros.check(e.def.pombero ? 'pombero' : e.def.rataBlanca ? 'rataBlanca' : undefined);
     MZ.ui.updateHUD();
   };
 
@@ -4609,6 +5241,11 @@ window.MZ = window.MZ || {};
       if (d === 1) {
         const dmg = Math.max(1, e.atk - P.def + (Math.random() < 0.4 ? 1 : 0));
         MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name);
+        if (e.def.vampiro) { // te chupa la vida y se cura
+          e.hp = Math.min(e.maxHp, e.hp + dmg);
+          const ep = MZ.toPx(e.x, e.y);
+          MZ.fx.floatText(ep.x, ep.y - 12, '+' + dmg, 0xff2222, 11);
+        }
         if (e.def.poison && P.hp > 0 && Math.random() < 0.7) MZ.poisonPlayer(e.def.poison, e.def.name);
         // los jefes pegan tan fuerte que te mueven de casillero
         if (e.boss && P.hp > 0 && pushAway(P, e.x, e.y)) {
@@ -5025,6 +5662,16 @@ window.MZ = window.MZ || {};
       MZ.fx.floatText(p.x, p.y - 12, '☠1', 0x66ff44, 12);
       if (P.hp <= 0) { MZ.die('el veneno'); return; }
     }
+    // petaca de tequila (mejora permanente): se toma sola al 30% de vida
+    if (S.playing && P.petaca && P.hp > 0 && P.hp <= P.maxHp * 0.3) {
+      P.petaca = false;
+      const heal = 10 + Math.floor(S.depth / 3);
+      P.hp = Math.min(P.maxHp, P.hp + heal);
+      const p = MZ.toPx(P.x, P.y);
+      MZ.fx.floatText(p.x, p.y - 16, 'petaca +' + heal + ' 🍹', 0xffe680, 13);
+      MZ.audio.mate();
+      MZ.say('tequila');
+    }
     if (S.playing) updateVisibility();
     MZ.ui.updateHUD();
     serializeRun();
@@ -5050,8 +5697,9 @@ window.MZ = window.MZ || {};
         if (Math.random() < 0.12) MZ.say('lootMalo');
         break;
       case 'potion': {
-        if (Math.random() < 0.18) {
-          // poción vencida: te envenena en vez de curar
+        // ruleta rusa de kiosco: 75% cura, 25% vencida y te envenena
+        if (Math.random() < 0.25) {
+          MZ.say('pocionMala');
           MZ.poisonPlayer(4, 'una poción vencida');
         } else {
           const heal = 10 + Math.floor(S.depth / 3);
@@ -5059,8 +5707,16 @@ window.MZ = window.MZ || {};
           P.poison = 0;
           MZ.audio.pickup();
           MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' HP', 0xff66ff, 13);
-          if (Math.random() < 0.2) MZ.say('lootMalo');
+          if (Math.random() < 0.4) MZ.say('pocionBuena', { h: heal });
         }
+        break;
+      }
+      case 'heart': {
+        const heal = 5 + Math.floor(S.depth / 4);
+        P.hp = Math.min(P.maxHp, P.hp + heal);
+        MZ.audio.pickup();
+        MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' ❤', 0xff3355, 14);
+        if (Math.random() < 0.3) MZ.say('corazon', { h: heal });
         break;
       }
       case 'weapon': {
@@ -5122,7 +5778,19 @@ window.MZ = window.MZ || {};
         MZ.audio.mate();
         MZ.say('mateLegendario', null, 4000);
         MZ.fx.flash(0.35, 0x00ffc8);
+        MZ.logros.check('mateLeg');
         break;
+      case 'tequila': {
+        // cura fuerte ya, resaca después (1 turno de veneno)
+        const heal = 8 + Math.floor(S.depth / 3);
+        P.hp = Math.min(P.maxHp, P.hp + heal);
+        P.poison = Math.max(P.poison, 1);
+        MZ.audio.mate();
+        MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' 🍹', 0xffe680, 14);
+        MZ.say('tequila');
+        MZ.logros.check('tequila');
+        break;
+      }
       case 'chest':
         P.gold += it.amount;
         P.hp = Math.min(P.maxHp, P.hp + 8);
@@ -5262,6 +5930,7 @@ window.MZ = window.MZ || {};
       melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
       gold: 0, kills: 0, streak: 0, steps: 0,
     };
+    MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
     MZ.quests.reset();
     S.playing = true;
@@ -5272,6 +5941,7 @@ window.MZ = window.MZ || {};
     MZ.save.store();
     MZ.ui.hideScreens();
     buildLevel();
+    MZ.showIntro();
     if (d.runs > 1 && Math.random() < 0.5) MZ.say('volver');
   };
 
@@ -5298,6 +5968,7 @@ window.MZ = window.MZ || {};
     const d = MZ.save.data;
     if (S.depth > d.bestDepth) { d.bestDepth = S.depth; MZ.save.store(); }
     buildLevel();
+    MZ.logros.check();
     if (!S.level.isBoss && Math.random() < 0.35) MZ.say('nivel', { n: S.depth });
   }
 
@@ -5319,14 +5990,18 @@ window.MZ = window.MZ || {};
     d.totalGold += S.player.gold;
     d.totalSteps += S.player.steps;
     d.bestDepth = Math.max(d.bestDepth, S.depth);
+    const almas = MZ.meta.cosecha(S.depth, S.player.kills);
+    d.almas = (d.almas || 0) + almas;
     d.run = null; // muerto es muerto: no hay resume
     MZ.save.store();
+    MZ.logros.check();
     setTimeout(() => {
       MZ.ui.showDeath(
         MZ.quote('morir', { n: S.depth, d: d.deaths }),
         `Nivel alcanzado: ${S.depth} (récord: ${d.bestDepth})<br>` +
         `Bajas: ${S.player.kills} · Oro: ${S.player.gold} · Pasos: ${S.player.steps}` +
         (from ? `<br>Te mató: ${from}` : '') +
+        `<br>👻 Cosecha: +${almas} almas (total: ${d.almas})` +
         `<br>Muertes acumuladas: ${d.deaths}`
       );
     }, 1000);

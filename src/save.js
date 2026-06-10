@@ -5,7 +5,7 @@ window.MZ = window.MZ || {};
   const KEY = 'mazmorra_bardo_v1';
   const DB = 'mazmorra_bardo';
   const STORE = 'kv';
-  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, totalSteps: 0, run: null };
+  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, nona: 0, totalSteps: 0, run: null };
   let data = { ...defaults };
   let db = null;
 

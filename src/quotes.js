@@ -13,6 +13,9 @@ window.MZ = window.MZ || {};
       'Spoiler: el héroe muere al final. Y al principio. Y en el medio.',
       'Nivel {n}. El dungeon ni se enteró de que viniste.',
       'Tranqui, perder también es un estilo de juego.',
+      'Moriste como en Helbreath: con el inventario lleno y la dignidad vacía.',
+      'Ni un amistoso le ganás vos. La Scaloneta llorando desde USA.',
+      'Te fuiste antes del primer tema. Ni en el Tiger Tiger duraban tan poco.',
     ],
     matar: [
       "Tomá pa' vos.",
@@ -77,6 +80,19 @@ window.MZ = window.MZ || {};
       'Racha de {k}. Andá a comprar un Quini.',
       '{k} seguidos sin que te toquen. Bueno, tampoco te la creas.',
       'Imparable. ¿Quién sos y qué hiciste con el de antes?',
+      'Racha de {k}. Modo Scaloneta: que no te la cuenten.',
+    ],
+    rataBlanca: [
+      '¡LA RATA BLANCA! Suena un solo de guitarra a lo lejos... y llueve oro. La leyenda continúa.',
+      'Cazaste a la Rata Blanca. Mujer amante de la fortuna: mirá ese oro.',
+    ],
+    tequila: [
+      'Tequila del dungeon. Cura el cuerpo, factura el hígado. Salud.',
+      'Un shot y adentro. Mañana lo lamentás, hoy sos inmortal.',
+      '¡TEQUILA! Como en Cancún, pero con esqueletos mirando.',
+    ],
+    logro: [
+      '🏆 LOGRO: {t}',
     ],
     volver: [
       '¿Otra vez vos? Bueno, pasá.',
@@ -126,6 +142,21 @@ window.MZ = window.MZ || {};
       'El altar estaba de mal humor. Como todo acá.',
       'Le rezaste al altar equivocado, genio.',
       'El altar te miró y dijo "no". Y encima te maldijo.',
+    ],
+    pocionBuena: [
+      'Poción fresca. +{h} HP. Hoy zafaste.',
+      'Rica. Gusto a frutilla con química dudosa. +{h} HP.',
+      'La poción era de las buenas. Anotá la fecha: no pasa seguido.',
+    ],
+    pocionMala: [
+      'VENCIDA. ¿La fecha? ¿Quién mira la fecha? Vos no, claro.',
+      'Esa poción tenía más años que el dungeon. A llorarla.',
+      'Gusto raro... muy raro... uy. UY.',
+    ],
+    corazon: [
+      'Un corazón. +{h} HP. Mejor no preguntar de quién era.',
+      '+{h} HP. Late todavía. Asco, pero funciona.',
+      'Corazón fresco. La dieta del aventurero es ASÍ.',
     ],
     veneno: [
       'Envenenado. La poción decía "agitar antes de usar", no "desconfiar antes de usar".',

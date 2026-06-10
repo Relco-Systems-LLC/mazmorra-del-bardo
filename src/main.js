@@ -394,6 +394,16 @@ window.MZ = window.MZ || {};
       MZ.fx.floatText(p.x, p.y - 12, '☠1', 0x66ff44, 12);
       if (P.hp <= 0) { MZ.die('el veneno'); return; }
     }
+    // petaca de tequila (mejora permanente): se toma sola al 30% de vida
+    if (S.playing && P.petaca && P.hp > 0 && P.hp <= P.maxHp * 0.3) {
+      P.petaca = false;
+      const heal = 10 + Math.floor(S.depth / 3);
+      P.hp = Math.min(P.maxHp, P.hp + heal);
+      const p = MZ.toPx(P.x, P.y);
+      MZ.fx.floatText(p.x, p.y - 16, 'petaca +' + heal + ' 🍹', 0xffe680, 13);
+      MZ.audio.mate();
+      MZ.say('tequila');
+    }
     if (S.playing) updateVisibility();
     MZ.ui.updateHUD();
     serializeRun();
@@ -419,8 +429,9 @@ window.MZ = window.MZ || {};
         if (Math.random() < 0.12) MZ.say('lootMalo');
         break;
       case 'potion': {
-        if (Math.random() < 0.18) {
-          // poción vencida: te envenena en vez de curar
+        // ruleta rusa de kiosco: 75% cura, 25% vencida y te envenena
+        if (Math.random() < 0.25) {
+          MZ.say('pocionMala');
           MZ.poisonPlayer(4, 'una poción vencida');
         } else {
           const heal = 10 + Math.floor(S.depth / 3);
@@ -428,8 +439,16 @@ window.MZ = window.MZ || {};
           P.poison = 0;
           MZ.audio.pickup();
           MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' HP', 0xff66ff, 13);
-          if (Math.random() < 0.2) MZ.say('lootMalo');
+          if (Math.random() < 0.4) MZ.say('pocionBuena', { h: heal });
         }
+        break;
+      }
+      case 'heart': {
+        const heal = 5 + Math.floor(S.depth / 4);
+        P.hp = Math.min(P.maxHp, P.hp + heal);
+        MZ.audio.pickup();
+        MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' ❤', 0xff3355, 14);
+        if (Math.random() < 0.3) MZ.say('corazon', { h: heal });
         break;
       }
       case 'weapon': {
@@ -491,7 +510,19 @@ window.MZ = window.MZ || {};
         MZ.audio.mate();
         MZ.say('mateLegendario', null, 4000);
         MZ.fx.flash(0.35, 0x00ffc8);
+        MZ.logros.check('mateLeg');
         break;
+      case 'tequila': {
+        // cura fuerte ya, resaca después (1 turno de veneno)
+        const heal = 8 + Math.floor(S.depth / 3);
+        P.hp = Math.min(P.maxHp, P.hp + heal);
+        P.poison = Math.max(P.poison, 1);
+        MZ.audio.mate();
+        MZ.fx.floatText(p.x, p.y - 8, '+' + heal + ' 🍹', 0xffe680, 14);
+        MZ.say('tequila');
+        MZ.logros.check('tequila');
+        break;
+      }
       case 'chest':
         P.gold += it.amount;
         P.hp = Math.min(P.maxHp, P.hp + 8);
@@ -631,6 +662,7 @@ window.MZ = window.MZ || {};
       melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
       gold: 0, kills: 0, streak: 0, steps: 0,
     };
+    MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
     MZ.quests.reset();
     S.playing = true;
@@ -641,6 +673,7 @@ window.MZ = window.MZ || {};
     MZ.save.store();
     MZ.ui.hideScreens();
     buildLevel();
+    MZ.showIntro();
     if (d.runs > 1 && Math.random() < 0.5) MZ.say('volver');
   };
 
@@ -667,6 +700,7 @@ window.MZ = window.MZ || {};
     const d = MZ.save.data;
     if (S.depth > d.bestDepth) { d.bestDepth = S.depth; MZ.save.store(); }
     buildLevel();
+    MZ.logros.check();
     if (!S.level.isBoss && Math.random() < 0.35) MZ.say('nivel', { n: S.depth });
   }
 
@@ -688,14 +722,18 @@ window.MZ = window.MZ || {};
     d.totalGold += S.player.gold;
     d.totalSteps += S.player.steps;
     d.bestDepth = Math.max(d.bestDepth, S.depth);
+    const almas = MZ.meta.cosecha(S.depth, S.player.kills);
+    d.almas = (d.almas || 0) + almas;
     d.run = null; // muerto es muerto: no hay resume
     MZ.save.store();
+    MZ.logros.check();
     setTimeout(() => {
       MZ.ui.showDeath(
         MZ.quote('morir', { n: S.depth, d: d.deaths }),
         `Nivel alcanzado: ${S.depth} (récord: ${d.bestDepth})<br>` +
         `Bajas: ${S.player.kills} · Oro: ${S.player.gold} · Pasos: ${S.player.steps}` +
         (from ? `<br>Te mató: ${from}` : '') +
+        `<br>👻 Cosecha: +${almas} almas (total: ${d.almas})` +
         `<br>Muertes acumuladas: ${d.deaths}`
       );
     }, 1000);

@@ -114,16 +114,26 @@ window.MZ = window.MZ || {};
       const r = Math.random();
       const type = r < 0.4 ? 'gold' : r < 0.65 ? 'potion' : r < 0.78 ? 'weapon' : r < 0.88 ? 'bow' : r < 0.96 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
+    } else if (Math.random() < 0.14) {
+      // corazón: vida directa, más probable si venís golpeado
+      MZ.spawnItemAt('heart', e.x, e.y);
+    } else if (P.hp < P.maxHp * 0.35 && Math.random() < 0.25) {
+      MZ.spawnItemAt('heart', e.x, e.y); // piedad del dungeon
     }
 
     if (e.boss) {
       MZ.say('jefeMuerto');
       MZ.fx.slowmo(350);
       MZ.quests.onBossKill();
+      const d = MZ.save.data;
+      d.jefesMuertos = (d.jefesMuertos || 0) + 1;
+      MZ.save.store();
     }
     else if (e.def.pombero) MZ.say('pomberoMuerto');
+    else if (e.def.rataBlanca) { MZ.say('rataBlanca', null, 4000); MZ.fx.flash(0.35, 0xffffff); }
     else if (P.streak === 5) MZ.say('racha', { k: P.streak });
     else if (Math.random() < 0.18) MZ.say('matar');
+    MZ.logros.check(e.def.pombero ? 'pombero' : e.def.rataBlanca ? 'rataBlanca' : undefined);
     MZ.ui.updateHUD();
   };
 
@@ -236,6 +246,11 @@ window.MZ = window.MZ || {};
       if (d === 1) {
         const dmg = Math.max(1, e.atk - P.def + (Math.random() < 0.4 ? 1 : 0));
         MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name);
+        if (e.def.vampiro) { // te chupa la vida y se cura
+          e.hp = Math.min(e.maxHp, e.hp + dmg);
+          const ep = MZ.toPx(e.x, e.y);
+          MZ.fx.floatText(ep.x, ep.y - 12, '+' + dmg, 0xff2222, 11);
+        }
         if (e.def.poison && P.hp > 0 && Math.random() < 0.7) MZ.poisonPlayer(e.def.poison, e.def.name);
         // los jefes pegan tan fuerte que te mueven de casillero
         if (e.boss && P.hp > 0 && pushAway(P, e.x, e.y)) {

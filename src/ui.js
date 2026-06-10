@@ -26,6 +26,12 @@ window.MZ = window.MZ || {};
         MZ.audio.ensure();
         MZ.newRun();
       });
+      $('cta-shop').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.audio.ensure();
+        MZ.meta.abrirTienda();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -151,9 +157,12 @@ window.MZ = window.MZ || {};
     showStart() {
       const d = MZ.save.data;
       $('start-stats').innerHTML = (d.runs > 0
-        ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>Pasos caminados: ${d.totalSteps}`
+        ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>` +
+          `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
+      if (d.runs > 0) $('cta-shop').classList.remove('hidden');
+      else $('cta-shop').classList.add('hidden');
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;

@@ -64,8 +64,9 @@
   }
   #dialog {
     position: fixed; left: 8px; right: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
-    z-index: 8; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
+    z-index: 12; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
     border-radius: 14px; padding: 14px; box-shadow: 0 0 24px rgba(177, 76, 255, .3);
+    max-height: 70vh; overflow-y: auto;
   }
   #dlg-name { font-weight: bold; font-size: 15px; margin-bottom: 6px; text-shadow: 0 0 8px currentColor; }
   #dlg-text { color: #ddd; font-size: 14px; line-height: 1.55; margin-bottom: 12px; white-space: pre-line; }
@@ -99,6 +100,7 @@
   <div class="stats" id="start-stats"></div>
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
+  <div class="cta hidden" id="cta-shop" style="border-color:#ffd700;text-shadow:0 0 8px #ffd700;box-shadow:0 0 16px rgba(255,215,0,.3);animation:none;font-size:13px;padding:9px 20px">&#128123; QUIOSCO DE LAS ALMAS</div>
   <div class="sub" style="margin-top:12px">
     <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
     <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
@@ -127,6 +129,7 @@
 <script src="src/audio.js"></script>
 <script src="src/dungeon.js"></script>
 <script src="src/entities.js"></script>
+<script src="src/logros.js"></script>
 <script src="src/lore.js"></script>
 <script src="src/npc.js"></script>
 <script src="src/fx.js"></script>

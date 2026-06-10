@@ -9,6 +9,10 @@ window.MZ = window.MZ || {};
     fantasma: { name: 'Fantasma', sprite: 'fantasma', color: 0xa0c4ff, scale: 0.8, ghost: true, hp: 7, atk: 3, gold: 5, minDepth: 5 },
     arquero: { name: 'Arquero Maldito', sprite: 'arquero', color: 0xccffaa, scale: 0.85, ranged: 5, hp: 8, atk: 3, gold: 6, minDepth: 6 },
     ojo: { name: 'Ojo Maldito', sprite: 'ojo', color: 0xffa500, scale: 0.7, ranged: 4, hp: 8, atk: 3, gold: 6, minDepth: 8 },
+    golem: { name: 'Gólem de Utilería', sprite: 'golem', color: 0x8d99ae, scale: 1.1, hp: 22, atk: 5, gold: 12, slow: true, minDepth: 12 },
+    vampiro: { name: 'Vampiro de Palco', sprite: 'vampiro', color: 0xff2222, scale: 0.9, hp: 14, atk: 4, gold: 14, vampiro: true, minDepth: 16 },
+    payaso: { name: 'Payaso del Entreacto', sprite: 'payaso', color: 0xff2244, scale: 0.9, hp: 12, atk: 4, gold: 16, ranged: 4, poison: 2, minDepth: 20 },
+    rataBlanca: { name: 'La Rata Blanca', sprite: 'rataBlanca', color: 0xffffff, scale: 0.7, hp: 10, atk: 2, gold: 60, rataBlanca: true, rare: true, minDepth: 1 },
     pombero: { name: 'El Pombero', sprite: 'pombero', color: 0x00ff88, scale: 0.85, pombero: true, hp: 14, atk: 1, gold: 0, rare: true, minDepth: 1 },
     boss: { name: 'Jefe', sprite: 'jefe', color: 0xff2266, scale: 1.6, hp: 28, atk: 4, gold: 20, boss: true, rare: true, minDepth: 1 },
     barril: { name: 'Barril explosivo', sprite: 'barril', color: 0xffa500, scale: 0.8, hp: 3, atk: 0, gold: 0, static: true, explode: true, rare: true, minDepth: 1 },
@@ -47,6 +51,8 @@ window.MZ = window.MZ || {};
     chest: { sprite: 'cofre', color: 0xffd700, scale: 0.65 },
     anillo: { sprite: 'anillo', color: 0x00e5ff, scale: 0.5 },
     pinchos: { sprite: 'pinchos', color: 0x607d8b, scale: 0.7 },
+    heart: { sprite: 'corazon', color: 0xff3355, scale: 0.45 },
+    tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
   };
 

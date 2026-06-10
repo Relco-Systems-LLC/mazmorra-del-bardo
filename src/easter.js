@@ -27,6 +27,7 @@ window.MZ = window.MZ || {};
       MZ.say('disco');
       MZ.audio.mate();
       MZ.fx.flash(0.3, 0xff00ff);
+      MZ.logros.check('disco');
     },
 
     update(dt) {

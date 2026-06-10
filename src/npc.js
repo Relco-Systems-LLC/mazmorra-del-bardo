@@ -7,6 +7,11 @@ window.MZ = window.MZ || {};
     bardo: { name: 'Anselmo el Bardo', sprite: 'bardo', color: 0x66aaff, scale: 0.95 },
     rodrigo: { name: 'Rodrigo el Perdido', sprite: 'rodrigo', color: 0x9aa5b1, scale: 0.95 },
     esperanza: { name: 'Esperanza, la Viuda', sprite: 'esperanza', color: 0xff2255, scale: 0.95 },
+    nona: { name: 'La Nona', sprite: 'nona', color: 0xb088dd, scale: 0.95 },
+    tahur: { name: 'El Tahúr', sprite: 'tahur', color: 0xffd700, scale: 0.95 },
+    herrero: { name: 'Fierrito', sprite: 'herrero', color: 0x9aa5b1, scale: 0.95 },
+    nieto: { name: 'Tato, el Perdido Hace 20 Años', sprite: 'nieto', color: 0xc0c8d0, scale: 0.95 },
+    fundador: { name: 'El Bardo Fundador', sprite: 'fundador', color: 0xffd700, scale: 1.05 },
   };
 
   const $ = id => document.getElementById(id);

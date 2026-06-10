@@ -164,6 +164,10 @@ window.MZ = window.MZ || {};
       const c = takeCell();
       if (c) enemies.push({ type: 'pombero', x: c.x, y: c.y });
     }
+    if (!isBoss && rng.chance(0.015)) { // La Rata Blanca: la leyenda continúa
+      const c = takeCell();
+      if (c) enemies.push({ type: 'rataBlanca', x: c.x, y: c.y });
+    }
 
     // Ítems.
     const items = [];
@@ -188,6 +192,7 @@ window.MZ = window.MZ || {};
     if (depth >= 2 && depth % 3 === 1 && rng.chance(0.5)) drop('bow');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
+    if (rng.chance(0.1)) drop('tequila');
     if (rng.chance(0.012)) drop('mateLegendario');
     if (secret) items.push({ type: 'chest', x: secret.room.x, y: secret.room.y, amount: 40 + depth * 3 });
 
