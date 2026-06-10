@@ -39,22 +39,24 @@ window.MZ = window.MZ || {};
     if (!isBoss && depth >= 12 && (D().nona || 0) >= 2 && !D().nietoVisto && Math.random() < 0.3) {
       out.push('nieto');
     }
-    if (isBoss || depth < 2) return out;
+    if (isBoss) return out;
     out.push('mercader'); // Don Olivera tiene franquicia en todos los pisos
     if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
-    const pool = ['bardo', 'bardo'];
-    if (depth >= 2) pool.push('tahur');
-    if (depth >= 3) pool.push('nona');
-    if (depth >= 4) pool.push('morena', 'morena');
-    if (depth >= 5) pool.push('herrero');
-    if (depth >= 6) pool.push('critico');
+    // El subsuelo está poblado: pool con peso, se permiten repetidos
+    // (cada encuentro es fresco — los que progresan avanzan, los de servicio re-atienden).
+    const pool = ['bardo', 'bardo', 'mercader', 'tahur'];
+    if (depth >= 2) pool.push('tahur', 'nona');
+    if (depth >= 3) pool.push('nona', 'morena');
+    if (depth >= 4) pool.push('morena', 'herrero');
+    if (depth >= 5) pool.push('herrero', 'critico');
+    if (depth >= 6) pool.push('critico', 'djtigre');
     if (depth >= 8) pool.push('djtigre');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
-    const want = (Math.random() < 0.75 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
-    for (let i = 0; i < want; i++) {
-      const t = pool[Math.floor(Math.random() * pool.length)];
-      if (!out.includes(t)) out.push(t);
-    }
+    // más NPCs por sala: 2–4 desde nivel 2; nivel 1 también puebla un poco
+    const want = depth < 2
+      ? (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0)
+      : 2 + (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
+    for (let i = 0; i < want; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
     return out;
   };
 

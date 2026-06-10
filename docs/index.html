@@ -101,7 +101,9 @@
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
   <div class="cta hidden" id="cta-shop" style="border-color:#ffd700;text-shadow:0 0 8px #ffd700;box-shadow:0 0 16px rgba(255,215,0,.3);animation:none;font-size:13px;padding:9px 20px">&#128123; QUIOSCO DE LAS ALMAS</div>
+  <div class="cta hidden" id="cta-codex" style="border-color:#ff8800;text-shadow:0 0 8px #ff8800;box-shadow:0 0 16px rgba(255,136,0,.3);animation:none;font-size:13px;padding:9px 20px">&#128214; BESTIARIO</div>
   <div class="cta hidden" id="cta-stats" style="border-color:#9d6bff;text-shadow:0 0 8px #9d6bff;box-shadow:0 0 16px rgba(157,107,255,.3);animation:none;font-size:13px;padding:9px 20px">&#128202; STATS</div>
+  <div class="sub" style="margin-top:6px"><span id="btn-reset" style="text-decoration:underline;color:#ff4d6d">&#128465; borrar todo el progreso</span></div>
   <div class="sub" style="margin-top:12px">
     <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
     <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
@@ -3535,7 +3537,7 @@ window.MZ = window.MZ || {};
   const KEY = 'mazmorra_bardo_v1';
   const DB = 'mazmorra_bardo';
   const STORE = 'kv';
-  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, nona: 0, totalSteps: 0, run: null };
+  const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, nona: 0, totalSteps: 0, run: null, codex: null };
   let data = { ...defaults };
   let db = null;
 
@@ -3604,6 +3606,12 @@ window.MZ = window.MZ || {};
       }
       try { localStorage.setItem(KEY, raw); } catch (e) { }
     },
+
+    // borra todo el progreso (vuelve a cero)
+    reset() {
+      data = { ...defaults };
+      this.store();
+    },
   };
 })();
 
@@ -3660,6 +3668,14 @@ window.MZ = window.MZ || {};
     stairs() { beep(440, 440, 0.08, 'triangle', 0.07); beep(550, 550, 0.08, 'triangle', 0.07, 0.09); beep(660, 880, 0.14, 'triangle', 0.08, 0.18); },
     death() { beep(440, 110, 0.5, 'sawtooth', 0.1); beep(220, 55, 0.7, 'square', 0.08, 0.15); noise(0.6, 0.18, 400, 0.1); },
     boss() { beep(82, 41, 0.5, 'sawtooth', 0.12); beep(110, 55, 0.5, 'square', 0.1, 0.25); noise(0.4, 0.12, 250, 0.5); },
+    doomEntry() {
+      // drones graves apilados + golpe: entrada a la arena del jefe
+      beep(55, 55, 1.1, 'sawtooth', 0.13);
+      beep(41, 41, 1.1, 'square', 0.1, 0.05);
+      beep(110, 82, 0.9, 'sawtooth', 0.08, 0.15);
+      noise(0.7, 0.16, 180, 0.0);
+      beep(33, 27, 1.4, 'sine', 0.12, 0.3);
+    },
     mate() { beep(523, 523, 0.09, 'triangle', 0.08); beep(659, 659, 0.09, 'triangle', 0.08, 0.1); beep(784, 1046, 0.16, 'triangle', 0.09, 0.2); },
     secret() { beep(784, 784, 0.07, 'sine', 0.07); beep(988, 988, 0.07, 'sine', 0.07, 0.08); beep(1175, 1568, 0.18, 'sine', 0.08, 0.16); },
   };
@@ -3684,6 +3700,8 @@ window.MZ = window.MZ || {};
 
   MZ.themeFor = function (depth) {
     if (depth === 42) return { wall: 0xffd700, floor: 0x33290a, accent: 0xffffff, name: '42' };
+    // niveles de jefe: infierno Doom (rojo sangre, piso negro-rojizo, fuego)
+    if (depth % 5 === 0) return { wall: 0xff1a1a, floor: 0x1a0505, accent: 0xff7700, name: 'infierno', hell: true };
     return MZ.THEMES[Math.floor((depth - 1) / 5) % MZ.THEMES.length];
   };
 
@@ -4224,6 +4242,271 @@ window.MZ = window.MZ || {};
 
 </script>
 <script>
+// Bestiario / Pokedex: se llena al ver monstruos, hablar NPCs y agarrar objetos.
+// 3 oraciones de lore picante por entrada descubierta.
+window.MZ = window.MZ || {};
+(() => {
+  MZ.CODEX = {
+    monstruos: [
+      { id: 'rata', nombre: 'Rata', sprite: 'rata', color: 0xff5577, lore: [
+        'Antes escribía la columna de espectáculos del diario La Mazmorra.',
+        'Paneó la obra del Bardo Fundador y quedó maldita en cuatro patas.',
+        'Sigue mordiendo tobillos con el mismo veneno que ponía en sus reseñas.' ] },
+      { id: 'slime', nombre: 'Slime', sprite: 'slime', color: 0x66ff99, lore: [
+        'Tenía un blog de crítica teatral con doce lectores fieles.',
+        'La maldición lo dejó gelatinoso, pero su autoestima sigue intacta.',
+        'Se mueve cada dos turnos: ni apurado opina, ni apurado ataca.' ] },
+      { id: 'vibora', nombre: 'Víbora', sprite: 'vibora', color: 0x2ecc40, lore: [
+        'Lengua viperina literal: te envenena de un mordisco.',
+        'Era la chismosa del camarín, hoy reparte ponzoña sin distinción.',
+        'Pegale de lejos o vas a pasar el próximo nivel verde de la cara.' ] },
+      { id: 'esqueleto', nombre: 'Esqueleto', sprite: 'esqueleto', color: 0xe8e8ff, lore: [
+        'Acomodador del teatro que murió esperando que alguien apague el celular.',
+        'No le queda carne pero sí rencor, que es lo último que se pierde.',
+        'Golpea seco, como su sentido del humor.' ] },
+      { id: 'fantasma', nombre: 'Fantasma', sprite: 'fantasma', color: 0xa0c4ff, lore: [
+        'Lo echaron de la radio por pasar Edguy a las cuatro de la tarde.',
+        'Atraviesa paredes porque ya nada lo detiene, ni la decencia musical.',
+        'Translúcido, melancólico y con muy mala puntería emocional.' ] },
+      { id: 'arquero', nombre: 'Arquero Maldito', sprite: 'arquero', color: 0xccffaa, lore: [
+        'Disparaba dardos de papel a los actores que olvidaban la letra.',
+        'Ahora dispara flechas de verdad desde cinco casilleros de distancia.',
+        'Si lo ves lejos, no te quedes quieto haciéndote el valiente.' ] },
+      { id: 'ojo', nombre: 'Ojo Maldito', sprite: 'ojo', color: 0xffa500, lore: [
+        'Era el apuntador: todo lo veía desde el foso del escenario.',
+        'Quedó reducido a un globo ocular flotante con muy malas intenciones.',
+        'Te castiga a distancia, porque mirar feo nunca fue suficiente para él.' ] },
+      { id: 'golem', nombre: 'Gólem de Utilería', sprite: 'golem', color: 0x8d99ae, lore: [
+        'Hecho con los decorados de piedra que nunca se terminaron de pagar.',
+        'Lento como trámite en ventanilla, pero te parte al medio si te alcanza.',
+        'Aguanta más que tu paciencia un lunes a la mañana.' ] },
+      { id: 'vampiro', nombre: 'Vampiro de Palco', sprite: 'vampiro', color: 0xff2222, lore: [
+        'Veía todas las funciones gratis desde el palco, chupándole la sangre al teatro.',
+        'Ahora te la chupa a vos: cada golpe que te da, se cura.',
+        'Matalo rápido o se va a poner más sano que vos.' ] },
+      { id: 'payaso', nombre: 'Payaso del Entreacto', sprite: 'payaso', color: 0xff2244, lore: [
+        'Animaba los intervalos hasta que el público pidió que parara. Para siempre.',
+        'Tira proyectiles venenosos con una sonrisa que no se borra ni muerto.',
+        'El humor del subsuelo es así: te envenena y encima se ríe.' ] },
+      { id: 'rataBlanca', nombre: 'La Rata Blanca', sprite: 'rataBlanca', color: 0xffffff, lore: [
+        'Leyenda del subsuelo: cuando aparece, suena un solo de guitarra a lo lejos.',
+        'Cazarla hace llover oro como en el mejor recital de los ochenta.',
+        'Mujer amante de la fortuna: rarísima, blanca y generosa.' ] },
+      { id: 'pombero', nombre: 'El Pombero', sprite: 'pombero', color: 0x00ff88, lore: [
+        'El duende del folclore que SÍ existe, y encima te afana el oro.',
+        'Silba, te roba y se teletransporta antes de que reacciones.',
+        'Si lográs cazarlo, devuelve el doble: el karma criollo es real.' ] },
+      { id: 'mimic', nombre: 'Mimic', sprite: 'mimic', color: 0xffd700, lore: [
+        'Un cofre que aprendió que la mejor carnada es la codicia ajena.',
+        'Te muerde apenas lo abrís: el tesoro eras vos, campeón.',
+        'Regla de oro del dungeon: nada lindo es gratis.' ] },
+      { id: 'barril', nombre: 'Barril Explosivo', sprite: 'barril', color: 0xffa500, lore: [
+        'Sobró de cuando esto era un fuerte y guardaban pólvora con criterio dudoso.',
+        'No se mueve ni ataca, pero reventalo cerca de un enemigo y agradecé.',
+        'Cuidado con la onda expansiva: también te empuja a vos.' ] },
+    ],
+    jefes: [
+      { id: 'El Encargado', nombre: 'El Encargado', sprite: 'jefe', color: 0xff2266, lore: [
+        'Empresario teatral que cortaba los sándwiches de miga al medio... a lo largo.',
+        'Por ese crimen contra la gastronomía quedó maldito al frente del nivel 5.',
+        'Pega tan fuerte que te mueve de casillero: respetá la distancia.' ] },
+      { id: 'La Jefa del Subsuelo', nombre: 'La Jefa del Subsuelo', sprite: 'jefe', color: 0xff2266, lore: [
+        'Manejaba la boletería con puño de hierro y vuelto inexacto.',
+        'Reina del piso 10, no perdona ni una entrada sin pagar.',
+        'Mandar sigue siendo lo suyo, aunque ya no quede a quién.' ] },
+      { id: 'El Chamuyero', nombre: 'El Chamuyero', sprite: 'jefe', color: 0xff2266, lore: [
+        'El agente de prensa que prometía giras mundiales que nunca pasaban.',
+        'Te habla bonito mientras te clava el puñal: puro verso con filo.',
+        'No le creas nada, ni siquiera cuando dice que ya está muerto.' ] },
+      { id: 'Doña Penumbra', nombre: 'Doña Penumbra', sprite: 'jefe', color: 0xff2266, lore: [
+        'La encargada de luces que decidió que la mejor iluminación era ninguna.',
+        'Reina de las sombras del piso profundo, donde casi no ves nada.',
+        'Le tiene fobia a los focos: por eso pelea en la oscuridad.' ] },
+      { id: 'El Recaudador', nombre: 'El Recaudador', sprite: 'jefe', color: 0xff2266, lore: [
+        'Cobraba la recaudación y nunca rendía cuentas a nadie.',
+        'Ahora cobra peaje en almas en lo más hondo del teatro.',
+        'Matarlo es el acto de justicia fiscal más satisfactorio del dungeon.' ] },
+      { id: 'jefe', nombre: 'Jefe de Piso', sprite: 'jefe', color: 0xff2266, lore: [
+        'Cada cinco niveles, un viejo empresario del teatro te corta el paso.',
+        'Su sala es especial: rojo infierno, marca ritual y mística Doom.',
+        'Caen mate seguro y, a veces, La Bestia 9000 de premio.' ] },
+    ],
+    personajes: [
+      { id: 'mercader', nombre: 'Don Olivera', sprite: 'mercader', color: 0xffd27f, lore: [
+        'Vende en todos los pisos: una franquicia montada en plena maldición.',
+        'Todo se le "cayó de un camión", el camión de otra mazmorra.',
+        'Acepta oro, no acepta quejas ni devoluciones.' ] },
+      { id: 'morena', nombre: 'Morena', sprite: 'morena', color: 0xff4cf0, lore: [
+        'La actriz principal que ya era bruja antes del teatro; lo del escenario era hobby.',
+        'Si le tirás onda y sobrevivís, el romance crece run tras run.',
+        'Sus besos curan, sus mates enamoran y su tequila es de Cancún.' ] },
+      { id: 'bardo', nombre: 'Anselmo el Bardo', sprite: 'bardo', color: 0x66aaff, lore: [
+        'El narrador maldito que te bardea en cada muerte con cariño.',
+        'Te cuenta la historia del teatro en capítulos, gorra al revés mediante.',
+        'Tocó de soporte de Rata Blanca, y no deja que lo olvides.' ] },
+      { id: 'rodrigo', nombre: 'Rodrigo el Perdido', sprite: 'rodrigo', color: 0x9aa5b1, lore: [
+        'Perdió su anillo de casamiento varios pisos más abajo.',
+        'Te paga bien por recuperarlo y mejor por no hacer preguntas.',
+        'Spoiler: el anillo dice "Para R., con amor, M." y M es de Morena.' ] },
+      { id: 'esperanza', nombre: 'Esperanza, la Viuda', sprite: 'esperanza', color: 0xff2255, lore: [
+        'Enviudó del primer Encargado. Y del segundo. Y del tercero.',
+        'Te manda a vengarla matando al jefe, que era su difunto marido.',
+        'Cumplida la venganza, capaz te invita a salir el viernes.' ] },
+      { id: 'nona', nombre: 'La Nona', sprite: 'nona', color: 0xb088dd, lore: [
+        'Cocinaba para todo el elenco; su guiso resucitaba giras enteras.',
+        'Te cura con comida y te bardea con amor por estar tan flaco.',
+        'Hace veinte años que pone un plato de más para su nieto perdido.' ] },
+      { id: 'tahur', nombre: 'El Tahúr', sprite: 'tahur', color: 0xffd700, lore: [
+        'El productor que se jugó la recaudación a los dados. Tres veces.',
+        'Doble o nada con dados cargados de carisma y de plomo.',
+        'Si te animás a la ruleta rusa, que San Cayetano te ampare.' ] },
+      { id: 'herrero', nombre: 'Fierrito', sprite: 'herrero', color: 0x9aa5b1, lore: [
+        'Hacía espadas de utilería; ahora hace de las que cortan en serio.',
+        'Te unta el arma con veneno, refuerza el escudo y templa el filo.',
+        'La ironía de su oficio no se le escapa, y la cobra igual.' ] },
+      { id: 'nieto', nombre: 'Tato, el Perdido', sprite: 'nieto', color: 0xc0c8d0, lore: [
+        'El nieto de la Nona, que bajó hace veinte años a buscar fama.',
+        'Nunca encontró la salida (y se quedó jugando al Helbreath en una sala con wifi).',
+        'Contarle que la Nona lo espera cierra el arco más tierno del pozo.' ] },
+      { id: 'fundador', nombre: 'El Bardo Fundador', sprite: 'fundador', color: 0xffd700, lore: [
+        'El que vendió su alma por funciones eternas y escribe el dungeon desde adentro.',
+        'Te espera en el nivel 50: La Última Función.',
+        'Resulta que el bardeo de cien años era, todo este tiempo, amor.' ] },
+      { id: 'critico', nombre: 'El Crítico', sprite: 'critico', color: 0xccaa66, lore: [
+        'El único que sigue humano: maldecir a un crítico requiere que algo le importe.',
+        'Te reseña el run con estrellas calculadas de tus stats reales.',
+        'Si le sacás cuatro estrellas, hasta te paga del fondo de prensa.' ] },
+      { id: 'djtigre', nombre: 'DJ Tigre', sprite: 'djtigre', color: 0xff8800, lore: [
+        'El DJ fantasma del Tiger Tiger: la última función nunca terminó.',
+        'Te cura con power metal y, si hay suerte, te sube el ATK.',
+        'Pide una lenta de Edguy si venís golpeado; nadie juzga acá abajo.' ] },
+    ],
+    arsenal: [
+      { id: 'pinas', nombre: 'Piñas', sprite: 'heroePinas', color: 0x00cfff, lore: [
+        'Con lo que arrancás todo run: dos puños y mucha fe.',
+        'ATK 1, pero no se rompen ni se quedan sin balas nunca.',
+        'Los antiguos peleaban así, y mirá cómo terminaron.' ] },
+      { id: 'espada', nombre: 'Armas Blancas', sprite: 'espada', color: 0x66ddff, lore: [
+        'Del Cuchillo de Asado al Facón del Más Allá: el fierro criollo escala.',
+        'Tienen filo limitado: se gastan y volvés a las piñas.',
+        'Agarrar otra igual le suma filos en vez de venderse.' ] },
+      { id: 'arco', nombre: 'Arcos y Gomeras', sprite: 'arco', color: 0xffaa66, lore: [
+        'De la Gomera de Barrio al Arco del Coliseo: muerte a distancia.',
+        'Munición corta: cada flecha cuenta, no la malgastes.',
+        'Tap a un enemigo lejano con línea de visión para disparar.' ] },
+      { id: 'bfg', nombre: 'La Bestia 9000', sprite: 'bfg', color: 0x33ff66, lore: [
+        'El BFG criollo: una sola bala, cero sobrevivientes a la vista.',
+        'Revienta todo enemigo en línea de visión en un radio enorme.',
+        'Cae 5% en cualquier kill, 10% cerca de un jefe vivo. Doom estaría orgulloso.' ] },
+      { id: 'termo', nombre: 'Termo del Abuelo', sprite: 'mate', color: 0x88ff66, lore: [
+        'Arma blanca con un secreto: al romperse, te ceba un mate sagrado.',
+        'Su último servicio es curarte la vida entera.',
+        'El abuelo aprueba desde el más allá cada vez que explota.' ] },
+      { id: 'punal', nombre: 'Puñal Tramposo', sprite: 'espada', color: 0xaa66ff, lore: [
+        'Daño x4 si el enemigo no te vio venir: la traición es un arte.',
+        'Pero un 10% de las veces te corta a vos, porque el karma vigila.',
+        'Para jugadores con sangre fría y dedos cruzados.' ] },
+      { id: 'gomeraBat', nombre: 'Gomera de Baterías', sprite: 'arco', color: 0xffff66, lore: [
+        'Dispara baterías viejas que rebotan entre enemigos en cadena.',
+        'Hasta tres saltos, perdiendo un poco de daño en cada uno.',
+        'Reciclar nunca fue tan violento ni tan satisfactorio.' ] },
+      { id: 'microfono', nombre: 'Micrófono del Bardo', sprite: 'arco', color: 0xff4cf0, lore: [
+        'Un grito amplificado que daña y empuja todo a dos casilleros.',
+        'AoE alrededor del blanco: ideal para abrirte paso cantando.',
+        'El feedback acústico también es un arma, si sabés usarlo.' ] },
+      { id: 'escudo', nombre: 'Escudos', sprite: 'escudo', color: 0x9d6bff, lore: [
+        'De la Tapa de Olla al Escudo del Gremio: la defensa improvisada.',
+        'Suman DEF y ahora se ven en el brazo del héroe.',
+        'No frenan todo, pero la diferencia entre vivir y revivir la hacen.' ] },
+      { id: 'potion', nombre: 'Poción', sprite: 'pocion', color: 0xff66ff, lore: [
+        'Ruleta de kiosco: 75% te cura, 25% está vencida y te envenena.',
+        'Nadie mira la fecha de vencimiento acá abajo. Vos tampoco.',
+        'Gusto a frutilla con química dudosa, pero cuando cura, salva.' ] },
+      { id: 'mate', nombre: 'Mate', sprite: 'mate', color: 0x88ff66, lore: [
+        'Un buen mate cura la vida entera y limpia el veneno.',
+        'Lo dropean los jefes como gesto de respeto post mortem.',
+        'Amargo, reparador y profundamente argentino.' ] },
+      { id: 'mateLegendario', nombre: 'Mate Legendario', sprite: 'mateOro', color: 0x00ffc8, lore: [
+        'Cebado por los dioses: cura todo y te hace más fuerte para siempre.',
+        '+5 HP máximo y +1 ATK de base. Drop rarísimo.',
+        'Esto sí que es un buen mate, papá.' ] },
+      { id: 'tequila', nombre: 'Tequila', sprite: 'tequila', color: 0xffe680, lore: [
+        'Cura fuerte ya, resaca después: un turno de veneno como peaje.',
+        'Del que Morena trajo de Cancún, no preguntes cómo.',
+        'Mañana lo lamentás, hoy sos inmortal.' ] },
+      { id: 'heart', nombre: 'Corazón', sprite: 'corazon', color: 0xff3355, lore: [
+        'Vida directa en formato órgano: mejor no preguntar de quién era.',
+        'Lo sueltan los monstruos, más seguido si venís golpeado.',
+        'Late todavía. Asco, pero funciona.' ] },
+      { id: 'altar', nombre: 'Altar', sprite: 'altar', color: 0x00ffc8, lore: [
+        'Mitad bendición, mitad maldición: la ruleta espiritual del dungeon.',
+        'Puede curarte, darte oro, o un efecto loco que dura el nivel.',
+        'Berserk, Rey Midas, Fantasmal o Imán: rezá y que salga lo bueno.' ] },
+      { id: 'pinchos', nombre: 'Pinchos', sprite: 'pinchos', color: 0x607d8b, lore: [
+        'Trampa del piso que estaba ahí, brillando, a la vista de todos.',
+        'Te lastima al pisarla y no se va: el posicionamiento importa.',
+        'El piso de acá abajo tiene opiniones, y duelen.' ] },
+      { id: 'cofre', nombre: 'Cofre', sprite: 'cofre', color: 0xffd700, lore: [
+        'Oro y un poco de cura para el que se anima a abrirlo.',
+        'Ojo: 15% de las veces tiene dientes y se llama Mimic.',
+        'La codicia y el riesgo viven en la misma cajita.' ] },
+      { id: 'anillo', nombre: 'Anillo de Rodrigo', sprite: 'anillo', color: 0x00e5ff, lore: [
+        'El anillo de casamiento que Rodrigo perdió allá abajo.',
+        'Tiene un grabado comprometedor adentro: leelo antes de devolverlo.',
+        'Objeto de quest: puro chamuyo y secretos de pareja.' ] },
+    ],
+  };
+
+  function ensure() {
+    const d = MZ.save.data;
+    if (!d.codex) d.codex = { monstruos: {}, jefes: {}, personajes: {}, arsenal: {} };
+    for (const c of ['monstruos', 'jefes', 'personajes', 'arsenal']) if (!d.codex[c]) d.codex[c] = {};
+    return d.codex;
+  }
+
+  MZ.codex = {
+    ensure,
+    seen(cat, id) { return !!ensure()[cat] && !!ensure()[cat][id]; },
+
+    discover(cat, id) {
+      const cx = ensure();
+      if (!cx[cat] || cx[cat][id]) return;
+      // solo descubrir ids que existen en CODEX
+      const def = (MZ.CODEX[cat] || []).find(e => e.id === id);
+      if (!def) return;
+      cx[cat][id] = 1;
+      MZ.save.store();
+      if (MZ.ui) {
+        MZ.ui.toast('📖 Bestiario: descubriste a ' + def.nombre, 3000);
+        if (MZ.audio) MZ.audio.pickup();
+      }
+    },
+
+    counts() {
+      const cx = ensure();
+      let got = 0, total = 0;
+      for (const c of ['monstruos', 'jefes', 'personajes', 'arsenal']) {
+        total += MZ.CODEX[c].length;
+        got += Object.keys(cx[c]).length;
+      }
+      return { got, total };
+    },
+
+    // mapea un arma equipada a su id de arsenal
+    weaponId(w) {
+      if (!w) return null;
+      if (w.aoe) return 'bfg';
+      if (w.curaAlRomper) return 'termo';
+      if (w.traicionero) return 'punal';
+      if (w.rebote) return 'gomeraBat';
+      if (w.grito) return 'microfono';
+      return w.kind === 'ranged' ? 'arco' : 'espada';
+    },
+  };
+})();
+
+</script>
+<script>
 // Lore escrito a mano: NPCs con historia, quests secundarias, romance y picante.
 window.MZ = window.MZ || {};
 (() => {
@@ -4265,22 +4548,24 @@ window.MZ = window.MZ || {};
     if (!isBoss && depth >= 12 && (D().nona || 0) >= 2 && !D().nietoVisto && Math.random() < 0.3) {
       out.push('nieto');
     }
-    if (isBoss || depth < 2) return out;
+    if (isBoss) return out;
     out.push('mercader'); // Don Olivera tiene franquicia en todos los pisos
     if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
-    const pool = ['bardo', 'bardo'];
-    if (depth >= 2) pool.push('tahur');
-    if (depth >= 3) pool.push('nona');
-    if (depth >= 4) pool.push('morena', 'morena');
-    if (depth >= 5) pool.push('herrero');
-    if (depth >= 6) pool.push('critico');
+    // El subsuelo está poblado: pool con peso, se permiten repetidos
+    // (cada encuentro es fresco — los que progresan avanzan, los de servicio re-atienden).
+    const pool = ['bardo', 'bardo', 'mercader', 'tahur'];
+    if (depth >= 2) pool.push('tahur', 'nona');
+    if (depth >= 3) pool.push('nona', 'morena');
+    if (depth >= 4) pool.push('morena', 'herrero');
+    if (depth >= 5) pool.push('herrero', 'critico');
+    if (depth >= 6) pool.push('critico', 'djtigre');
     if (depth >= 8) pool.push('djtigre');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
-    const want = (Math.random() < 0.75 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
-    for (let i = 0; i < want; i++) {
-      const t = pool[Math.floor(Math.random() * pool.length)];
-      if (!out.includes(t)) out.push(t);
-    }
+    // más NPCs por sala: 2–4 desde nivel 2; nivel 1 también puebla un poco
+    const want = depth < 2
+      ? (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0)
+      : 2 + (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
+    for (let i = 0; i < want; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
     return out;
   };
 
@@ -4951,6 +5236,7 @@ window.MZ = window.MZ || {};
       d.npcsConocidos[npc.type] = 1;
       MZ.save.store();
     }
+    MZ.codex.discover('personajes', npc.type);
     MZ.audio.pickup();
     MZ.dialog.open(lore.talk(npc));
   };
@@ -5120,6 +5406,16 @@ window.MZ = window.MZ || {};
         e.preventDefault();
         MZ.ui.showStats();
       });
+      $('cta-codex').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.showCodex();
+      });
+      $('btn-reset').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.confirmReset();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -5260,6 +5556,65 @@ window.MZ = window.MZ || {};
       MZ.dialog.open(statsNode());
     },
 
+    // ---- Bestiario / Pokedex ----
+    showCodex() {
+      const CATS = [
+        { key: 'monstruos', t: '🐀 Monstruos' },
+        { key: 'jefes', t: '💀 Jefes' },
+        { key: 'personajes', t: '🎭 Personajes' },
+        { key: 'arsenal', t: '⚔ Arsenal y objetos' },
+      ];
+      function entrada(cat, def) {
+        return {
+          name: def.nombre, color: def.color,
+          text: def.lore.join('\n\n'),
+          choices: [{ label: '← Volver', fn: () => lista(cat) }],
+        };
+      }
+      function lista(catKey) {
+        const cat = CATS.find(c => c.key === catKey);
+        const defs = MZ.CODEX[catKey];
+        const got = defs.filter(d => MZ.codex.seen(catKey, d.id)).length;
+        const choices = defs.map(def => {
+          if (MZ.codex.seen(catKey, def.id)) return { label: def.nombre, fn: () => entrada(catKey, def) };
+          return { label: '??? 🔒', fn: () => lista(catKey) };
+        });
+        choices.push({ label: '← Categorías', fn: raiz });
+        return { name: cat.t, color: 0xff8800, text: 'Descubiertos: ' + got + '/' + defs.length, choices };
+      }
+      function raiz() {
+        const c = MZ.codex.counts();
+        const pct = Math.round((c.got / c.total) * 100);
+        const choices = CATS.map(cat => {
+          const defs = MZ.CODEX[cat.key];
+          const got = defs.filter(d => MZ.codex.seen(cat.key, d.id)).length;
+          return { label: cat.t + ' (' + got + '/' + defs.length + ')', fn: () => lista(cat.key) };
+        });
+        choices.push({ label: 'Cerrar', fn: null });
+        return { name: 'Bestiario del Bardo', color: 0xff8800, text: 'Completado: ' + pct + '% (' + c.got + '/' + c.total + ')\nTodo lo que ves, hablás o agarrás queda registrado acá.', choices };
+      }
+      MZ.dialog.open(raiz());
+    },
+
+    // ---- Borrar todo el progreso ----
+    confirmReset() {
+      MZ.dialog.open({
+        name: 'Borrar todo', color: 0xff4d6d,
+        text: 'Esto borra TODO: récords, almas, mejoras, romance, bestiario, partida en curso. Vuelve a cero, como recién instalado. ¿Seguro?',
+        choices: [
+          {
+            label: 'Sí, borrá todo', fn() {
+              MZ.save.reset();
+              MZ.ui.toast('Progreso borrado. Tabula rasa, campeón.', 3000);
+              MZ.ui.showStart();
+              return null;
+            },
+          },
+          { label: 'No, me arrepentí', fn: null },
+        ],
+      });
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -5310,13 +5665,10 @@ window.MZ = window.MZ || {};
           `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
-      if (d.runs > 0) {
-        $('cta-shop').classList.remove('hidden');
-        $('cta-stats').classList.remove('hidden');
-      } else {
-        $('cta-shop').classList.add('hidden');
-        $('cta-stats').classList.add('hidden');
-      }
+      const showExtras = d.runs > 0;
+      ['cta-shop', 'cta-stats', 'cta-codex'].forEach(id =>
+        $(id).classList.toggle('hidden', !showExtras));
+      $('btn-reset').parentElement.classList.toggle('hidden', !showExtras);
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;
@@ -5502,7 +5854,7 @@ window.MZ = window.MZ || {};
     if (P.melee && P.melee.traicionero) {
       if (!e.awake) dmg *= 4;
       if (Math.random() < 0.1) {
-        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo');
+        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo', 'vos mismo');
         if (P.hp <= 0) return;
       }
     }
@@ -5654,7 +6006,7 @@ window.MZ = window.MZ || {};
         }
       }
       if (P.hp > 0 && cheb(P, e) <= 1) {
-        MZ.hurtPlayer(4 + Math.floor(S.depth / 3), 'un barril explosivo');
+        MZ.hurtPlayer(4 + Math.floor(S.depth / 3), 'un barril explosivo', 'trampa');
         // la onda expansiva te tira una casilla para atrás
         if (P.hp > 0 && pushAway(P, e.x, e.y)) MZ.onPlayerDisplaced();
       }
@@ -5721,7 +6073,7 @@ window.MZ = window.MZ || {};
     MZ.ui.updateHUD();
   };
 
-  MZ.hurtPlayer = function (dmg, from) {
+  MZ.hurtPlayer = function (dmg, from, cat) {
     const S = MZ.state, P = S.player;
     P.hp -= dmg;
     P.streak = 0;
@@ -5733,7 +6085,7 @@ window.MZ = window.MZ || {};
     MZ.audio.hurt();
     if (dmg >= Math.max(4, P.maxHp * 0.22) && Math.random() < 0.5) MZ.say('danioGrande');
     MZ.ui.updateHUD();
-    if (P.hp <= 0) MZ.die(from);
+    if (P.hp <= 0) MZ.die(from, cat);
   };
 
   MZ.poisonPlayer = function (turns, from) {
@@ -5842,7 +6194,7 @@ window.MZ = window.MZ || {};
       if (e.def.pombero) { pomberoTurn(e); continue; }
       if (d === 1) {
         const dmg = Math.max(1, e.atk - P.def + (Math.random() < 0.4 ? 1 : 0));
-        MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name);
+        MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name, e.boss ? 'jefe' : 'monstruo');
         if (e.def.vampiro) { // te chupa la vida y se cura
           e.hp = Math.min(e.maxHp, e.hp + dmg);
           const ep = MZ.toPx(e.x, e.y);
@@ -5858,7 +6210,7 @@ window.MZ = window.MZ || {};
       }
       if (e.def.ranged && d <= e.def.ranged && MZ.los(e.x, e.y, P.x, P.y)) {
         MZ.fx.bolt(MZ.toPx(e.x, e.y), MZ.toPx(P.x, P.y), e.def.color);
-        MZ.hurtPlayer(Math.max(1, e.atk - 1 - P.def), e.def.name);
+        MZ.hurtPlayer(Math.max(1, e.atk - 1 - P.def), e.def.name, 'monstruo');
         continue;
       }
       if (d <= 10) stepToward(e);
@@ -5933,6 +6285,17 @@ window.MZ = window.MZ || {};
     g = new PIXI.Graphics();
     g.circle(26, 26, 22).stroke({ width: 4, color: 0xffffff });
     t.ring = R.generateTexture(g);
+
+    // marca ritual (estrella de 5 puntas dentro de doble anillo) para la arena de jefe
+    g = new PIXI.Graphics();
+    const RC = 60, rr = 56;
+    g.circle(RC, RC, rr).stroke({ width: 3, color: 0xffffff, alpha: 0.9 });
+    g.circle(RC, RC, rr * 0.82).stroke({ width: 2, color: 0xffffff, alpha: 0.7 });
+    const pent = [];
+    for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; pent.push({ x: RC + Math.cos(a) * rr * 0.78, y: RC + Math.sin(a) * rr * 0.78 }); }
+    for (let i = 0; i < 5; i++) { const a = pent[i], b = pent[(i + 2) % 5]; g.moveTo(a.x, a.y).lineTo(b.x, b.y); }
+    g.stroke({ width: 2.5, color: 0xffffff, alpha: 0.85 });
+    t.ritual = R.generateTexture(g);
 
     return t;
   }
@@ -6194,6 +6557,28 @@ window.MZ = window.MZ || {};
       return en;
     });
 
+    // Mística Doom: marca ritual roja pulsante bajo el jefe + aura del jefe.
+    if (L.theme.hell) {
+      const boss = S.enemies.find(e => e.boss);
+      if (boss) {
+        const mark = new PIXI.Sprite(TEX.ritual);
+        mark.anchor.set(0.5);
+        mark.tint = 0xff2200;
+        mark.blendMode = 'add';
+        mark.scale.set(TILE / 60 * 2.2);
+        const mp = MZ.toPx(boss.x, boss.y);
+        mark.position.set(mp.x, mp.y);
+        mapLayer.addChild(mark);
+        S.glows.push({ spr: mark, phase: 0 });
+        // aura extra del jefe
+        const aura = new PIXI.Sprite(TEX.glow);
+        aura.anchor.set(0.5); aura.tint = 0xff2200; aura.blendMode = 'add';
+        aura.scale.set(boss.def.scale * 2.6); aura.alpha = 0.5;
+        boss.spr.addChildAt(aura, 0);
+        S.glows.push({ spr: aura, phase: 1.5 });
+      }
+    }
+
     // Modificadores de evento sobre el nivel recién generado.
     if (!restore && S.evento === 'invasion') {
       for (const e of [...S.enemies]) {
@@ -6280,9 +6665,18 @@ window.MZ = window.MZ || {};
       if (L.isBoss) {
         const boss = S.enemies.find(e => e.boss);
         MZ.say('jefeIntro', { b: boss ? boss.name : 'el jefe' });
-        MZ.audio.boss();
-        MZ.fx.shake(6);
+        // entrada dramática a la arena: fondo más oscuro, flash rojo, drones graves, shake largo
+        app.renderer.background.color = 0x0a0000;
+        MZ.fx.flash(0.55, 0xff0000);
+        MZ.fx.shake(14);
+        MZ.audio.doomEntry();
+      } else {
+        app.renderer.background.color = 0x03030c;
       }
+    } else if (L.theme.hell) {
+      app.renderer.background.color = 0x0a0000; // resume en arena
+    } else {
+      app.renderer.background.color = 0x03030c;
     }
     serializeRun();
   }
@@ -6304,6 +6698,10 @@ window.MZ = window.MZ || {};
       if (!e.spr) continue;
       const d = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
       e.spr.visible = d <= R && MZ.los(P.x, P.y, e.x, e.y);
+      if (e.spr.visible) { // bestiario: descubrir al ver
+        if (e.boss) { MZ.codex.discover('jefes', 'jefe'); if (e.name) MZ.codex.discover('jefes', e.name); }
+        else MZ.codex.discover('monstruos', e.type);
+      }
     }
     const dimItem = (o) => {
       if (!o.spr) return;
@@ -6335,7 +6733,7 @@ window.MZ = window.MZ || {};
       P.hp -= 1;
       const p = MZ.toPx(P.x, P.y);
       MZ.fx.floatText(p.x, p.y - 12, '☠1', 0x66ff44, 12);
-      if (P.hp <= 0) { MZ.die('el veneno'); return; }
+      if (P.hp <= 0) { MZ.die('el veneno', 'veneno'); return; }
     }
     // eventos y efectos de altar que actúan por turno
     S.turnos = (S.turnos || 0) + 1;
@@ -6398,11 +6796,15 @@ window.MZ = window.MZ || {};
     // Los pinchos lastiman y se quedan donde están.
     if (it.type === 'pinchos') {
       MZ.say('trampa');
-      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos');
+      MZ.codex.discover('arsenal', 'pinchos');
+      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos', 'trampa');
       return;
     }
 
     MZ.fx.sparkle(p.x, p.y, it.def.color);
+    // bestiario: descubrir el objeto al levantarlo
+    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg' };
+    if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
     switch (it.type) {
       case 'gold':
         P.gold += it.amount;
@@ -6435,6 +6837,7 @@ window.MZ = window.MZ || {};
       }
       case 'weapon': {
         const w = MZ.genGear('melee', S.depth);
+        MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
         // misma arma: en vez de venderla, le sumás los filos
         if (P.melee && P.melee.name === w.name && P.melee.uses != null && w.uses != null) {
           P.melee.uses += w.uses;
@@ -6458,6 +6861,7 @@ window.MZ = window.MZ || {};
       }
       case 'bow': {
         const w = MZ.genGear('ranged', S.depth);
+        MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
         // mismo arco: recargás munición en vez de venderlo
         if (P.ranged && !P.ranged.aoe && P.ranged.name === w.name && P.ranged.ammo != null && w.ammo != null) {
           P.ranged.ammo += w.ammo;
@@ -6546,7 +6950,8 @@ window.MZ = window.MZ || {};
               break;
             }
           }
-          MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'un mimic');
+          MZ.codex.discover('monstruos', 'mimic');
+          MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'un mimic', 'trampa');
         } else {
           P.gold += it.amount;
           P.hp = Math.min(P.maxHp, P.hp + 8);
@@ -6706,6 +7111,8 @@ window.MZ = window.MZ || {};
     };
     MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
+    MZ.codex.discover('arsenal', 'pinas'); // con lo que arrancás
+    if (S.player.melee) MZ.codex.discover('arsenal', MZ.codex.weaponId(S.player.melee));
     MZ.quests.reset();
     S.playing = true;
     S.dialogOpen = false;
@@ -6747,7 +7154,7 @@ window.MZ = window.MZ || {};
     if (!S.level.isBoss && Math.random() < 0.35) MZ.say('nivel', { n: S.depth });
   }
 
-  MZ.die = function (from) {
+  MZ.die = function (from, cat) {
     if (!S.playing) return;
     const P = S.player;
     touch = null;
@@ -6796,7 +7203,7 @@ window.MZ = window.MZ || {};
         MZ.quote('morir', { n: S.depth, d: d.deaths }),
         `Nivel alcanzado: ${S.depth} (récord: ${d.bestDepth})<br>` +
         `Bajas: ${S.player.kills} · Oro: ${S.player.gold} · Pasos: ${S.player.steps}` +
-        (from ? `<br>Te mató: ${from}` : '') +
+        (from ? `<br>Te mató: ${from}${cat ? ' (' + cat + ')' : ''}` : '') +
         `<br>👻 Cosecha: +${almas} almas (total: ${d.almas})` +
         `<br>Muertes acumuladas: ${d.deaths}`
       );

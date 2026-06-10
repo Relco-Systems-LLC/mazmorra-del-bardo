@@ -64,6 +64,17 @@ window.MZ = window.MZ || {};
     g.circle(26, 26, 22).stroke({ width: 4, color: 0xffffff });
     t.ring = R.generateTexture(g);
 
+    // marca ritual (estrella de 5 puntas dentro de doble anillo) para la arena de jefe
+    g = new PIXI.Graphics();
+    const RC = 60, rr = 56;
+    g.circle(RC, RC, rr).stroke({ width: 3, color: 0xffffff, alpha: 0.9 });
+    g.circle(RC, RC, rr * 0.82).stroke({ width: 2, color: 0xffffff, alpha: 0.7 });
+    const pent = [];
+    for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i * 2 * Math.PI / 5; pent.push({ x: RC + Math.cos(a) * rr * 0.78, y: RC + Math.sin(a) * rr * 0.78 }); }
+    for (let i = 0; i < 5; i++) { const a = pent[i], b = pent[(i + 2) % 5]; g.moveTo(a.x, a.y).lineTo(b.x, b.y); }
+    g.stroke({ width: 2.5, color: 0xffffff, alpha: 0.85 });
+    t.ritual = R.generateTexture(g);
+
     return t;
   }
   const TEX = makeTextures();
@@ -324,6 +335,28 @@ window.MZ = window.MZ || {};
       return en;
     });
 
+    // Mística Doom: marca ritual roja pulsante bajo el jefe + aura del jefe.
+    if (L.theme.hell) {
+      const boss = S.enemies.find(e => e.boss);
+      if (boss) {
+        const mark = new PIXI.Sprite(TEX.ritual);
+        mark.anchor.set(0.5);
+        mark.tint = 0xff2200;
+        mark.blendMode = 'add';
+        mark.scale.set(TILE / 60 * 2.2);
+        const mp = MZ.toPx(boss.x, boss.y);
+        mark.position.set(mp.x, mp.y);
+        mapLayer.addChild(mark);
+        S.glows.push({ spr: mark, phase: 0 });
+        // aura extra del jefe
+        const aura = new PIXI.Sprite(TEX.glow);
+        aura.anchor.set(0.5); aura.tint = 0xff2200; aura.blendMode = 'add';
+        aura.scale.set(boss.def.scale * 2.6); aura.alpha = 0.5;
+        boss.spr.addChildAt(aura, 0);
+        S.glows.push({ spr: aura, phase: 1.5 });
+      }
+    }
+
     // Modificadores de evento sobre el nivel recién generado.
     if (!restore && S.evento === 'invasion') {
       for (const e of [...S.enemies]) {
@@ -410,9 +443,18 @@ window.MZ = window.MZ || {};
       if (L.isBoss) {
         const boss = S.enemies.find(e => e.boss);
         MZ.say('jefeIntro', { b: boss ? boss.name : 'el jefe' });
-        MZ.audio.boss();
-        MZ.fx.shake(6);
+        // entrada dramática a la arena: fondo más oscuro, flash rojo, drones graves, shake largo
+        app.renderer.background.color = 0x0a0000;
+        MZ.fx.flash(0.55, 0xff0000);
+        MZ.fx.shake(14);
+        MZ.audio.doomEntry();
+      } else {
+        app.renderer.background.color = 0x03030c;
       }
+    } else if (L.theme.hell) {
+      app.renderer.background.color = 0x0a0000; // resume en arena
+    } else {
+      app.renderer.background.color = 0x03030c;
     }
     serializeRun();
   }
@@ -434,6 +476,10 @@ window.MZ = window.MZ || {};
       if (!e.spr) continue;
       const d = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
       e.spr.visible = d <= R && MZ.los(P.x, P.y, e.x, e.y);
+      if (e.spr.visible) { // bestiario: descubrir al ver
+        if (e.boss) { MZ.codex.discover('jefes', 'jefe'); if (e.name) MZ.codex.discover('jefes', e.name); }
+        else MZ.codex.discover('monstruos', e.type);
+      }
     }
     const dimItem = (o) => {
       if (!o.spr) return;
@@ -465,7 +511,7 @@ window.MZ = window.MZ || {};
       P.hp -= 1;
       const p = MZ.toPx(P.x, P.y);
       MZ.fx.floatText(p.x, p.y - 12, '☠1', 0x66ff44, 12);
-      if (P.hp <= 0) { MZ.die('el veneno'); return; }
+      if (P.hp <= 0) { MZ.die('el veneno', 'veneno'); return; }
     }
     // eventos y efectos de altar que actúan por turno
     S.turnos = (S.turnos || 0) + 1;
@@ -528,11 +574,15 @@ window.MZ = window.MZ || {};
     // Los pinchos lastiman y se quedan donde están.
     if (it.type === 'pinchos') {
       MZ.say('trampa');
-      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos');
+      MZ.codex.discover('arsenal', 'pinchos');
+      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos', 'trampa');
       return;
     }
 
     MZ.fx.sparkle(p.x, p.y, it.def.color);
+    // bestiario: descubrir el objeto al levantarlo
+    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg' };
+    if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
     switch (it.type) {
       case 'gold':
         P.gold += it.amount;
@@ -565,6 +615,7 @@ window.MZ = window.MZ || {};
       }
       case 'weapon': {
         const w = MZ.genGear('melee', S.depth);
+        MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
         // misma arma: en vez de venderla, le sumás los filos
         if (P.melee && P.melee.name === w.name && P.melee.uses != null && w.uses != null) {
           P.melee.uses += w.uses;
@@ -588,6 +639,7 @@ window.MZ = window.MZ || {};
       }
       case 'bow': {
         const w = MZ.genGear('ranged', S.depth);
+        MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
         // mismo arco: recargás munición en vez de venderlo
         if (P.ranged && !P.ranged.aoe && P.ranged.name === w.name && P.ranged.ammo != null && w.ammo != null) {
           P.ranged.ammo += w.ammo;
@@ -676,7 +728,8 @@ window.MZ = window.MZ || {};
               break;
             }
           }
-          MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'un mimic');
+          MZ.codex.discover('monstruos', 'mimic');
+          MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'un mimic', 'trampa');
         } else {
           P.gold += it.amount;
           P.hp = Math.min(P.maxHp, P.hp + 8);
@@ -836,6 +889,8 @@ window.MZ = window.MZ || {};
     };
     MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
+    MZ.codex.discover('arsenal', 'pinas'); // con lo que arrancás
+    if (S.player.melee) MZ.codex.discover('arsenal', MZ.codex.weaponId(S.player.melee));
     MZ.quests.reset();
     S.playing = true;
     S.dialogOpen = false;
@@ -877,7 +932,7 @@ window.MZ = window.MZ || {};
     if (!S.level.isBoss && Math.random() < 0.35) MZ.say('nivel', { n: S.depth });
   }
 
-  MZ.die = function (from) {
+  MZ.die = function (from, cat) {
     if (!S.playing) return;
     const P = S.player;
     touch = null;
@@ -926,7 +981,7 @@ window.MZ = window.MZ || {};
         MZ.quote('morir', { n: S.depth, d: d.deaths }),
         `Nivel alcanzado: ${S.depth} (récord: ${d.bestDepth})<br>` +
         `Bajas: ${S.player.kills} · Oro: ${S.player.gold} · Pasos: ${S.player.steps}` +
-        (from ? `<br>Te mató: ${from}` : '') +
+        (from ? `<br>Te mató: ${from}${cat ? ' (' + cat + ')' : ''}` : '') +
         `<br>👻 Cosecha: +${almas} almas (total: ${d.almas})` +
         `<br>Muertes acumuladas: ${d.deaths}`
       );

@@ -70,6 +70,7 @@ window.MZ = window.MZ || {};
       d.npcsConocidos[npc.type] = 1;
       MZ.save.store();
     }
+    MZ.codex.discover('personajes', npc.type);
     MZ.audio.pickup();
     MZ.dialog.open(lore.talk(npc));
   };

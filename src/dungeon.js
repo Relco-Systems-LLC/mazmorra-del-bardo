@@ -15,6 +15,8 @@ window.MZ = window.MZ || {};
 
   MZ.themeFor = function (depth) {
     if (depth === 42) return { wall: 0xffd700, floor: 0x33290a, accent: 0xffffff, name: '42' };
+    // niveles de jefe: infierno Doom (rojo sangre, piso negro-rojizo, fuego)
+    if (depth % 5 === 0) return { wall: 0xff1a1a, floor: 0x1a0505, accent: 0xff7700, name: 'infierno', hell: true };
     return MZ.THEMES[Math.floor((depth - 1) / 5) % MZ.THEMES.length];
   };
 

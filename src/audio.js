@@ -49,6 +49,14 @@ window.MZ = window.MZ || {};
     stairs() { beep(440, 440, 0.08, 'triangle', 0.07); beep(550, 550, 0.08, 'triangle', 0.07, 0.09); beep(660, 880, 0.14, 'triangle', 0.08, 0.18); },
     death() { beep(440, 110, 0.5, 'sawtooth', 0.1); beep(220, 55, 0.7, 'square', 0.08, 0.15); noise(0.6, 0.18, 400, 0.1); },
     boss() { beep(82, 41, 0.5, 'sawtooth', 0.12); beep(110, 55, 0.5, 'square', 0.1, 0.25); noise(0.4, 0.12, 250, 0.5); },
+    doomEntry() {
+      // drones graves apilados + golpe: entrada a la arena del jefe
+      beep(55, 55, 1.1, 'sawtooth', 0.13);
+      beep(41, 41, 1.1, 'square', 0.1, 0.05);
+      beep(110, 82, 0.9, 'sawtooth', 0.08, 0.15);
+      noise(0.7, 0.16, 180, 0.0);
+      beep(33, 27, 1.4, 'sine', 0.12, 0.3);
+    },
     mate() { beep(523, 523, 0.09, 'triangle', 0.08); beep(659, 659, 0.09, 'triangle', 0.08, 0.1); beep(784, 1046, 0.16, 'triangle', 0.09, 0.2); },
     secret() { beep(784, 784, 0.07, 'sine', 0.07); beep(988, 988, 0.07, 'sine', 0.07, 0.08); beep(1175, 1568, 0.18, 'sine', 0.08, 0.16); },
   };

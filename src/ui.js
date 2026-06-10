@@ -37,6 +37,16 @@ window.MZ = window.MZ || {};
         e.preventDefault();
         MZ.ui.showStats();
       });
+      $('cta-codex').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.showCodex();
+      });
+      $('btn-reset').addEventListener('pointerdown', e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.confirmReset();
+      });
       $('screen-death').addEventListener('pointerdown', e => {
         e.preventDefault();
         if (Date.now() - deathShownAt < 700) return; // que no se saltee la pantalla sin querer
@@ -177,6 +187,65 @@ window.MZ = window.MZ || {};
       MZ.dialog.open(statsNode());
     },
 
+    // ---- Bestiario / Pokedex ----
+    showCodex() {
+      const CATS = [
+        { key: 'monstruos', t: '🐀 Monstruos' },
+        { key: 'jefes', t: '💀 Jefes' },
+        { key: 'personajes', t: '🎭 Personajes' },
+        { key: 'arsenal', t: '⚔ Arsenal y objetos' },
+      ];
+      function entrada(cat, def) {
+        return {
+          name: def.nombre, color: def.color,
+          text: def.lore.join('\n\n'),
+          choices: [{ label: '← Volver', fn: () => lista(cat) }],
+        };
+      }
+      function lista(catKey) {
+        const cat = CATS.find(c => c.key === catKey);
+        const defs = MZ.CODEX[catKey];
+        const got = defs.filter(d => MZ.codex.seen(catKey, d.id)).length;
+        const choices = defs.map(def => {
+          if (MZ.codex.seen(catKey, def.id)) return { label: def.nombre, fn: () => entrada(catKey, def) };
+          return { label: '??? 🔒', fn: () => lista(catKey) };
+        });
+        choices.push({ label: '← Categorías', fn: raiz });
+        return { name: cat.t, color: 0xff8800, text: 'Descubiertos: ' + got + '/' + defs.length, choices };
+      }
+      function raiz() {
+        const c = MZ.codex.counts();
+        const pct = Math.round((c.got / c.total) * 100);
+        const choices = CATS.map(cat => {
+          const defs = MZ.CODEX[cat.key];
+          const got = defs.filter(d => MZ.codex.seen(cat.key, d.id)).length;
+          return { label: cat.t + ' (' + got + '/' + defs.length + ')', fn: () => lista(cat.key) };
+        });
+        choices.push({ label: 'Cerrar', fn: null });
+        return { name: 'Bestiario del Bardo', color: 0xff8800, text: 'Completado: ' + pct + '% (' + c.got + '/' + c.total + ')\nTodo lo que ves, hablás o agarrás queda registrado acá.', choices };
+      }
+      MZ.dialog.open(raiz());
+    },
+
+    // ---- Borrar todo el progreso ----
+    confirmReset() {
+      MZ.dialog.open({
+        name: 'Borrar todo', color: 0xff4d6d,
+        text: 'Esto borra TODO: récords, almas, mejoras, romance, bestiario, partida en curso. Vuelve a cero, como recién instalado. ¿Seguro?',
+        choices: [
+          {
+            label: 'Sí, borrá todo', fn() {
+              MZ.save.reset();
+              MZ.ui.toast('Progreso borrado. Tabula rasa, campeón.', 3000);
+              MZ.ui.showStart();
+              return null;
+            },
+          },
+          { label: 'No, me arrepentí', fn: null },
+        ],
+      });
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -227,13 +296,10 @@ window.MZ = window.MZ || {};
           `🏆 Logros: ${MZ.logros.count()}/${MZ.logros.defs.length} · 👻 Almas: ${d.almas || 0}`
         : '')
         + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
-      if (d.runs > 0) {
-        $('cta-shop').classList.remove('hidden');
-        $('cta-stats').classList.remove('hidden');
-      } else {
-        $('cta-shop').classList.add('hidden');
-        $('cta-stats').classList.add('hidden');
-      }
+      const showExtras = d.runs > 0;
+      ['cta-shop', 'cta-stats', 'cta-codex'].forEach(id =>
+        $(id).classList.toggle('hidden', !showExtras));
+      $('btn-reset').parentElement.classList.toggle('hidden', !showExtras);
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;

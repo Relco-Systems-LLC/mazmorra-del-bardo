@@ -42,7 +42,7 @@ window.MZ = window.MZ || {};
     if (P.melee && P.melee.traicionero) {
       if (!e.awake) dmg *= 4;
       if (Math.random() < 0.1) {
-        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo');
+        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo', 'vos mismo');
         if (P.hp <= 0) return;
       }
     }
@@ -194,7 +194,7 @@ window.MZ = window.MZ || {};
         }
       }
       if (P.hp > 0 && cheb(P, e) <= 1) {
-        MZ.hurtPlayer(4 + Math.floor(S.depth / 3), 'un barril explosivo');
+        MZ.hurtPlayer(4 + Math.floor(S.depth / 3), 'un barril explosivo', 'trampa');
         // la onda expansiva te tira una casilla para atrás
         if (P.hp > 0 && pushAway(P, e.x, e.y)) MZ.onPlayerDisplaced();
       }
@@ -261,7 +261,7 @@ window.MZ = window.MZ || {};
     MZ.ui.updateHUD();
   };
 
-  MZ.hurtPlayer = function (dmg, from) {
+  MZ.hurtPlayer = function (dmg, from, cat) {
     const S = MZ.state, P = S.player;
     P.hp -= dmg;
     P.streak = 0;
@@ -273,7 +273,7 @@ window.MZ = window.MZ || {};
     MZ.audio.hurt();
     if (dmg >= Math.max(4, P.maxHp * 0.22) && Math.random() < 0.5) MZ.say('danioGrande');
     MZ.ui.updateHUD();
-    if (P.hp <= 0) MZ.die(from);
+    if (P.hp <= 0) MZ.die(from, cat);
   };
 
   MZ.poisonPlayer = function (turns, from) {
@@ -382,7 +382,7 @@ window.MZ = window.MZ || {};
       if (e.def.pombero) { pomberoTurn(e); continue; }
       if (d === 1) {
         const dmg = Math.max(1, e.atk - P.def + (Math.random() < 0.4 ? 1 : 0));
-        MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name);
+        MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name, e.boss ? 'jefe' : 'monstruo');
         if (e.def.vampiro) { // te chupa la vida y se cura
           e.hp = Math.min(e.maxHp, e.hp + dmg);
           const ep = MZ.toPx(e.x, e.y);
@@ -398,7 +398,7 @@ window.MZ = window.MZ || {};
       }
       if (e.def.ranged && d <= e.def.ranged && MZ.los(e.x, e.y, P.x, P.y)) {
         MZ.fx.bolt(MZ.toPx(e.x, e.y), MZ.toPx(P.x, P.y), e.def.color);
-        MZ.hurtPlayer(Math.max(1, e.atk - 1 - P.def), e.def.name);
+        MZ.hurtPlayer(Math.max(1, e.atk - 1 - P.def), e.def.name, 'monstruo');
         continue;
       }
       if (d <= 10) stepToward(e);

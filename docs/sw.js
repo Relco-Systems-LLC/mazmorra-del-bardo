@@ -1,7 +1,7 @@
 // Service worker network-first para el HTML del juego, cache-first para assets.
 // Con internet siempre cargás la última versión; sin internet, andás offline igual.
-// 20260610172951 lo reemplaza build.sh con el timestamp, para invalidar cache al republicar.
-const CACHE = 'mazmorra-20260610172951';
+// 20260610174107 lo reemplaza build.sh con el timestamp, para invalidar cache al republicar.
+const CACHE = 'mazmorra-20260610174107';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
