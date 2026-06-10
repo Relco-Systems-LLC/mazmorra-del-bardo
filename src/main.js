@@ -222,6 +222,7 @@ window.MZ = window.MZ || {};
       cracks: S.brokenCracks.slice(),
       evento: S.evento || null,
       mapaActivo: !!S.mapaActivo,
+      mapaVenta: !!S.mapaVenta,
       explored: Array.from(S.explored).join(''),
       quests: JSON.parse(JSON.stringify(MZ.quests.run)),
     };
@@ -281,9 +282,13 @@ window.MZ = window.MZ || {};
     if (restore) {
       S.evento = restore.evento || null;
       S.mapaActivo = !!restore.mapaActivo; // el mapa es por-nivel, se guarda
+      S.mapaVenta = !!restore.mapaVenta;
     } else {
       S.evento = MZ.eventos.sortear(S.depth, L.isBoss);
       S.mapaActivo = false; // bajar de nivel resetea el mapa
+      // ¿el mercader de ESTE piso trae el mapa? se decide una vez al entrar (30%),
+      // no por cada charla (al mercader se le puede hablar varias veces).
+      S.mapaVenta = Math.random() < 0.30;
       if (S.player) { S.player.efecto = null; S.player.efectoTurnos = 0; }
     }
 

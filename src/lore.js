@@ -28,35 +28,38 @@ window.MZ = window.MZ || {};
     },
   };
 
-  // Qué NPCs aparecen en cada nivel (quests forzadas primero, después azar).
+  // Qué NPCs aparecen en cada nivel. Regla: nunca 2 iguales en el mismo piso.
   MZ.pickNpcsForLevel = function (depth, isBoss) {
     const Q = MZ.quests.run;
     const out = [];
-    if (depth === 50) { out.push('fundador'); return out; } // la última función
-    if (Q.anillo && Q.anillo.stage === 'tengo') out.push('rodrigo');
-    if (Q.venganza && Q.venganza.stage === 'cumplida' && !isBoss) out.push('esperanza');
+    const add = (t) => { if (!out.includes(t)) out.push(t); }; // dedup: máx 1 de cada tipo
+    if (depth === 50) { add('fundador'); return out; } // la última función
+    if (Q.anillo && Q.anillo.stage === 'tengo') add('rodrigo');
+    if (Q.venganza && Q.venganza.stage === 'cumplida' && !isBoss) add('esperanza');
     // el nieto de la Nona: aparece una sola vez (histórico), bien abajo, si la conocés
     if (!isBoss && depth >= 12 && (D().nona || 0) >= 2 && !D().nietoVisto && Math.random() < 0.3) {
-      out.push('nieto');
+      add('nieto');
     }
     if (isBoss) return out;
-    out.push('mercader'); // Don Olivera tiene franquicia en todos los pisos
-    if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) out.push('esperanza');
-    // El subsuelo está poblado: pool con peso, se permiten repetidos
-    // (cada encuentro es fresco — los que progresan avanzan, los de servicio re-atienden).
-    const pool = ['bardo', 'bardo', 'mercader', 'tahur'];
-    if (depth >= 2) pool.push('tahur', 'nona');
-    if (depth >= 3) pool.push('nona', 'morena');
-    if (depth >= 4) pool.push('morena', 'herrero');
-    if (depth >= 5) pool.push('herrero', 'critico');
-    if (depth >= 6) pool.push('critico', 'djtigre');
+    add('mercader'); // SIEMPRE exactamente 1 mercader por piso
+    if (depth % 5 === 4 && !Q.venganza && !Q.espOferta) add('esperanza');
+    // Pool de servicio (sin mercader ni morena: esos tienen reglas propias).
+    const pool = ['bardo', 'tahur'];
+    if (depth >= 2) pool.push('nona');
+    if (depth >= 4) pool.push('herrero');
+    if (depth >= 5) pool.push('critico');
     if (depth >= 8) pool.push('djtigre');
     if (depth >= 3 && !Q.anillo) pool.push('rodrigo');
-    // más NPCs por sala: 2–4 desde nivel 2; nivel 1 también puebla un poco
+    // 2–4 NPCs desde nivel 2; nivel 1 casi vacío. Dedup natural por add().
     const want = depth < 2
       ? (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0)
       : 2 + (Math.random() < 0.6 ? 1 : 0) + (Math.random() < 0.35 ? 1 : 0);
-    for (let i = 0; i < want; i++) out.push(pool[Math.floor(Math.random() * pool.length)]);
+    let guard = 0;
+    while (out.filter(t => t !== 'mercader' && t !== 'morena').length < want && guard++ < 30) {
+      add(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    // Morena es RARA: máx 1, 5% de chance por piso, desde nivel 4.
+    if (depth >= 4 && Math.random() < 0.05) add('morena');
     return out;
   };
 
@@ -80,7 +83,7 @@ window.MZ = window.MZ || {};
         return mercaderMenu(npc, 'Salud. Si te cae mal, yo no te vendí nada.');
       },
     });
-    if (!MZ.state.mapaActivo) choices.push({
+    if (MZ.state.mapaVenta && !MZ.state.mapaActivo) choices.push({
       label: `🗺 Mapa del nivel (minimapa) — ${cMapa} oro`,
       fn() {
         if (p.gold < cMapa) return mercaderMenu(npc, 'El mapa cuesta, pibe. Sin oro andás a ciegas nomás.');
@@ -229,22 +232,30 @@ window.MZ = window.MZ || {};
   function bardoTalk() {
     const p = P(), cap = D().loreCap || 0;
     if (cap < CAPITULOS.length) {
+      const ultimo = cap === CAPITULOS.length - 1;
+      // primero ofrecer; el lore se muestra recién si elegís escuchar
       return node('Anselmo el Bardo', 0x66aaff,
-        CAPITULOS[cap],
-        [{
-          label: cap === CAPITULOS.length - 1 ? 'Procesar la revelación' : 'Escuchar (y aceptar la gorra)',
-          fn() {
-            D().loreCap = cap + 1; MZ.save.store();
-            p.gold += 10;
-            MZ.audio.gold(); MZ.ui.updateHUD();
-            if (cap === CAPITULOS.length - 1) {
-              p.maxHp += 5; p.hp = Math.min(p.maxHp, p.hp + 5); MZ.recalcStats(); MZ.ui.updateHUD();
+        ultimo
+          ? 'Me queda un solo capítulo, el final. La verdad del pozo. ¿Te animás a escucharla? (la gorra se agradece)'
+          : 'Tengo el capítulo ' + (cap + 1) + ' de la historia de este teatro maldito. ¿Te sentás a escuchar? Te dejo 10 de oro por la molestia.',
+        [
+          {
+            label: ultimo ? 'Escuchar la verdad final' : 'Escuchar el capítulo',
+            fn() {
+              D().loreCap = cap + 1; MZ.save.store();
+              p.gold += 10;
+              MZ.audio.gold(); MZ.ui.updateHUD();
+              if (ultimo) {
+                p.maxHp += 5; p.hp = Math.min(p.maxHp, p.hp + 5); MZ.recalcStats(); MZ.ui.updateHUD();
+                return node('Anselmo el Bardo', 0x66aaff,
+                  CAPITULOS[cap] + '\n\n(Conocer la verdad fortalece: +5 HP máx. Y tomá 10 de oro, la gorra al revés, hoy pago yo.)', null);
+              }
               return node('Anselmo el Bardo', 0x66aaff,
-                'Conocer la verdad fortalece. O te arruina la cabeza, depende del día. (+5 HP máx)\n\nHoy parece que fortalece. Tomá 10 de oro: la gorra al revés, hoy pago yo.', null);
-            }
-            return node('Anselmo el Bardo', 0x66aaff, 'Tomá 10 de oro: la gorra al revés, hoy pago yo. Volvé que esto sigue.', null);
+                CAPITULOS[cap] + '\n\n(Tomá 10 de oro: la gorra al revés, hoy pago yo. Volvé que esto sigue.)', null);
+            },
           },
-        }, { label: 'No tengo tiempo para teatro', fn: null }]);
+          { label: ultimo ? 'Hoy no, no estoy listo' : 'Ahora no, Anselmo', fn: null },
+        ]);
     }
     const yapas = [
       'Copla del día: "Bajó valiente el cruzado / con su espada y su ilusión / lo mató una rata flaca / en el primer escalón."',
@@ -258,6 +269,14 @@ window.MZ = window.MZ || {};
       'Anoche soñé que tocaba con Helloween en Cancún. Tobias Sammet de invitado, tequila en el escenario. Desperté acá, con un esqueleto mirándome. La vida es injusta, querido.',
       '¿Sabías que abajo del nivel 30 hay una pista de baile? Quedó del Tiger Tiger original. Los fantasmas todavía hacen la fila para entrar. Algunos hábitos no mueren ni muertos.',
     ];
+    // de vez en cuando, el Bardo te dibuja un plano del piso
+    if (!MZ.state.mapaActivo && Math.random() < 0.12) {
+      return node('Anselmo el Bardo', 0x66aaff,
+        'Esperá, esperá. Yo armaba la escenografía de este lugar, ¿te conté? Tomá, te dibujo el plano del piso. Cortesía de la casa.',
+        [{
+          label: 'Gracias, maestro', fn() { MZ.activarMapa(); return null; },
+        }, { label: 'No hace falta', fn: null }]);
+    }
     return node('Anselmo el Bardo', 0x66aaff, yapas[Math.floor(Math.random() * yapas.length)], null);
   }
 
