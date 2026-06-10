@@ -5960,27 +5960,39 @@ window.MZ = window.MZ || {};
       this.updateAimbar();
     },
 
-    // Botón de modo + barra de selección de arma a distancia (solo en modo apuntar).
+    // Selector único de arma: caminar + cada arma a distancia. Tocar un arma la
+    // elige y entra en modo apuntar; tocar 🚶 vuelve a caminar. Siempre visible.
     updateAimbar() {
       const S = MZ.state;
-      const btn = $('btn-aim'), bar = $('aimbar');
-      if (!S || !S.playing) { btn.classList.add('hidden'); bar.classList.add('hidden'); return; }
-      btn.classList.remove('hidden');
-      btn.innerHTML = S.aimMode ? '&#127919;' : '&#128694;'; // 🎯 / 🚶
-      btn.classList.toggle('aiming', !!S.aimMode);
-      if (!S.aimMode) { bar.classList.add('hidden'); return; }
+      const bar = $('aimbar');
+      const oldBtn = $('btn-aim');
+      if (oldBtn) oldBtn.classList.add('hidden'); // el botón flotante ya no se usa
+      if (!S || !S.playing) { bar.classList.add('hidden'); return; }
       const P = S.player;
+      // si el arma activa se agotó (arco descartado / granada en 0), volvés a caminar
+      if (S.aimMode) {
+        const ok = P.aimSel === 'ranged' ? !!P.ranged : ((P.granadas && P.granadas[P.aimSel]) || 0) > 0;
+        if (!ok) S.aimMode = false;
+      }
       bar.classList.remove('hidden');
       bar.innerHTML = '';
       const chips = [];
-      chips.push({ sel: 'ranged', label: (P.ranged ? (P.ranged.aoe ? '💚' : P.ranged.rapido ? '🔫' : '🏹') : '🚫') + ' ' + (P.ranged ? (P.ranged.ammo != null ? '●' + P.ranged.ammo : '∞') : 'sin arma'), empty: !P.ranged });
+      // caminar (modo movimiento)
+      chips.push({ sel: 'walk', label: '🚶', active: !S.aimMode });
+      // arma disparable equipada
+      if (P.ranged) {
+        const ic = P.ranged.aoe ? '💚' : P.ranged.rapido ? '🔫' : '🏹';
+        chips.push({ sel: 'ranged', label: ic + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''), active: S.aimMode && P.aimSel === 'ranged' });
+      }
+      // granadas con stock > 0
       for (const k of MZ.GRENADE_KEYS) {
-        const g = MZ.GRENADES[k], n = (P.granadas && P.granadas[k]) || 0;
-        chips.push({ sel: k, label: g.icon + ' ' + n, empty: n <= 0 });
+        const n = (P.granadas && P.granadas[k]) || 0;
+        if (n <= 0) continue;
+        chips.push({ sel: k, label: MZ.GRENADES[k].icon + ' ' + n, active: S.aimMode && P.aimSel === k });
       }
       for (const c of chips) {
         const el = document.createElement('div');
-        el.className = 'aimchip' + (P.aimSel === c.sel ? ' sel' : '') + (c.empty ? ' empty' : '');
+        el.className = 'aimchip' + (c.active ? ' sel' : '');
         el.textContent = c.label;
         el.addEventListener('pointerdown', ev => { ev.stopPropagation(); ev.preventDefault(); MZ.selectAim(c.sel); });
         bar.appendChild(el);
@@ -7732,7 +7744,18 @@ window.MZ = window.MZ || {};
     hideReticle();
     MZ.ui.updateAimbar();
   };
-  MZ.selectAim = function (sel) { if (S.player) { S.player.aimSel = sel; MZ.ui.updateAimbar(); } };
+  // Selector único: 'walk' vuelve a caminar; un arma la elige y entra en apuntar.
+  MZ.selectAim = function (sel) {
+    if (!S.playing || !S.player) return;
+    touch = null; aimPointer = null; hideReticle();
+    if (sel === 'walk') {
+      S.aimMode = false;
+    } else {
+      S.player.aimSel = sel;
+      S.aimMode = true;
+    }
+    MZ.ui.updateAimbar();
+  };
 
   // objetivo según el dedo: para ranged snapea al enemigo; para granada la casilla clampeada.
   function aimTarget() {

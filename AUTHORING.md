@@ -26,7 +26,9 @@ El ejemplo *McDonald's* aparece como `→ Mc:` a lo largo del doc.
 **NO TOCAR (agnóstico al tema, ya está hecho y testeado):**
 - Combate por turnos, bump-attack, knockback, crítico, veneno, **iniciativa (dado 50% al moverte
   pegado)**.
-- Movimiento D-pad relativo (8 dir) + **modo apuntar** (botón 🚶/🎯, ráfaga, lanzar granadas).
+- Movimiento D-pad relativo (8 dir) + **selector único de arma** (aimbar: chip 🚶 caminar + un
+  chip por arma a distancia; tocar un arma = elegirla y entrar en apuntar, tocar 🚶 = volver a
+  caminar; ráfaga manteniendo para disparables, lanzar al soltar para granadas).
 - **7 vidas** por run (revive con seed nuevo, pierde ½ oro), save IndexedDB+localStorage, resume.
 - FX/partículas, screen-shake, minimapa, niebla de guerra, eventos de nivel, spawn **80/20**,
   **boss cada 5 niveles**, mística Doom de arena, soborno de NPC bloqueante, codex engine,

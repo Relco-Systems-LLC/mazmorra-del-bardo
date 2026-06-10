@@ -1097,7 +1097,18 @@ window.MZ = window.MZ || {};
     hideReticle();
     MZ.ui.updateAimbar();
   };
-  MZ.selectAim = function (sel) { if (S.player) { S.player.aimSel = sel; MZ.ui.updateAimbar(); } };
+  // Selector único: 'walk' vuelve a caminar; un arma la elige y entra en apuntar.
+  MZ.selectAim = function (sel) {
+    if (!S.playing || !S.player) return;
+    touch = null; aimPointer = null; hideReticle();
+    if (sel === 'walk') {
+      S.aimMode = false;
+    } else {
+      S.player.aimSel = sel;
+      S.aimMode = true;
+    }
+    MZ.ui.updateAimbar();
+  };
 
   // objetivo según el dedo: para ranged snapea al enemigo; para granada la casilla clampeada.
   function aimTarget() {
