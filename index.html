@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>Mazmorra del Bardo</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; background: #000; overflow: hidden; height: 100%;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+    font-family: ui-monospace, 'Cascadia Mono', Menlo, Consolas, monospace;
+  }
+  #game, #game canvas { position: fixed; inset: 0; }
+  #hud {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 6px); left: 0; right: 0;
+    display: flex; justify-content: space-between; padding: 4px 14px;
+    font-size: 15px; font-weight: bold; pointer-events: none; z-index: 5;
+    text-shadow: 0 0 8px currentColor;
+  }
+  #hud span { pointer-events: auto; }
+  #hp { color: #ff4d6d; } #depth { color: #9d6bff; } #gold { color: #ffd700; }
+  #toast {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 42px); left: 50%;
+    transform: translateX(-50%); max-width: 86vw;
+    color: #fff; background: rgba(8, 8, 18, .88); border: 1px solid rgba(0,255,255,.4);
+    border-radius: 10px; padding: 8px 14px; font-size: 14px; text-align: center;
+    z-index: 6; pointer-events: none; opacity: 0; transition: opacity .25s;
+    box-shadow: 0 0 18px rgba(0,255,255,.25);
+  }
+  .screen {
+    position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px;
+    background: rgba(0, 0, 5, .93); color: #eee; text-align: center; padding: 24px;
+  }
+  .screen h1 {
+    color: #0ff; text-shadow: 0 0 16px #0ff, 0 0 44px rgba(0,255,255,.5);
+    letter-spacing: 5px; font-size: 30px; margin: 0; line-height: 1.3;
+  }
+  .screen .sub { color: #999; font-size: 13px; line-height: 1.7; }
+  .screen .quote { color: #ffd700; font-size: 15px; max-width: 82vw; line-height: 1.5; text-shadow: 0 0 10px rgba(255,215,0,.5); }
+  .screen .stats { color: #9d6bff; font-size: 13px; line-height: 1.9; }
+  .screen .cta {
+    margin-top: 10px; color: #fff; border: 1px solid #0ff; border-radius: 12px;
+    padding: 12px 28px; font-size: 16px; letter-spacing: 2px;
+    text-shadow: 0 0 8px #0ff; box-shadow: 0 0 16px rgba(0,255,255,.35);
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse { 50% { box-shadow: 0 0 32px rgba(0,255,255,.6); } }
+  #equip {
+    position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); left: 10px; right: 70px;
+    color: #7fd4e0; font-size: 11px; line-height: 1.5; pointer-events: none; z-index: 5;
+    text-shadow: 0 0 6px rgba(0,229,255,.4); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  #fps {
+    position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); right: 10px;
+    color: #555; font-size: 11px; pointer-events: none; z-index: 5;
+  }
+  #dialog {
+    position: fixed; left: 8px; right: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
+    z-index: 8; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
+    border-radius: 14px; padding: 14px; box-shadow: 0 0 24px rgba(177, 76, 255, .3);
+  }
+  #dlg-name { font-weight: bold; font-size: 15px; margin-bottom: 6px; text-shadow: 0 0 8px currentColor; }
+  #dlg-text { color: #ddd; font-size: 14px; line-height: 1.55; margin-bottom: 12px; white-space: pre-line; }
+  #dlg-choices { display: flex; flex-direction: column; gap: 8px; }
+  .dlg-btn {
+    background: rgba(0, 255, 255, .07); color: #0ff; border: 1px solid rgba(0, 255, 255, .5);
+    border-radius: 10px; padding: 11px 12px; font-size: 14px; font-family: inherit; text-align: left;
+  }
+  .dlg-btn:active { background: rgba(0, 255, 255, .25); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="game"></div>
+<div id="hud" class="hidden">
+  <span id="hp">&#10084; 20/20</span>
+  <span id="depth">NIVEL 1</span>
+  <span><span id="gold">&#9672; 0</span>&nbsp;&nbsp;<span id="btn-pause" style="color:#7fd4e0;padding:0 4px">&#10074;&#10074;</span></span>
+</div>
+<div id="toast"></div>
+<div id="equip" class="hidden"></div>
+<div id="fps"></div>
+<div id="dialog" class="hidden">
+  <div id="dlg-name"></div>
+  <div id="dlg-text"></div>
+  <div id="dlg-choices"></div>
+</div>
+<div id="screen-start" class="screen">
+  <h1>MAZMORRA<br/>DEL BARDO</h1>
+  <div class="sub">roguelike de bolsillo &middot; niveles infinitos<br/>manten&eacute; el dedo hacia donde quieras ir (con diagonales)<br/>camin&aacute; contra un enemigo para fajarlo &middot; tap a uno lejano para dispararle</div>
+  <div class="stats" id="start-stats"></div>
+  <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
+  <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
+  <div class="sub" style="margin-top:12px">
+    <span id="btn-export" style="text-decoration:underline">&#128190; exportar save</span>
+    &nbsp;&middot;&nbsp;
+    <span id="btn-import" style="text-decoration:underline">&#128194; importar save</span>
+    <input type="file" id="import-file" accept=".save,.json,.txt" style="display:none" />
+  </div>
+</div>
+<div id="screen-pause" class="screen hidden">
+  <h1 style="font-size:24px">PAUSA</h1>
+  <div class="sub">la partida se guarda sola, tranquilo</div>
+  <div class="cta" id="cta-resume" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">SEGUIR JUGANDO</div>
+  <div class="cta" id="cta-export-pause">&#128190; EXPORTAR SAVE</div>
+  <div class="cta" id="cta-exit" style="border-color:#ff4d6d;text-shadow:0 0 8px #ff4d6d;box-shadow:0 0 16px rgba(255,77,109,.35)">SALIR AL MEN&Uacute;</div>
+</div>
+<div id="screen-death" class="screen hidden">
+  <h1 style="color:#ff4d6d;text-shadow:0 0 16px #ff4d6d,0 0 44px rgba(255,77,109,.5)">MORISTE</h1>
+  <div class="quote" id="death-quote"></div>
+  <div class="stats" id="death-stats"></div>
+  <div class="cta" style="border-color:#ff4d6d;text-shadow:0 0 8px #ff4d6d;box-shadow:0 0 16px rgba(255,77,109,.35)">OTRA VEZ</div>
+</div>
+<script src="vendor/pixi.min.js"></script>
+<script src="src/rng.js"></script>
+<script src="src/sprites.js"></script>
+<script src="src/quotes.js"></script>
+<script src="src/save.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/dungeon.js"></script>
+<script src="src/entities.js"></script>
+<script src="src/lore.js"></script>
+<script src="src/npc.js"></script>
+<script src="src/fx.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/easter.js"></script>
+<script src="src/combat.js"></script>
+<script src="src/main.js"></script>
+<script>
+// PWA: solo sobre http(s); en file:// no aplica y no debe romper.
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  try { navigator.serviceWorker.register('sw.js'); } catch (e) { }
+}
+</script>
+</body>
+</html>

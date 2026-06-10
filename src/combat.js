@@ -1,0 +1,255 @@
+// Resolución de combate (melee, distancia, veneno, explosiones) + IA enemiga.
+// Adyacencia y movimiento en 8 direcciones (diagonales incluidas).
+window.MZ = window.MZ || {};
+(() => {
+  const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+
+  function hitEnemy(e, dmg, crit) {
+    e.hp -= dmg;
+    e.awake = true;
+    const p = MZ.toPx(e.x, e.y);
+    MZ.fx.floatText(p.x, p.y - 10, String(dmg), crit ? 0xffe066 : 0xffffff, crit ? 20 : 14);
+    MZ.fx.explode(p.x, p.y, e.def.color, crit ? 14 : 6, crit ? 3 : 1.8, 0.6);
+    if (crit) {
+      MZ.audio.crit();
+      MZ.fx.shake(5);
+      MZ.fx.slowmo(140);
+      if (Math.random() < 0.4) MZ.say('critico');
+    } else {
+      MZ.audio.hit();
+    }
+    if (e.hp <= 0) MZ.killEnemy(e);
+  }
+
+  // Empuja una casilla en la dirección opuesta a (fromX, fromY). true si se movió.
+  function pushAway(t, fromX, fromY) {
+    const dx = Math.sign(t.x - fromX), dy = Math.sign(t.y - fromY);
+    if (!dx && !dy) return false;
+    const nx = t.x + dx, ny = t.y + dy;
+    if (!MZ.passable(nx, ny) || MZ.enemyAt(nx, ny) || MZ.npcAt(nx, ny)) return false;
+    const P = MZ.state.player;
+    if (t !== P && P.x === nx && P.y === ny) return false;
+    t.x = nx; t.y = ny;
+    return true;
+  }
+
+  MZ.playerAttack = function (e) {
+    const P = MZ.state.player;
+    const crit = Math.random() < 0.12;
+    let dmg = P.atk + (Math.random() < 0.5 ? 0 : 1);
+    if (crit) dmg *= 2;
+    // arma con veneno: la víctima se pudre de a poco
+    if (P.melee && P.melee.veneno && !e.dead && Math.random() < 0.6) {
+      e.poison = Math.max(e.poison, 3);
+      const p = MZ.toPx(e.x, e.y);
+      MZ.fx.floatText(p.x, p.y - 22, '☠', 0x66ff44, 13);
+    }
+    const knock = crit || (P.melee && P.melee.empuje);
+    hitEnemy(e, dmg, crit);
+    // knockback: críticos y armas con empuje mueven al enemigo de casillero
+    if (knock && !e.dead && !e.def.static && pushAway(e, P.x, P.y)) {
+      const p2 = MZ.toPx(e.x, e.y);
+      MZ.fx.trail(p2.x, p2.y, e.def.color);
+    }
+  };
+
+  MZ.playerRangedAttack = function (e) {
+    const P = MZ.state.player;
+    const crit = Math.random() < 0.1;
+    let dmg = P.ranged.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
+    if (crit) dmg *= 2;
+    MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
+    hitEnemy(e, dmg, crit);
+  };
+
+  MZ.killEnemy = function (e) {
+    const S = MZ.state, P = S.player;
+    e.dead = true;
+    const p = MZ.toPx(e.x, e.y);
+    if (e.spr) { e.spr.destroy(); e.spr = null; }
+    S.enemies = S.enemies.filter(x => x !== e);
+
+    // Barril explosivo: daña todo lo que tenga al lado (en cadena).
+    if (e.def.explode) {
+      MZ.fx.explode(p.x, p.y, 0xffa500, 44, 5, 1.3);
+      MZ.fx.ring(p.x, p.y, 0xff8800, true);
+      MZ.fx.flash(0.4, 0xff8800);
+      MZ.fx.shake(10);
+      MZ.audio.kill();
+      for (const o of [...S.enemies]) {
+        if (!o.dead && cheb(o, e) <= 1) {
+          o.hp -= 10 + S.depth;
+          const op = MZ.toPx(o.x, o.y);
+          MZ.fx.floatText(op.x, op.y - 10, String(10 + S.depth), 0xff8800, 14);
+          if (o.hp <= 0) MZ.killEnemy(o);
+        }
+      }
+      if (P.hp > 0 && cheb(P, e) <= 1) {
+        MZ.hurtPlayer(4 + Math.floor(S.depth / 3), 'un barril explosivo');
+        // la onda expansiva te tira una casilla para atrás
+        if (P.hp > 0 && pushAway(P, e.x, e.y)) MZ.onPlayerDisplaced();
+      }
+      if (Math.random() < 0.5) MZ.spawnItemAt('gold', e.x, e.y, 8 + S.depth);
+      MZ.ui.updateHUD();
+      return;
+    }
+
+    MZ.fx.explode(p.x, p.y, e.def.color, e.boss ? 60 : 24, e.boss ? 5 : 3, e.boss ? 1.4 : 1);
+    MZ.fx.ring(p.x, p.y, e.def.color, e.boss);
+    MZ.fx.flash(e.boss ? 0.45 : 0.15);
+    MZ.fx.shake(e.boss ? 14 : 6);
+    MZ.audio.kill();
+    let gold = (e.def.gold || 2) + Math.floor(S.depth * 0.7) + Math.floor(Math.random() * 4);
+    if (e.boss) gold += 30 + S.depth * 2;
+    if (e.stolen) gold += e.stolen * 2; // el Pombero devuelve el doble si lo cazás
+    P.gold += gold;
+    P.kills++;
+    P.streak++;
+    MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
+
+    // Drops: los monstruos sueltan loot en el piso.
+    if (e.boss) {
+      MZ.spawnItemAt('mate', e.x, e.y);
+    } else if (Math.random() < 0.22) {
+      const r = Math.random();
+      const type = r < 0.4 ? 'gold' : r < 0.65 ? 'potion' : r < 0.78 ? 'weapon' : r < 0.88 ? 'bow' : r < 0.96 ? 'armor' : 'mate';
+      MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
+    }
+
+    if (e.boss) {
+      MZ.say('jefeMuerto');
+      MZ.fx.slowmo(350);
+      MZ.quests.onBossKill();
+    }
+    else if (e.def.pombero) MZ.say('pomberoMuerto');
+    else if (P.streak === 5) MZ.say('racha', { k: P.streak });
+    else if (Math.random() < 0.18) MZ.say('matar');
+    MZ.ui.updateHUD();
+  };
+
+  MZ.hurtPlayer = function (dmg, from) {
+    const S = MZ.state, P = S.player;
+    P.hp -= dmg;
+    P.streak = 0;
+    const p = MZ.toPx(P.x, P.y);
+    MZ.fx.floatText(p.x, p.y - 10, '-' + dmg, 0xff4d6d, 16);
+    MZ.fx.explode(p.x, p.y, 0xff4d6d, 8, 2, 0.7);
+    MZ.fx.shake(4);
+    MZ.fx.flash(0.2, 0xff0033);
+    MZ.audio.hurt();
+    if (dmg >= Math.max(4, P.maxHp * 0.22) && Math.random() < 0.5) MZ.say('danioGrande');
+    MZ.ui.updateHUD();
+    if (P.hp <= 0) MZ.die(from);
+  };
+
+  MZ.poisonPlayer = function (turns, from) {
+    const P = MZ.state.player;
+    P.poison = Math.max(P.poison, turns);
+    const p = MZ.toPx(P.x, P.y);
+    MZ.fx.floatText(p.x, p.y - 24, '☠ envenenado', 0x66ff44, 13);
+    MZ.say('veneno');
+    MZ.ui.updateHUD();
+  };
+
+  function free(e, x, y) {
+    const P = MZ.state.player;
+    if (!MZ.inBounds(x, y)) return false;
+    if (P.x === x && P.y === y) return false;
+    if (MZ.enemyAt(x, y)) return false;
+    if (MZ.npcAt(x, y)) return false;
+    if (e.def.ghost) return true; // el fantasma atraviesa paredes
+    return MZ.passable(x, y);
+  }
+
+  function stepToward(e) {
+    const P = MZ.state.player;
+    const dx = Math.sign(P.x - e.x), dy = Math.sign(P.y - e.y);
+    const cand = [];
+    if (dx && dy) cand.push([dx, dy]); // diagonal directa primero
+    if (Math.abs(P.x - e.x) >= Math.abs(P.y - e.y)) cand.push([dx, 0], [0, dy]);
+    else cand.push([0, dy], [dx, 0]);
+    cand.push([0, -dy], [-dx, 0]);
+    for (const [cx, cy] of cand) {
+      if (!cx && !cy) continue;
+      if (free(e, e.x + cx, e.y + cy)) { e.x += cx; e.y += cy; return; }
+    }
+  }
+
+  function teleport(e, nearPlayer) {
+    const S = MZ.state, L = S.level, P = S.player;
+    const spots = [];
+    for (let y = 1; y < L.h - 1; y++) for (let x = 1; x < L.w - 1; x++) {
+      if (!MZ.passable(x, y) || MZ.enemyAt(x, y) || MZ.npcAt(x, y) || (P.x === x && P.y === y)) continue;
+      const d = Math.max(Math.abs(x - P.x), Math.abs(y - P.y));
+      if (nearPlayer ? (d >= 2 && d <= 3) : d >= 8) spots.push({ x, y });
+    }
+    if (!spots.length) return;
+    const to = spots[Math.floor(Math.random() * spots.length)];
+    const a = MZ.toPx(e.x, e.y), b = MZ.toPx(to.x, to.y);
+    MZ.fx.sparkle(a.x, a.y, e.def.color);
+    MZ.fx.sparkle(b.x, b.y, e.def.color);
+    e.x = to.x; e.y = to.y;
+    if (e.spr) e.spr.position.set(b.x, b.y);
+  }
+
+  function pomberoTurn(e) {
+    const S = MZ.state, P = S.player;
+    if (cheb(e, P) === 1) {
+      const steal = Math.min(P.gold, 8 + Math.floor(Math.random() * 15));
+      if (steal > 0) {
+        P.gold -= steal;
+        e.stolen = (e.stolen || 0) + steal;
+        const p = MZ.toPx(P.x, P.y);
+        MZ.fx.floatText(p.x, p.y - 14, '-' + steal + ' oro', 0xffd700, 14);
+        MZ.say('pombero');
+        MZ.audio.hurt();
+        MZ.ui.updateHUD();
+      }
+      teleport(e, false);
+    } else if (Math.random() < 0.2) {
+      teleport(e, true);
+    } else {
+      stepToward(e);
+    }
+  }
+
+  MZ.enemiesTurn = function () {
+    const S = MZ.state, P = S.player;
+    for (const e of [...S.enemies]) {
+      if (e.dead || P.hp <= 0) continue;
+      // veneno sobre el enemigo (armas con veneno del jugador)
+      if (e.poison > 0) {
+        e.poison--;
+        e.hp -= 1;
+        const p = MZ.toPx(e.x, e.y);
+        MZ.fx.floatText(p.x, p.y - 10, '1', 0x66ff44, 11);
+        if (e.hp <= 0) { MZ.killEnemy(e); continue; }
+      }
+      if (e.def.static) continue; // los barriles no opinan
+      if (e.def.slow) { e._t = !e._t; if (e._t) continue; }
+      const d = cheb(e, P);
+      if (!e.awake) {
+        if (d <= 7 && MZ.los(e.x, e.y, P.x, P.y)) e.awake = true;
+        else continue;
+      }
+      if (e.def.pombero) { pomberoTurn(e); continue; }
+      if (d === 1) {
+        const dmg = Math.max(1, e.atk - P.def + (Math.random() < 0.4 ? 1 : 0));
+        MZ.hurtPlayer(dmg, e.boss ? e.name : e.def.name);
+        if (e.def.poison && P.hp > 0 && Math.random() < 0.7) MZ.poisonPlayer(e.def.poison, e.def.name);
+        // los jefes pegan tan fuerte que te mueven de casillero
+        if (e.boss && P.hp > 0 && pushAway(P, e.x, e.y)) {
+          MZ.fx.shake(7);
+          MZ.onPlayerDisplaced();
+        }
+        continue;
+      }
+      if (e.def.ranged && d <= e.def.ranged && MZ.los(e.x, e.y, P.x, P.y)) {
+        MZ.fx.bolt(MZ.toPx(e.x, e.y), MZ.toPx(P.x, P.y), e.def.color);
+        MZ.hurtPlayer(Math.max(1, e.atk - 1 - P.def), e.def.name);
+        continue;
+      }
+      if (d <= 10) stepToward(e);
+    }
+  };
+})();
