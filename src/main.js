@@ -564,6 +564,13 @@ window.MZ = window.MZ || {};
       }
       case 'weapon': {
         const w = MZ.genGear('melee', S.depth);
+        // misma arma: en vez de venderla, le sumás los filos
+        if (P.melee && P.melee.name === w.name && P.melee.uses != null && w.uses != null) {
+          P.melee.uses += w.uses;
+          MZ.audio.pickup();
+          MZ.say('recarga', { w: w.name, n: P.melee.uses + ' filos' });
+          break;
+        }
         // recambio rápido: agarrás si es mejor, si estás a piñas, o si tu filo agoniza
         if (!P.melee || w.atk >= P.melee.atk || P.melee.uses <= 4) {
           P.melee = w;
@@ -580,6 +587,13 @@ window.MZ = window.MZ || {};
       }
       case 'bow': {
         const w = MZ.genGear('ranged', S.depth);
+        // mismo arco: recargás munición en vez de venderlo
+        if (P.ranged && !P.ranged.aoe && P.ranged.name === w.name && P.ranged.ammo != null && w.ammo != null) {
+          P.ranged.ammo += w.ammo;
+          MZ.audio.pickup();
+          MZ.say('recarga', { w: w.name, n: P.ranged.ammo + ' tiros' });
+          break;
+        }
         if (!P.ranged || (!P.ranged.aoe && (w.atk >= P.ranged.atk || P.ranged.ammo <= 1))) {
           P.ranged = w;
           MZ.audio.pickup();

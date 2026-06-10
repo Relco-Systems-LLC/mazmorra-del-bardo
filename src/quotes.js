@@ -225,6 +225,12 @@ window.MZ = window.MZ || {};
       'La Bestia quedó vacía. Fue hermoso mientras duró.',
       'Sin bala, La Bestia es un pisapapeles verde. La soltás con respeto.',
     ],
+    recarga: [
+      'Misma arma: le sumás lo que traía. {w} ahora con {n}.',
+      'Recargaste {w}. A seguir tirando: {n}.',
+      'Otro {w} igual: combinás y seguís. {n}.',
+      'Dos {w} es mejor que uno... bueno, es uno con más: {n}.',
+    ],
     lootArma: [
       '{w}. Esto ya es otra cosa, eh.',
       'Equipaste: {w}. Ahora sí das un poco de miedo.',
