@@ -16,6 +16,7 @@ window.MZ = window.MZ || {};
     pombero: { name: 'El Pombero', sprite: 'pombero', color: 0x00ff88, scale: 0.85, pombero: true, hp: 14, atk: 1, gold: 0, rare: true, minDepth: 1 },
     boss: { name: 'Jefe', sprite: 'jefe', color: 0xff2266, scale: 1.6, hp: 28, atk: 4, gold: 20, boss: true, rare: true, minDepth: 1 },
     barril: { name: 'Barril explosivo', sprite: 'barril', color: 0xffa500, scale: 0.8, hp: 3, atk: 0, gold: 0, static: true, explode: true, rare: true, minDepth: 1 },
+    mimic: { name: 'Mimic', sprite: 'mimic', color: 0xffd700, scale: 0.85, hp: 16, atk: 4, gold: 35, rare: true, minDepth: 1 },
   };
 
   MZ.BOSS_NAMES = ['El Encargado', 'La Jefa del Subsuelo', 'El Chamuyero', 'Doña Penumbra', 'El Recaudador'];
@@ -82,7 +83,28 @@ window.MZ = window.MZ || {};
     ],
   };
 
+  // Armas locas: mecánicas únicas, ~12% de los drops de arma.
+  const LOCAS = {
+    melee: [
+      { name: 'Termo del Abuelo', atk: 3, curaAlRomper: true },
+      { name: 'Puñal Tramposo', atk: 2, traicionero: true },
+    ],
+    ranged: [
+      { name: 'Gomera de Baterías', atk: 3, range: 4, rebote: true },
+      { name: 'Micrófono del Bardo', atk: 2, range: 3, grito: true },
+    ],
+  };
+
   MZ.genGear = function (kind, depth) {
+    if (LOCAS[kind] && Math.random() < 0.12) {
+      const base = LOCAS[kind][Math.floor(Math.random() * LOCAS[kind].length)];
+      const g = { kind, ...base };
+      const bonus = Math.floor(depth / 7);
+      if (bonus > 0) { g.atk += bonus; g.name += ' +' + bonus; }
+      if (kind === 'melee') g.uses = 10 + Math.floor(Math.random() * 5);
+      if (kind === 'ranged') g.ammo = g.grito ? 3 : 4 + Math.floor(Math.random() * 3);
+      return g;
+    }
     const pool = MZ.GEAR[kind];
     let tier = Math.floor(depth / 5) + (Math.random() < 0.3 ? 1 : 0) - (Math.random() < 0.3 ? 1 : 0);
     tier = Math.max(0, Math.min(pool.length - 1, tier));

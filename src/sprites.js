@@ -634,6 +634,19 @@ window.MZ = window.MZ || {};
         '...vvvv...',
       ],
     },
+    mimic: {
+      pal: { C: 0x8a5a2b, c: 0x5d3a1e, G: 0xffd700, W: 0xffffff, R: 0x661111, E: 0xff2222 },
+      map: [
+        '.CCCCCCCC.',
+        '.CGEGGEGC.',
+        '.CWCWCWCC.',
+        '.RRRRRRRR.',
+        '.CWCCWCCW.',
+        '.CCCCCCCC.',
+        '.CCCCCCCC.',
+        '.cccccccc.',
+      ],
+    },
     cofre: {
       pal: { C: 0x8a5a2b, c: 0x5d3a1e, G: 0xffd700 },
       map: [

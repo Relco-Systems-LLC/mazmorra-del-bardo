@@ -37,6 +37,15 @@ window.MZ = window.MZ || {};
     const P = MZ.state.player;
     const crit = Math.random() < 0.12;
     let dmg = P.atk + (Math.random() < 0.5 ? 0 : 1);
+    if (P.efecto === 'berserk') dmg *= 2;
+    // Puñal Tramposo: x4 por la espalda, pero a veces te corta a vos
+    if (P.melee && P.melee.traicionero) {
+      if (!e.awake) dmg *= 4;
+      if (Math.random() < 0.1) {
+        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo');
+        if (P.hp <= 0) return;
+      }
+    }
     if (crit) dmg *= 2;
     // arma con veneno: la víctima se pudre de a poco
     if (P.melee && P.melee.veneno && !e.dead && Math.random() < 0.6) {
@@ -55,14 +64,47 @@ window.MZ = window.MZ || {};
     if (P.melee && P.melee.uses != null) {
       P.melee.uses--;
       if (P.melee.uses <= 0) {
-        MZ.say('armaRota', { w: P.melee.name });
+        if (P.melee.curaAlRomper) {
+          // Termo del Abuelo: su último servicio es cebarte uno sagrado
+          P.hp = P.maxHp;
+          P.poison = 0;
+          MZ.say('termoRoto', null, 3500);
+          MZ.audio.mate();
+          MZ.fx.flash(0.25, 0x88ff66);
+        } else {
+          MZ.say('armaRota', { w: P.melee.name });
+          MZ.audio.hurt();
+        }
         P.melee = null;
         MZ.recalcStats();
-        MZ.audio.hurt();
       }
       MZ.ui.updateHUD();
     }
   };
+
+  // Micrófono del Bardo: grito AoE que empuja todo lejos del blanco.
+  function gritar(target) {
+    const S = MZ.state, P = S.player, w = P.ranged;
+    const cx = target.x, cy = target.y;
+    const cp = MZ.toPx(cx, cy);
+    MZ.fx.ring(cp.x, cp.y, 0xff4cf0, true);
+    MZ.fx.shake(8);
+    MZ.audio.crit();
+    for (const o of [...S.enemies]) {
+      if (o.dead) continue;
+      if (Math.max(Math.abs(o.x - cx), Math.abs(o.y - cy)) > 2) continue;
+      o.awake = true;
+      o.hp -= w.atk;
+      const op = MZ.toPx(o.x, o.y);
+      MZ.fx.floatText(op.x, op.y - 10, String(w.atk), 0xff4cf0, 13);
+      if (o.hp <= 0) { MZ.killEnemy(o); continue; }
+      if (!o.def.static) {
+        const from = (o.x === cx && o.y === cy) ? P : { x: cx, y: cy };
+        pushAway(o, from.x, from.y);
+        pushAway(o, from.x, from.y);
+      }
+    }
+  }
 
   // La Bestia 9000: revienta todo enemigo a la vista en un radio enorme.
   function fireBFG(target) {
@@ -93,12 +135,30 @@ window.MZ = window.MZ || {};
     const w = P.ranged;
     if (w.aoe) {
       fireBFG(e);
+    } else if (w.grito) {
+      gritar(e);
     } else {
       const crit = Math.random() < 0.1;
       let dmg = w.atk + Math.floor(P.baseAtk / 2) + (Math.random() < 0.5 ? 0 : 1);
       if (crit) dmg *= 2;
       MZ.fx.bolt(MZ.toPx(P.x, P.y), MZ.toPx(e.x, e.y), 0x00e5ff);
       hitEnemy(e, dmg, crit);
+      // Gomera de Baterías: el tiro rebota en cadena
+      if (w.rebote) {
+        let from = e, dmgC = dmg - 1;
+        const ya = new Set([e]);
+        for (let j = 0; j < 2 && dmgC > 0; j++) {
+          const next = MZ.state.enemies.find(o => !o.dead && !ya.has(o)
+            && Math.max(Math.abs(o.x - from.x), Math.abs(o.y - from.y)) <= 3
+            && MZ.los(from.x, from.y, o.x, o.y));
+          if (!next) break;
+          MZ.fx.bolt(MZ.toPx(from.x, from.y), MZ.toPx(next.x, next.y), 0xffff66);
+          hitEnemy(next, dmgC, false);
+          ya.add(next);
+          from = next;
+          dmgC--;
+        }
+      }
     }
     // munición: sin balas, el arma se descarta
     if (w.ammo != null) {
@@ -151,16 +211,18 @@ window.MZ = window.MZ || {};
     let gold = (e.def.gold || 2) + Math.floor(S.depth * 0.7) + Math.floor(Math.random() * 4);
     if (e.boss) gold += 30 + S.depth * 2;
     if (e.stolen) gold += e.stolen * 2; // el Pombero devuelve el doble si lo cazás
+    // fiesta en el Tiger y Rey Midas duplican el botín (apilable, jugátela)
+    gold *= (S.evento === 'fiesta' ? 2 : 1) * (P.efecto === 'midas' ? 2 : 1);
     P.gold += gold;
     P.kills++;
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
-    // La Bestia 9000: 10% al matar un bicho cerca de un jefe vivo.
-    // (el dungeon te arma justo cuando más lo necesitás)
+    // La Bestia 9000: 5% en cualquier kill desde el nivel 1; 10% cerca de
+    // un jefe vivo (el momento exacto). Ninguna arma es imposible.
     const bossCerca = !e.boss && S.enemies.some(b =>
       b.boss && !b.dead && Math.max(Math.abs(b.x - e.x), Math.abs(b.y - e.y)) <= 5);
-    if (bossCerca && Math.random() < 0.10) {
+    if (!e.boss && Math.random() < (bossCerca ? 0.10 : 0.05)) {
       // la Bestia no se pierde por un casillero ocupado: busca lugar al lado
       const spots = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
       for (const [ox, oy] of spots) {
@@ -172,7 +234,7 @@ window.MZ = window.MZ || {};
     // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-    } else if (!bossCerca && Math.random() < 0.3) {
+    } else if (Math.random() < (S.evento === 'invasion' ? 0.5 : 0.3)) {
       const r = Math.random();
       const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
@@ -287,6 +349,15 @@ window.MZ = window.MZ || {};
 
   MZ.enemiesTurn = function () {
     const S = MZ.state, P = S.player;
+    // Fiesta en el Tiger: nadie pelea, todos bailan (se mueven al azar)
+    if (S.evento === 'fiesta') {
+      for (const e of S.enemies) {
+        if (e.dead || e.def.static) continue;
+        const d = [[1, 0], [-1, 0], [0, 1], [0, -1]][Math.floor(Math.random() * 4)];
+        if (free(e, e.x + d[0], e.y + d[1])) { e.x += d[0]; e.y += d[1]; }
+      }
+      return;
+    }
     for (const e of [...S.enemies]) {
       if (e.dead || P.hp <= 0) continue;
       // veneno sobre el enemigo (armas con veneno del jugador)
@@ -301,7 +372,9 @@ window.MZ = window.MZ || {};
       if (e.def.slow) { e._t = !e._t; if (e._t) continue; }
       const d = cheb(e, P);
       if (!e.awake) {
-        if (d <= 7 && MZ.los(e.x, e.y, P.x, P.y)) e.awake = true;
+        // Rey Midas: brillás tanto que te huelen de lejos
+        const detect = P.efecto === 'midas' ? 10 : 7;
+        if (d <= detect && MZ.los(e.x, e.y, P.x, P.y)) e.awake = true;
         else continue;
       }
       if (e.def.pombero) { pomberoTurn(e); continue; }

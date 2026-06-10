@@ -196,6 +196,7 @@ window.MZ = window.MZ || {};
         soldSword: !!n.soldSword, soldVest: !!n.soldVest, soldBow: !!n.soldBow,
       })),
       cracks: S.brokenCracks.slice(),
+      evento: S.evento || null,
       explored: Array.from(S.explored).join(''),
       quests: JSON.parse(JSON.stringify(MZ.quests.run)),
     };
@@ -248,6 +249,15 @@ window.MZ = window.MZ || {};
 
     const L = S.level = MZ.genLevel(S.runSeed, S.depth);
     const th = L.theme;
+
+    // Evento del nivel y limpieza de efectos de altar (duran un piso).
+    S.turnos = 0;
+    if (restore) {
+      S.evento = restore.evento || null;
+    } else {
+      S.evento = MZ.eventos.sortear(S.depth, L.isBoss);
+      if (S.player) { S.player.efecto = null; S.player.efectoTurnos = 0; }
+    }
 
     // Grietas ya rotas en la partida guardada: aplicar antes de crear sprites.
     S.brokenCracks = restore ? restore.cracks.slice() : [];
@@ -311,6 +321,27 @@ window.MZ = window.MZ || {};
       return en;
     });
 
+    // Modificadores de evento sobre el nivel recién generado.
+    if (!restore && S.evento === 'invasion') {
+      for (const e of [...S.enemies]) {
+        if (e.boss || e.def.rare) continue;
+        const c = findFreeCell(5);
+        if (!c) break;
+        const en = MZ.makeEnemy(e.type, c.x, c.y, S.depth);
+        en.spr = entitySprite(en.def, enemyLayer);
+        const p = MZ.toPx(c.x, c.y);
+        en.spr.position.set(p.x, p.y);
+        S.enemies.push(en);
+      }
+    }
+    if (!restore && S.evento === 'lluvia') {
+      for (let i = 0; i < 6; i++) spawnItem('gold', findFreeCell(3), 8 + S.depth * 2);
+      for (const e of S.enemies) {
+        e.hp = Math.round(e.hp * 1.3);
+        e.maxHp = Math.round(e.maxHp * 1.3);
+      }
+    }
+
     // Total de piso transitable, para el % de mapa recorrido.
     L.floorTotal = 0;
     for (let i = 0; i < L.w * L.h; i++) {
@@ -365,6 +396,7 @@ window.MZ = window.MZ || {};
     MZ.ui.updateHUD();
     if (!restore) {
       MZ.easter.onDepth(S.depth);
+      if (S.evento) MZ.eventos.anunciar(S.evento);
       if (L.isBoss) {
         const boss = S.enemies.find(e => e.boss);
         MZ.say('jefeIntro', { b: boss ? boss.name : 'el jefe' });
@@ -378,25 +410,26 @@ window.MZ = window.MZ || {};
   // ---- Niebla de guerra ----
   function updateVisibility() {
     const L = S.level, P = S.player;
+    const R = MZ.eventos.visionR(); // 7 normal, 2 en apagón
     for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) {
       const i = y * L.w + x;
       const spr = S.tileSprites[i];
       if (!spr) continue;
       const d = Math.max(Math.abs(x - P.x), Math.abs(y - P.y));
-      const vis = d <= 7 && MZ.los(P.x, P.y, x, y);
+      const vis = d <= R && MZ.los(P.x, P.y, x, y);
       if (vis) S.explored[i] = 1;
       spr.alpha = vis ? 1 : (S.explored[i] ? 0.22 : 0);
     }
     for (const e of S.enemies) {
       if (!e.spr) continue;
       const d = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y));
-      e.spr.visible = d <= 7 && MZ.los(P.x, P.y, e.x, e.y);
+      e.spr.visible = d <= R && MZ.los(P.x, P.y, e.x, e.y);
     }
     const dimItem = (o) => {
       if (!o.spr) return;
       const i = o.y * L.w + o.x;
       const d = Math.max(Math.abs(o.x - P.x), Math.abs(o.y - P.y));
-      const vis = d <= 7 && MZ.los(P.x, P.y, o.x, o.y);
+      const vis = d <= R && MZ.los(P.x, P.y, o.x, o.y);
       o.spr.visible = vis || !!S.explored[i];
       o.spr.alpha = vis ? 1 : 0.35;
     };
@@ -423,6 +456,45 @@ window.MZ = window.MZ || {};
       const p = MZ.toPx(P.x, P.y);
       MZ.fx.floatText(p.x, p.y - 12, '☠1', 0x66ff44, 12);
       if (P.hp <= 0) { MZ.die('el veneno'); return; }
+    }
+    // eventos y efectos de altar que actúan por turno
+    S.turnos = (S.turnos || 0) + 1;
+    if (S.playing && S.evento === 'niebla' && S.turnos % 10 === 0) {
+      MZ.poisonPlayer(2, 'la niebla venenosa');
+      if (!S.playing) return;
+    }
+    // berserk: si hay un enemigo pegado, tus puños deciden solos
+    if (S.playing && P.efecto === 'berserk' && P.hp > 0) {
+      const adj = S.enemies.find(e => !e.dead && Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y)) === 1);
+      if (adj) MZ.playerAttack(adj);
+    }
+    // imán: el oro cercano camina hacia vos
+    if (S.playing && P.efecto === 'iman') {
+      for (const it of S.items) {
+        if (it.type !== 'gold') continue;
+        const d = Math.max(Math.abs(it.x - P.x), Math.abs(it.y - P.y));
+        if (d > 3 || d === 0) continue;
+        const sx = Math.sign(P.x - it.x), sy = Math.sign(P.y - it.y);
+        // diagonal directa, si no por un eje
+        for (const [ox, oy] of [[sx, sy], [sx, 0], [0, sy]]) {
+          if (!ox && !oy) continue;
+          const nx = it.x + ox, ny = it.y + oy;
+          if (nx === P.x && ny === P.y) continue;
+          if (MZ.passable(nx, ny) && !MZ.itemAt(nx, ny)) {
+            it.x = nx; it.y = ny;
+            if (it.spr) { const pp = MZ.toPx(nx, ny); it.spr.position.set(pp.x, pp.y); }
+            break;
+          }
+        }
+      }
+    }
+    // fantasmal: tic-tac (no expira si justo estás adentro de una pared)
+    if (S.playing && P.efecto === 'fantasmal') {
+      P.efectoTurnos--;
+      if (P.efectoTurnos <= 0 && MZ.passable(P.x, P.y)) {
+        P.efecto = null;
+        MZ.ui.toast('Volvés a ser sólido. Qué bajón.', 2200);
+      }
     }
     // petaca de tequila (mejora permanente): se toma sola al 30% de vida
     if (S.playing && P.petaca && P.hp > 0 && P.hp <= P.maxHp * 0.3) {
@@ -561,36 +633,70 @@ window.MZ = window.MZ || {};
         MZ.logros.check('tequila');
         break;
       }
-      case 'chest':
-        P.gold += it.amount;
-        P.hp = Math.min(P.maxHp, P.hp + 8);
-        MZ.audio.secret();
-        MZ.fx.floatText(p.x, p.y - 8, '+' + it.amount, 0xffd700, 16);
+      case 'chest': {
+        if (Math.random() < 0.15) {
+          // EL COFRE TENÍA DIENTES
+          MZ.say('mimic', null, 3000);
+          MZ.audio.boss();
+          MZ.fx.shake(8);
+          const spots2 = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
+          for (const [ox, oy] of spots2) {
+            const x = it.x + ox, y = it.y + oy;
+            if (MZ.passable(x, y) && !MZ.enemyAt(x, y) && !MZ.npcAt(x, y)) {
+              const en = MZ.makeEnemy('mimic', x, y, S.depth);
+              en.awake = true;
+              en.spr = entitySprite(en.def, enemyLayer);
+              const mp = MZ.toPx(x, y);
+              en.spr.position.set(mp.x, mp.y);
+              S.enemies.push(en);
+              break;
+            }
+          }
+          MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'un mimic');
+        } else {
+          P.gold += it.amount;
+          P.hp = Math.min(P.maxHp, P.hp + 8);
+          MZ.audio.secret();
+          MZ.fx.floatText(p.x, p.y - 8, '+' + it.amount, 0xffd700, 16);
+        }
         break;
+      }
       case 'anillo':
         MZ.quests.ringFound();
         MZ.audio.secret();
         MZ.ui.toast('El anillo de Rodrigo. Tiene algo grabado adentro... Llevaselo.', 3500);
         break;
       case 'altar': {
-        const r = Math.random();
-        if (r < 0.35) {
-          P.hp = P.maxHp; P.poison = 0;
-          MZ.audio.mate();
-          MZ.say('altarBueno');
-        } else if (r < 0.55) {
-          P.maxHp += 2; P.hp = Math.min(P.maxHp, P.hp + 2); MZ.recalcStats();
-          MZ.audio.secret();
-          MZ.say('altarBueno');
-        } else if (r < 0.78) {
-          const g = 25 + S.depth * 2;
-          P.gold += g;
-          MZ.audio.gold();
-          MZ.fx.floatText(p.x, p.y - 8, '+' + g, 0xffd700, 15);
-          MZ.say('altarBueno');
+        if (Math.random() < 0.5) {
+          // clásico: cura, vida máxima, oro o maldición
+          const r = Math.random();
+          if (r < 0.35) {
+            P.hp = P.maxHp; P.poison = 0;
+            MZ.audio.mate();
+            MZ.say('altarBueno');
+          } else if (r < 0.55) {
+            P.maxHp += 2; P.hp = Math.min(P.maxHp, P.hp + 2); MZ.recalcStats();
+            MZ.audio.secret();
+            MZ.say('altarBueno');
+          } else if (r < 0.78) {
+            const g = 25 + S.depth * 2;
+            P.gold += g;
+            MZ.audio.gold();
+            MZ.fx.floatText(p.x, p.y - 8, '+' + g, 0xffd700, 15);
+            MZ.say('altarBueno');
+          } else {
+            MZ.poisonPlayer(3, 'el altar');
+            MZ.say('altarMalo');
+          }
         } else {
-          MZ.poisonPlayer(3, 'el altar');
-          MZ.say('altarMalo');
+          // efecto loco que dura el nivel (fantasmal: 10 turnos)
+          const efs = ['berserk', 'midas', 'fantasmal', 'iman'];
+          const ef = efs[Math.floor(Math.random() * efs.length)];
+          P.efecto = ef;
+          P.efectoTurnos = ef === 'fantasmal' ? 10 : 9999;
+          MZ.audio.secret();
+          MZ.fx.flash(0.3, 0x00ffc8);
+          MZ.say(ef, null, 4500);
         }
         break;
       }
@@ -636,12 +742,16 @@ window.MZ = window.MZ || {};
     }
 
     if (!MZ.passable(nx, ny)) {
-      // diagonal bloqueada: deslizar por el eje que sí se pueda
-      if (dx && dy) {
-        if (MZ.passable(P.x + dx, P.y) && !MZ.enemyAt(P.x + dx, P.y) && !MZ.npcAt(P.x + dx, P.y)) return tryMove(dx, 0);
-        if (MZ.passable(P.x, P.y + dy) && !MZ.enemyAt(P.x, P.y + dy) && !MZ.npcAt(P.x, P.y + dy)) return tryMove(0, dy);
+      // fantasmal: las paredes interiores son una sugerencia
+      const fantasma = P.efecto === 'fantasmal' && nx > 0 && ny > 0 && nx < L.w - 1 && ny < L.h - 1;
+      if (!fantasma) {
+        // diagonal bloqueada: deslizar por el eje que sí se pueda
+        if (dx && dy) {
+          if (MZ.passable(P.x + dx, P.y) && !MZ.enemyAt(P.x + dx, P.y) && !MZ.npcAt(P.x + dx, P.y)) return tryMove(dx, 0);
+          if (MZ.passable(P.x, P.y + dy) && !MZ.enemyAt(P.x, P.y + dy) && !MZ.npcAt(P.x, P.y + dy)) return tryMove(0, dy);
+        }
+        return false;
       }
-      return false;
     }
 
     const old = MZ.toPx(P.x, P.y);

@@ -61,7 +61,10 @@ window.MZ = window.MZ || {};
   // ---- Don Olivera, el mercader ----
   function mercaderMenu(npc, text) {
     const p = P(), d = MZ.state.depth;
-    const cPocion = 15, cEspada = 30 + d * 2, cChaleco = 40 + d * 2, cGomera = 25 + d;
+    // mercado negro: todo a mitad de precio
+    const k = MZ.state.evento === 'mercado' ? 0.5 : 1;
+    const cPocion = Math.ceil(15 * k), cEspada = Math.ceil((30 + d * 2) * k),
+      cChaleco = Math.ceil((40 + d * 2) * k), cGomera = Math.ceil((25 + d) * k);
     const choices = [];
     choices.push({
       label: `Poción (+12 HP, cura veneno) — ${cPocion} oro`,
@@ -428,6 +431,20 @@ window.MZ = window.MZ || {};
     if (p.gold >= 20) choices.push({ label: 'Apostar 20 de oro', fn: () => apostar(20) });
     if (p.gold >= 100) choices.push({ label: 'Apostar 100 (a lo grande)', fn: () => apostar(100) });
     if (p.gold > 0 && p.gold < 20) choices.push({ label: 'Apostar lo que tengo (' + p.gold + ')', fn: () => apostar(p.gold) });
+    if (p.gold >= 30) choices.push({
+      label: '🔫 Ruleta rusa — 30 oro (5/6 triplicás, 1/6 quedás en 1 HP)',
+      fn() {
+        p.gold -= 30;
+        if (Math.random() < 5 / 6) {
+          p.gold += 90;
+          MZ.audio.gold(); MZ.fx.flash(0.2, 0xffd700); MZ.ui.updateHUD();
+          return node('El Tahúr', 0xffd700, MZ.quote('ruletaGana'), null);
+        }
+        p.hp = 1;
+        MZ.audio.death(); MZ.fx.shake(12); MZ.fx.flash(0.45, 0xff0033); MZ.ui.updateHUD();
+        return node('El Tahúr', 0xffd700, MZ.quote('ruletaPierde'), null);
+      },
+    });
     choices.push({ label: 'Con el juego no, gracias', fn: () => node('El Tahúr', 0xffd700, 'Un hombre sabio. Aburrido, pero sabio. Igual acá te espero: todos vuelven a la mesa.', null) });
     return node('El Tahúr', 0xffd700,
       p.gold > 0

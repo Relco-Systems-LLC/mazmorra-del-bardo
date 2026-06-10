@@ -163,6 +163,39 @@ window.MZ = window.MZ || {};
       'Veneno en las venas. Como el lunes, pero literal.',
       'Te envenenaron. Tomate algo, pero algo bueno esta vez.',
     ],
+    mimic: [
+      '¡EL COFRE TENÍA DIENTES! Correte, CORRETE.',
+      'Mimic. Obvio. Nada lindo es gratis en este pozo.',
+      'El cofre te mordió. El tesoro eras vos.',
+    ],
+    ruletaGana: [
+      'Click. Cámara vacía. El Tahúr te paga el triple con cara de piedra: "la próxima gira más rápido el tambor".',
+      'Sobreviviste a la ruleta. Triple de oro y una historia para contar arriba. Si llegás.',
+    ],
+    ruletaPierde: [
+      'BANG... era de fogueo. Pero el susto te dejó en 1 HP igual. El Tahúr llora de risa.',
+      'El tambor giró mal. 1 HP y una lección: con el Tahúr, ni a las escondidas.',
+    ],
+    termoRoto: [
+      'Se rompió el Termo del Abuelo... y el agua del mate te curó entero. Gracias, abuelo.',
+      'El termo explotó en mil pedazos y te bañó en salud. El abuelo aprueba desde el más allá.',
+    ],
+    berserk: [
+      'BERSERK: ves todo rojo. Daño doble, pero tus puños tienen opinión propia.',
+      'El altar te llenó de furia. ATK x2 y cero diplomacia hasta bajar.',
+    ],
+    midas: [
+      'REY MIDAS: el oro te ama y los bichos te huelen de lejos. Doble botín, doble atención.',
+      'Todo lo que matás brilla doble. Y todo lo que respira te busca.',
+    ],
+    fantasmal: [
+      'FANTASMAL: 10 turnos atravesando paredes. La arquitectura es una sugerencia.',
+      'Sos niebla. Las paredes, un chiste. 10 turnos.',
+    ],
+    iman: [
+      'IMÁN: el oro viene solo hacia vos. Por fin algo viene solo en esta vida.',
+      'Magnetismo personal. Literal: las monedas caminan hacia vos.',
+    ],
     armaRota: [
       'Se rompió {w}. De vuelta a las piñas, como los antiguos.',
       '{w} dijo basta. Descansá en paz, fierro querido.',

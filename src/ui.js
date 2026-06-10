@@ -195,6 +195,10 @@ window.MZ = window.MZ || {};
       const eq = [P.melee ? '🗡 ' + P.melee.name + (P.melee.uses != null ? ' ×' + P.melee.uses : '') : '👊 Piñas'];
       if (P.ranged) eq.push((P.ranged.aoe ? '💚 ' : '🏹 ') + P.ranged.name + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''));
       if (P.shield) eq.push('🛡 ' + P.shield.name);
+      if (P.efecto) {
+        const nom = { berserk: 'BERSERK', midas: 'MIDAS', fantasmal: 'FANTASMAL ' + Math.max(0, P.efectoTurnos), iman: 'IMÁN' }[P.efecto];
+        if (nom) eq.push('✨ ' + nom);
+      }
       eq.push('ATK ' + P.atk + ' · DEF ' + P.def + ' · 👣 ' + (P.steps || 0));
       $('equip').textContent = eq.join('  ·  ');
     },
