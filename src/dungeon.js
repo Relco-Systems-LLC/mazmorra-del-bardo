@@ -192,7 +192,6 @@ window.MZ = window.MZ || {};
     if (rng.chance(0.35)) drop('weapon');
     if (depth >= 2 && rng.chance(0.45)) drop('bow');
     if (depth % 4 === 0 && rng.chance(0.6)) drop('armor');
-    if (depth >= 5 && rng.chance(0.05)) drop('bfg');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');

@@ -144,16 +144,16 @@ window.MZ = window.MZ || {};
       function menu(msg) {
         const choices = MEJORAS.map(m => {
           const lvl = self.nivel(m.id);
-          if (lvl >= m.max) return { label: '✔ ' + m.t + ' (MAX)', fn: () => menu('Eso ya está al mango, crack.') };
+          if (lvl >= m.max) return { label: '✔ ' + m.t + ' (MAX) — ' + m.d, fn: () => menu('Eso ya está al mango, crack.') };
           const c = self.costo(m);
           return {
-            label: m.t + ' [' + lvl + '/' + m.max + '] — ' + c + ' almas',
+            label: m.t + ': ' + m.d + ' [' + lvl + '/' + m.max + '] — ' + c + ' 👻',
             fn() {
               if (self.comprar(m.id)) {
                 if (MZ.audio) MZ.audio.pickup();
-                return menu(m.d + '. Comprado. Te quedan ' + (d.almas || 0) + ' almas.');
+                return menu('✔ Compraste ' + m.t + ' (nivel ' + self.nivel(m.id) + '/' + m.max + '): ' + m.d + '.\nTe quedan ' + (d.almas || 0) + ' almas.');
               }
-              return menu('No te alcanza. Morí más seguido, que las almas no crecen en los árboles.');
+              return menu('No te alcanza para ' + m.t + ' (' + c + ' almas). Morí más seguido, que las almas no crecen en los árboles.');
             },
           };
         });

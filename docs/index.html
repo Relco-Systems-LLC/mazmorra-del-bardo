@@ -3785,7 +3785,6 @@ window.MZ = window.MZ || {};
     if (rng.chance(0.35)) drop('weapon');
     if (depth >= 2 && rng.chance(0.45)) drop('bow');
     if (depth % 4 === 0 && rng.chance(0.6)) drop('armor');
-    if (depth >= 5 && rng.chance(0.05)) drop('bfg');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
@@ -4065,16 +4064,16 @@ window.MZ = window.MZ || {};
       function menu(msg) {
         const choices = MEJORAS.map(m => {
           const lvl = self.nivel(m.id);
-          if (lvl >= m.max) return { label: '✔ ' + m.t + ' (MAX)', fn: () => menu('Eso ya está al mango, crack.') };
+          if (lvl >= m.max) return { label: '✔ ' + m.t + ' (MAX) — ' + m.d, fn: () => menu('Eso ya está al mango, crack.') };
           const c = self.costo(m);
           return {
-            label: m.t + ' [' + lvl + '/' + m.max + '] — ' + c + ' almas',
+            label: m.t + ': ' + m.d + ' [' + lvl + '/' + m.max + '] — ' + c + ' 👻',
             fn() {
               if (self.comprar(m.id)) {
                 if (MZ.audio) MZ.audio.pickup();
-                return menu(m.d + '. Comprado. Te quedan ' + (d.almas || 0) + ' almas.');
+                return menu('✔ Compraste ' + m.t + ' (nivel ' + self.nivel(m.id) + '/' + m.max + '): ' + m.d + '.\nTe quedan ' + (d.almas || 0) + ' almas.');
               }
-              return menu('No te alcanza. Morí más seguido, que las almas no crecen en los árboles.');
+              return menu('No te alcanza para ' + m.t + ' (' + c + ' almas). Morí más seguido, que las almas no crecen en los árboles.');
             },
           };
         });
@@ -5417,11 +5416,23 @@ window.MZ = window.MZ || {};
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
+    // La Bestia 9000: 10% al matar un bicho cerca de un jefe vivo.
+    // (el dungeon te arma justo cuando más lo necesitás)
+    const bossCerca = !e.boss && S.enemies.some(b =>
+      b.boss && !b.dead && Math.max(Math.abs(b.x - e.x), Math.abs(b.y - e.y)) <= 5);
+    if (bossCerca && Math.random() < 0.10) {
+      // la Bestia no se pierde por un casillero ocupado: busca lugar al lado
+      const spots = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
+      for (const [ox, oy] of spots) {
+        const x = e.x + ox, y = e.y + oy;
+        if (MZ.passable(x, y) && !MZ.itemAt(x, y)) { MZ.spawnItemAt('bfg', x, y); break; }
+      }
+    }
+
     // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-      if (Math.random() < 0.15) MZ.spawnItemAt('bfg', e.x + 1, e.y);
-    } else if (Math.random() < 0.3) {
+    } else if (!bossCerca && Math.random() < 0.3) {
       const r = Math.random();
       const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));

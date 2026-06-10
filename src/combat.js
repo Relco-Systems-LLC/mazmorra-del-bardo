@@ -156,11 +156,23 @@ window.MZ = window.MZ || {};
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
+    // La Bestia 9000: 10% al matar un bicho cerca de un jefe vivo.
+    // (el dungeon te arma justo cuando más lo necesitás)
+    const bossCerca = !e.boss && S.enemies.some(b =>
+      b.boss && !b.dead && Math.max(Math.abs(b.x - e.x), Math.abs(b.y - e.y)) <= 5);
+    if (bossCerca && Math.random() < 0.10) {
+      // la Bestia no se pierde por un casillero ocupado: busca lugar al lado
+      const spots = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
+      for (const [ox, oy] of spots) {
+        const x = e.x + ox, y = e.y + oy;
+        if (MZ.passable(x, y) && !MZ.itemAt(x, y)) { MZ.spawnItemAt('bfg', x, y); break; }
+      }
+    }
+
     // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-      if (Math.random() < 0.15) MZ.spawnItemAt('bfg', e.x + 1, e.y);
-    } else if (Math.random() < 0.3) {
+    } else if (!bossCerca && Math.random() < 0.3) {
       const r = Math.random();
       const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
