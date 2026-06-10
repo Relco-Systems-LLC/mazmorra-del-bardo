@@ -3215,6 +3215,90 @@ window.MZ = window.MZ || {};
         '..SSSSSS..',
       ],
     },
+    granadaFrag: {
+      pal: { V: 0x3a7d44, v: 0x2a5d32, M: 0x555555, X: 0x222222 },
+      map: [
+        '....MX....',
+        '...MMM....',
+        '..XMMMX...',
+        '..VVVVVV..',
+        '.VvVVVVvV.',
+        '.VVXVVXVV.',
+        '.VvVVVVvV.',
+        '..VVVVVV..',
+        '...vvvv...',
+      ],
+    },
+    granadaMolotov: {
+      pal: { G: 0x88bb55, B: [0xcfe8ff, 0.8], F: 0xff7722, f: 0xffcc33, R: 0xcc2200 },
+      map: [
+        '....F.....',
+        '....f.....',
+        '...RRR....',
+        '...GBG....',
+        '..GBBBG...',
+        '.GBBBBBG..',
+        '.GBfFfBG..',
+        '.GBBBBBG..',
+        '..GBBBG...',
+        '...GGG....',
+      ],
+    },
+    granadaStun: {
+      pal: { Y: 0xffe14d, y: 0xccaa22, W: 0xffffff, M: 0x444444 },
+      map: [
+        '...MMMM...',
+        '..MYYYYM..',
+        '.MYWYYWYM.',
+        '.MYYYYYYM.',
+        '.MYWYYWYM.',
+        '.MYYYYYYM.',
+        '..MYYYYM..',
+        '...MMMM...',
+        '..y....y..',
+      ],
+    },
+    ametralladora: {
+      pal: { M: 0x33373f, m: 0x4a4f59, D: 0x22252b, B: 0x88909c, X: 0x111111 },
+      map: [
+        '..........',
+        '.MMMMMM...',
+        '.MmmmmM.B.',
+        'XDDDDDMMB.',
+        '.MMMMMmB..',
+        '..M.XMB...',
+        '..MMX.....',
+        '..DDD.....',
+        '..DDD.....',
+      ],
+    },
+    reticle: {
+      pal: { R: 0xff3344 },
+      map: [
+        'RRR....RRR',
+        'R........R',
+        'R...RR...R',
+        '....RR....',
+        '....RR....',
+        'R...RR...R',
+        'R........R',
+        'RRR....RRR',
+      ],
+    },
+    fuego: {
+      pal: { R: 0xff3300, O: 0xff7711, Y: 0xffcc33, y: [0xffee66, 0.9] },
+      map: [
+        '...Y..Y...',
+        '..YyO.yY..',
+        '.YOOOYOOY.',
+        '.OORROOOO.',
+        'OORRRRROOO',
+        'ORRRRRRROO',
+        '.ORRRRRO..',
+        '..OORRO...',
+        '...OOO....',
+      ],
+    },
     mapa: {
       pal: { P: 0xe8d8a0, p: 0xc8b070, L: 0x8a5a2b, R: 0xcc3322, X: 0x993322 },
       map: [
@@ -5283,12 +5367,59 @@ window.MZ = window.MZ || {};
     },
   };
 
+  // Soborno: un NPC ya hablado que te tapa el paso. Pide algo random de lo que
+  // tengas (oro, equipo o hasta vida — sin matarte) y se va (desaparece, no muere).
+  function bribeNode(npc) {
+    const P = MZ.state.player;
+    const d = MZ.state.depth;
+    const opts = [];
+    if (P.gold >= 10) {
+      const monto = Math.min(P.gold, 15 + d * 3);
+      opts.push({ desc: monto + ' de oro', pay: () => { P.gold -= monto; } });
+    }
+    if (P.melee) opts.push({ desc: 'tu ' + P.melee.name, pay: () => { P.melee = null; MZ.recalcStats(); } });
+    if (P.ranged && !P.ranged.aoe) opts.push({ desc: 'tu ' + P.ranged.name, pay: () => { P.ranged = null; } });
+    if (P.shield) opts.push({ desc: 'tu ' + P.shield.name, pay: () => { P.shield = null; MZ.recalcStats(); } });
+    if (P.hp > 4) { // hasta vida, pero nunca te mata (te deja en 1 como mínimo)
+      const q = Math.min(P.hp - 1, 3 + Math.floor(d / 4));
+      opts.push({ desc: q + ' de vida (un mordisco)', pay: () => { P.hp = Math.max(1, P.hp - q); } });
+    }
+
+    const remove = () => {
+      MZ.state.path = [];
+      if (npc.spr) { npc.spr.destroy({ children: true }); npc.spr = null; }
+      MZ.state.npcs = MZ.state.npcs.filter(x => x !== npc);
+      if (MZ.updateVisibility) MZ.updateVisibility();
+      MZ.ui.updateHUD();
+    };
+
+    // si no tenés NADA para dar, te tiene lástima y se corre igual (no soft-lock)
+    if (!opts.length) {
+      return {
+        name: npc.def.name, color: npc.def.color,
+        text: 'Te mira, te ve sin un mango ni un fierro, suspira... "Andá, andá, pasá. Me das lástima."',
+        choices: [{ label: 'Gracias (qué humillante)', fn() { remove(); return null; } }],
+      };
+    }
+
+    const ask = opts[Math.floor(Math.random() * opts.length)];
+    return {
+      name: npc.def.name, color: npc.def.color,
+      text: '"¿Querés pasar? Esto es un peaje, campeón. Dame ' + ask.desc + ' y desaparezco. O te quedás ahí mirándome."',
+      choices: [
+        { label: 'Pagar ' + ask.desc, fn() { ask.pay(); MZ.audio.gold(); remove(); return null; } },
+        { label: 'Ni en pedo', fn: null },
+      ],
+    };
+  }
+
   MZ.talkTo = function (npc) {
     const lore = MZ.LORE[npc.type];
     if (!lore) return;
-    // Una charla por encuentro: nada de farmear bonus a puro diálogo.
+    // Una charla por encuentro. Si volvés (te tapa el paso): soborno para que se corra.
     if (npc.talked) {
-      MZ.say('npcOcupado');
+      MZ.audio.pickup();
+      MZ.dialog.open(bribeNode(npc));
       return;
     }
     npc.talked = true;
