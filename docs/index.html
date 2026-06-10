@@ -103,6 +103,8 @@
     <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
     <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
     <span id="btn-update" style="text-decoration:underline">&#8635; buscar actualizaci&oacute;n</span>
+    <span id="btn-uninstall-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
+    <span id="btn-uninstall" class="hidden" style="text-decoration:underline">&#128465; desinstalar</span>
   </div>
 </div>
 <div id="screen-pause" class="screen hidden">
@@ -4189,6 +4191,19 @@ window.MZ = window.MZ || {};
           MZ.ui.toast('En Safari: botón Compartir → "Agregar a pantalla de inicio".', 5000);
         }
       });
+
+      // ---- Desinstalar: no hay API web para esto, solo se puede guiar al usuario ----
+      if (standalone) {
+        $('btn-uninstall').classList.remove('hidden');
+        $('btn-uninstall-sep').classList.remove('hidden');
+        $('btn-uninstall').addEventListener('pointerdown', e => {
+          e.stopPropagation();
+          e.preventDefault();
+          MZ.ui.toast(isIOS
+            ? 'Mantené apretado el ícono de la app en tu pantalla de inicio → "Eliminar app".'
+            : 'Mantené apretado el ícono de la app → "Desinstalar" (o Ajustes → Apps → Mazmorra).', 6000);
+        });
+      }
 
       // ---- Buscar actualización: limpia cache del SW y recarga ----
       $('btn-update').addEventListener('pointerdown', async e => {

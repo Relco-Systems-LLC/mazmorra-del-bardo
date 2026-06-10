@@ -81,6 +81,19 @@ window.MZ = window.MZ || {};
         }
       });
 
+      // ---- Desinstalar: no hay API web para esto, solo se puede guiar al usuario ----
+      if (standalone) {
+        $('btn-uninstall').classList.remove('hidden');
+        $('btn-uninstall-sep').classList.remove('hidden');
+        $('btn-uninstall').addEventListener('pointerdown', e => {
+          e.stopPropagation();
+          e.preventDefault();
+          MZ.ui.toast(isIOS
+            ? 'Mantené apretado el ícono de la app en tu pantalla de inicio → "Eliminar app".'
+            : 'Mantené apretado el ícono de la app → "Desinstalar" (o Ajustes → Apps → Mazmorra).', 6000);
+        });
+      }
+
       // ---- Buscar actualización: limpia cache del SW y recarga ----
       $('btn-update').addEventListener('pointerdown', async e => {
         e.stopPropagation();
