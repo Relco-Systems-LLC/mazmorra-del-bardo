@@ -21,6 +21,29 @@ El ejemplo *McDonald's* aparece como `→ Mc:` a lo largo del doc.
 
 ---
 
+## 0.5. TONO — regla innegociable (aplica a CUALQUIER tema)
+
+El juego **SIEMPRE** es **picante** y tiene **temática sexual sugerente**. No es opcional ni
+depende del tema: McDonald's, piratas, oficina, lo que sea — el humor adulto y la insinuación
+sexual son parte del ADN. Pautas:
+
+- **Voz**: argentino, sarcástico, bardo amistoso al jugador (puteadas suaves OK, sin insultos de
+  odio). Cada frase de `quotes.js` y cada diálogo de NPC respira esta actitud.
+- **Sexual SUGERENTE y censurado**, nunca explícito en pantalla: doble sentido, chamuyo, levante,
+  innuendo. El recurso canónico es la **escena "censurada por el Gremio de Bardos"** (bloques `█`)
+  cuando algo sube de tono — ver el romance de Morena/La Eterna como molde a reskinnear.
+- **Al menos un personaje de romance** por saga (rara, 5%/piso), con arco de levante que progresa
+  entre niveles/muertes y termina en escena censurada + buff. Reskinnealo al tema (la moza, la
+  reina del local, etc.) pero mantené la picardía.
+- **Repartido, no concentrado**: insinuación en frases de loot/muerte/idle, en NPCs de servicio
+  (la que te "atiende"), en descripciones del codex. Que se sienta en todo el juego, no en un rincón.
+- **Techo**: sugerente y gracioso, no pornográfico ni gráfico. Si dudás, censuralo con `█` y un
+  chiste. Nada de menores, no-consentimiento, ni nada ilegal — la picardía es entre adultos.
+
+> Regla práctica: si una saga regenerada quedó "family friendly", está MAL. Subile el tono.
+
+---
+
 ## 1. Motor vs Contenido
 
 **NO TOCAR (agnóstico al tema, ya está hecho y testeado):**
