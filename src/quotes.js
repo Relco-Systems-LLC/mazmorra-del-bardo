@@ -163,6 +163,13 @@ window.MZ = window.MZ || {};
       '+{h} HP. Late todavía. Asco, pero funciona.',
       'Corazón fresco. La dieta del aventurero es ASÍ.',
     ],
+    revivir: [
+      'Caíste parado, michi. Te quedan {v} vidas. (Se quedaron {oro} de oro en el más allá.)',
+      'Otra vida menos: {v} de 7. Los gatos te miran con orgullo. Perdiste {oro} de oro, eso sí.',
+      'Siete vidas como los gatos, te quedan {v}. La mitad del oro ({oro}) se fue con el susto.',
+      'Revivís en un piso nuevo del mismo infierno. Vidas: {v}. Oro perdido: {oro}.',
+      'Plot twist: no moriste del todo. {v} vidas restantes. La parca se cobró {oro} de oro de peaje.',
+    ],
     veneno: [
       'Envenenado. La poción decía "agitar antes de usar", no "desconfiar antes de usar".',
       'Veneno en las venas. Como el lunes, pero literal.',

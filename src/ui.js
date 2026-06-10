@@ -196,6 +196,7 @@ window.MZ = window.MZ || {};
       const P = S.player;
       $('hp').textContent = '❤ ' + Math.max(0, P.hp) + '/' + P.maxHp + (P.poison > 0 ? ' ☠' + P.poison : '');
       $('hp').style.color = P.poison > 0 ? '#66ff44' : '#ff4d6d';
+      $('lives').textContent = '🐈×' + (P.vidas != null ? P.vidas : 7);
       $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '') +
         (S.mapPct != null ? ' · ' + S.mapPct + '%' : '');
       MZ.refreshHeroSprite();

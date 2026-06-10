@@ -82,7 +82,7 @@
 <body>
 <div id="game"></div>
 <div id="hud" class="hidden">
-  <span id="hp">&#10084; 20/20</span>
+  <span><span id="hp">&#10084; 20/20</span>&nbsp;&nbsp;<span id="lives" style="color:#ffd700">&#128008;&times;7</span></span>
   <span id="depth">NIVEL 1</span>
   <span><span id="gold">&#9672; 0</span>&nbsp;&nbsp;<span id="btn-pause" style="color:#7fd4e0;padding:0 4px">&#10074;&#10074;</span></span>
 </div>
@@ -96,7 +96,7 @@
 </div>
 <div id="screen-start" class="screen">
   <h1>MAZMORRA<br/>DEL BARDO</h1>
-  <div class="sub">roguelike de bolsillo &middot; niveles infinitos<br/>manten&eacute; el dedo hacia donde quieras ir (con diagonales)<br/>camin&aacute; contra un enemigo para fajarlo &middot; tap a uno lejano para dispararle</div>
+  <div class="sub">roguelike de bolsillo &middot; niveles infinitos<br/>manten&eacute; el dedo hacia donde quieras ir (con diagonales)<br/>camin&aacute; contra un enemigo para fajarlo &middot; tap a uno lejano para dispararle<br/>&#128008; 7 vidas por run, como los gatos</div>
   <div class="stats" id="start-stats"></div>
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
@@ -3410,6 +3410,13 @@ window.MZ = window.MZ || {};
       '+{h} HP. Late todavía. Asco, pero funciona.',
       'Corazón fresco. La dieta del aventurero es ASÍ.',
     ],
+    revivir: [
+      'Caíste parado, michi. Te quedan {v} vidas. (Se quedaron {oro} de oro en el más allá.)',
+      'Otra vida menos: {v} de 7. Los gatos te miran con orgullo. Perdiste {oro} de oro, eso sí.',
+      'Siete vidas como los gatos, te quedan {v}. La mitad del oro ({oro}) se fue con el susto.',
+      'Revivís en un piso nuevo del mismo infierno. Vidas: {v}. Oro perdido: {oro}.',
+      'Plot twist: no moriste del todo. {v} vidas restantes. La parca se cobró {oro} de oro de peaje.',
+    ],
     veneno: [
       'Envenenado. La poción decía "agitar antes de usar", no "desconfiar antes de usar".',
       'Veneno en las venas. Como el lunes, pero literal.',
@@ -5272,6 +5279,7 @@ window.MZ = window.MZ || {};
       const P = S.player;
       $('hp').textContent = '❤ ' + Math.max(0, P.hp) + '/' + P.maxHp + (P.poison > 0 ? ' ☠' + P.poison : '');
       $('hp').style.color = P.poison > 0 ? '#66ff44' : '#ff4d6d';
+      $('lives').textContent = '🐈×' + (P.vidas != null ? P.vidas : 7);
       $('depth').textContent = 'NIVEL ' + S.depth + (S.level && S.level.isBoss ? ' · JEFE' : '') +
         (S.mapPct != null ? ' · ' + S.mapPct + '%' : '');
       MZ.refreshHeroSprite();
@@ -5810,7 +5818,9 @@ window.MZ = window.MZ || {};
       }
       return;
     }
+    const gen = S.gen;
     for (const e of [...S.enemies]) {
+      if (S.gen !== gen) return; // el jugador revivió y se reconstruyó el nivel: corto el turno viejo
       if (e.dead || P.hp <= 0) continue;
       // veneno sobre el enemigo (armas con veneno del jugador)
       if (e.poison > 0) {
@@ -6108,6 +6118,7 @@ window.MZ = window.MZ || {};
     }
     S.glows = [];
     touch = null;
+    S.gen = (S.gen || 0) + 1; // invalida loops de turno en curso (revivir reconstruye el nivel)
 
     const L = S.level = MZ.genLevel(S.runSeed, S.depth);
     const th = L.theme;
@@ -6691,7 +6702,7 @@ window.MZ = window.MZ || {};
       x: 0, y: 0, hp: 20, maxHp: 20,
       baseAtk: 1, baseDef: 0, atk: 0, def: 0,
       melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
-      gold: 0, kills: 0, streak: 0, steps: 0,
+      gold: 0, kills: 0, streak: 0, steps: 0, vidas: 7, // como los gatos
     };
     MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
@@ -6717,6 +6728,7 @@ window.MZ = window.MZ || {};
     S.player = { ...run.player };
     MZ.recalcStats();
     MZ.quests.run = JSON.parse(JSON.stringify(run.quests || {}));
+    if (S.player.vidas == null) S.player.vidas = 7; // saves viejos
     S.playing = true;
     S.dialogOpen = false;
     MZ.ui.hideScreens();
@@ -6737,9 +6749,30 @@ window.MZ = window.MZ || {};
 
   MZ.die = function (from) {
     if (!S.playing) return;
-    S.playing = false;
+    const P = S.player;
     touch = null;
     if (S.dialogOpen) MZ.dialog.close();
+
+    // 7 vidas como los gatos: si te quedan, revivís en un piso nuevo del mismo nivel
+    P.vidas = (P.vidas || 0) - 1;
+    if (P.vidas >= 1) {
+      const perdido = Math.floor(P.gold / 2);
+      P.gold -= perdido;
+      P.hp = P.maxHp;
+      P.poison = 0;
+      P.streak = 0;
+      const p2 = MZ.toPx(P.x, P.y);
+      MZ.fx.explode(p2.x, p2.y, 0xffd700, 30, 3, 1);
+      MZ.fx.flash(0.4, 0xffd700);
+      MZ.fx.shake(8);
+      MZ.audio.mate();
+      MZ.say('revivir', { v: P.vidas, oro: perdido }, 4500);
+      buildLevel(); // piso nuevo, mismo S.depth
+      return;
+    }
+
+    // sin vidas: muerte real
+    S.playing = false;
     const p = MZ.toPx(S.player.x, S.player.y);
     MZ.fx.explode(p.x, p.y, 0x00e5ff, 50, 4, 1.3);
     MZ.fx.ring(p.x, p.y, 0x00e5ff, true);

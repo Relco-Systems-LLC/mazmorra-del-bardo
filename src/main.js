@@ -248,6 +248,7 @@ window.MZ = window.MZ || {};
     }
     S.glows = [];
     touch = null;
+    S.gen = (S.gen || 0) + 1; // invalida loops de turno en curso (revivir reconstruye el nivel)
 
     const L = S.level = MZ.genLevel(S.runSeed, S.depth);
     const th = L.theme;
@@ -831,7 +832,7 @@ window.MZ = window.MZ || {};
       x: 0, y: 0, hp: 20, maxHp: 20,
       baseAtk: 1, baseDef: 0, atk: 0, def: 0,
       melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
-      gold: 0, kills: 0, streak: 0, steps: 0,
+      gold: 0, kills: 0, streak: 0, steps: 0, vidas: 7, // como los gatos
     };
     MZ.meta.aplicar(S.player); // mejoras permanentes compradas con almas
     MZ.recalcStats();
@@ -857,6 +858,7 @@ window.MZ = window.MZ || {};
     S.player = { ...run.player };
     MZ.recalcStats();
     MZ.quests.run = JSON.parse(JSON.stringify(run.quests || {}));
+    if (S.player.vidas == null) S.player.vidas = 7; // saves viejos
     S.playing = true;
     S.dialogOpen = false;
     MZ.ui.hideScreens();
@@ -877,9 +879,30 @@ window.MZ = window.MZ || {};
 
   MZ.die = function (from) {
     if (!S.playing) return;
-    S.playing = false;
+    const P = S.player;
     touch = null;
     if (S.dialogOpen) MZ.dialog.close();
+
+    // 7 vidas como los gatos: si te quedan, revivís en un piso nuevo del mismo nivel
+    P.vidas = (P.vidas || 0) - 1;
+    if (P.vidas >= 1) {
+      const perdido = Math.floor(P.gold / 2);
+      P.gold -= perdido;
+      P.hp = P.maxHp;
+      P.poison = 0;
+      P.streak = 0;
+      const p2 = MZ.toPx(P.x, P.y);
+      MZ.fx.explode(p2.x, p2.y, 0xffd700, 30, 3, 1);
+      MZ.fx.flash(0.4, 0xffd700);
+      MZ.fx.shake(8);
+      MZ.audio.mate();
+      MZ.say('revivir', { v: P.vidas, oro: perdido }, 4500);
+      buildLevel(); // piso nuevo, mismo S.depth
+      return;
+    }
+
+    // sin vidas: muerte real
+    S.playing = false;
     const p = MZ.toPx(S.player.x, S.player.y);
     MZ.fx.explode(p.x, p.y, 0x00e5ff, 50, 4, 1.3);
     MZ.fx.ring(p.x, p.y, 0x00e5ff, true);

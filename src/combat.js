@@ -358,7 +358,9 @@ window.MZ = window.MZ || {};
       }
       return;
     }
+    const gen = S.gen;
     for (const e of [...S.enemies]) {
+      if (S.gen !== gen) return; // el jugador revivió y se reconstruyó el nivel: corto el turno viejo
       if (e.dead || P.hp <= 0) continue;
       // veneno sobre el enemigo (armas con veneno del jugador)
       if (e.poison > 0) {
