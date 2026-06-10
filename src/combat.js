@@ -106,9 +106,10 @@ window.MZ = window.MZ || {};
     }
   }
 
-  // La Bestia 9000: revienta todo enemigo a la vista en un radio enorme.
-  function fireBFG(target) {
-    const S = MZ.state, P = S.player, w = P.ranged;
+  // La Bestia 9000 (slot propio P.bfg): revienta todo a la vista. Consume 1 bala.
+  MZ.fireBFG = function (target) {
+    const S = MZ.state, P = S.player, w = P.bfg;
+    if (!w) return;
     const pp = MZ.toPx(P.x, P.y);
     MZ.fx.flash(0.6, 0x33ff66);
     MZ.fx.shake(16);
@@ -128,7 +129,10 @@ window.MZ = window.MZ || {};
       if (e.hp <= 0) MZ.killEnemy(e);
     }
     MZ.say('bfgDisparo', null, 3500);
-  }
+    w.ammo--;
+    if (w.ammo <= 0) { P.bfg = null; MZ.say('bfgVacia'); }
+    MZ.ui.updateHUD();
+  };
 
   const cheb2 = (ax, ay, bx, by) => Math.max(Math.abs(ax - bx), Math.abs(ay - by));
 
@@ -202,9 +206,8 @@ window.MZ = window.MZ || {};
   MZ.playerRangedAttack = function (e) {
     const P = MZ.state.player;
     const w = P.ranged;
-    if (w.aoe) {
-      fireBFG(e);
-    } else if (w.grito) {
+    if (!w) return;
+    if (w.grito) {
       gritar(e);
     } else {
       const crit = Math.random() < 0.1;
@@ -233,7 +236,7 @@ window.MZ = window.MZ || {};
     if (w.ammo != null) {
       w.ammo--;
       if (w.ammo <= 0) {
-        MZ.say(w.aoe ? 'bfgVacia' : 'arcoVacio', { w: w.name });
+        MZ.say('arcoVacio', { w: w.name });
         P.ranged = null;
       }
       MZ.ui.updateHUD();
@@ -303,9 +306,10 @@ window.MZ = window.MZ || {};
     // Drops: los monstruos sueltan loot en el piso (armas seguido: se gastan).
     if (e.boss) {
       MZ.spawnItemAt('mate', e.x, e.y);
-    } else if (Math.random() < (S.evento === 'invasion' ? 0.5 : 0.3)) {
+    } else if (Math.random() < (S.evento === 'invasion' ? 0.6 : 0.42)) {
+      // más drops, con peso fuerte a armas: que siempre tengas con qué pelear
       const r = Math.random();
-      const type = r < 0.25 ? 'gold' : r < 0.42 ? 'potion' : r < 0.68 ? 'weapon' : r < 0.86 ? 'bow' : r < 0.95 ? 'armor' : 'mate';
+      const type = r < 0.18 ? 'gold' : r < 0.34 ? 'potion' : r < 0.60 ? 'weapon' : r < 0.82 ? 'bow' : r < 0.93 ? 'armor' : 'mate';
       MZ.spawnItemAt(type, e.x, e.y, 6 + Math.floor(S.depth * 1.2));
     } else if (Math.random() < 0.14) {
       // corazón: vida directa, más probable si venís golpeado

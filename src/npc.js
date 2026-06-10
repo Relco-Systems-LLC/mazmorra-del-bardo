@@ -100,13 +100,27 @@ window.MZ = window.MZ || {};
     };
   }
 
+  // ¿El NPC está tapando un paso angosto? (corredor/esquina: ≤2 vecinos transitables).
+  // En una sala abierta lo podés rodear, así que no "bloquea".
+  function npcBloquea(npc) {
+    let libres = 0;
+    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (MZ.passable(npc.x + ox, npc.y + oy)) libres++;
+    }
+    return libres <= 2;
+  }
+
   MZ.talkTo = function (npc) {
     const lore = MZ.LORE[npc.type];
     if (!lore) return;
-    // Una charla por encuentro. Si volvés (te tapa el paso): soborno para que se corra.
+    // Una charla por encuentro. Si volvés y te tapa un paso angosto: soborno para que se corra.
     if (npc.talked) {
-      MZ.audio.pickup();
-      MZ.dialog.open(bribeNode(npc));
+      if (npcBloquea(npc)) {
+        MZ.audio.pickup();
+        MZ.dialog.open(bribeNode(npc));
+      } else {
+        MZ.say('npcOcupado'); // en sala abierta: rodealo, no hay soborno
+      }
       return;
     }
     npc.talked = true;

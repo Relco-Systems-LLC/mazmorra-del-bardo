@@ -46,7 +46,7 @@ window.MZ = window.MZ || {};
       if (++depthTaps < 7 || S.player.cheatCobra) return;
       depthTaps = 0;
       S.player.cheatCobra = true;
-      S.player.ranged = MZ.genBFG(S.depth);
+      S.player.bfg = MZ.genBFG(S.depth);
       MZ.ui.toast('🚗 HOW DO YOU TURN THIS ON — La Bestia 9000 en tus manos.', 4500);
       MZ.audio.boss();
       MZ.fx.flash(0.35, 0x33ff66);

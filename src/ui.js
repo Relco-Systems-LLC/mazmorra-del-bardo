@@ -313,7 +313,8 @@ window.MZ = window.MZ || {};
       MZ.refreshHeroSprite();
       $('gold').textContent = '◈ ' + P.gold;
       const eq = [P.melee ? '🗡 ' + P.melee.name + (P.melee.uses != null ? ' ×' + P.melee.uses : '') : '👊 Piñas'];
-      if (P.ranged) eq.push((P.ranged.aoe ? '💚 ' : '🏹 ') + P.ranged.name + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''));
+      if (P.ranged) eq.push((P.ranged.rapido ? '🔫 ' : '🏹 ') + P.ranged.name + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''));
+      if (P.bfg) eq.push('💚 ' + P.bfg.name + ' ●' + P.bfg.ammo);
       if (P.shield) eq.push('🛡 ' + P.shield.name);
       if (P.efecto) {
         const nom = { berserk: 'BERSERK', midas: 'MIDAS', fantasmal: 'FANTASMAL ' + Math.max(0, P.efectoTurnos), iman: 'IMÁN' }[P.efecto];
@@ -336,9 +337,11 @@ window.MZ = window.MZ || {};
       if (oldBtn) oldBtn.classList.add('hidden'); // el botón flotante ya no se usa
       if (!S || !S.playing) { bar.classList.add('hidden'); return; }
       const P = S.player;
-      // si el arma activa se agotó (arco descartado / granada en 0), volvés a caminar
+      // si el arma activa se agotó (arco descartado / granada en 0 / bfg vacía), volvés a caminar
       if (S.aimMode) {
-        const ok = P.aimSel === 'ranged' ? !!P.ranged : ((P.granadas && P.granadas[P.aimSel]) || 0) > 0;
+        const ok = P.aimSel === 'ranged' ? !!P.ranged
+          : P.aimSel === 'bfg' ? !!P.bfg
+          : ((P.granadas && P.granadas[P.aimSel]) || 0) > 0;
         if (!ok) S.aimMode = false;
       }
       bar.classList.remove('hidden');
@@ -348,8 +351,12 @@ window.MZ = window.MZ || {};
       chips.push({ sel: 'walk', label: '🚶', active: !S.aimMode });
       // arma disparable equipada
       if (P.ranged) {
-        const ic = P.ranged.aoe ? '💚' : P.ranged.rapido ? '🔫' : '🏹';
+        const ic = P.ranged.rapido ? '🔫' : '🏹';
         chips.push({ sel: 'ranged', label: ic + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''), active: S.aimMode && P.aimSel === 'ranged' });
+      }
+      // La Bestia 9000 (slot propio)
+      if (P.bfg) {
+        chips.push({ sel: 'bfg', label: '💚 ●' + P.bfg.ammo, active: S.aimMode && P.aimSel === 'bfg' });
       }
       // granadas con stock > 0
       for (const k of MZ.GRENADE_KEYS) {

@@ -141,7 +141,7 @@ window.MZ = window.MZ || {};
   MZ.refreshHeroSprite = function () {
     if (!heroShape || !S.player) return;
     const P = S.player;
-    const name = P.ranged && P.ranged.aoe ? 'heroeBfg'
+    const name = P.bfg ? 'heroeBfg'
       : P.melee ? 'heroe'
       : P.ranged ? 'heroeArco'
       : 'heroePinas';
@@ -688,71 +688,67 @@ window.MZ = window.MZ || {};
         break;
       }
       case 'weapon': {
+        // melee acumula: nunca se vende. Queda el mejor atk + suma los usos.
         const w = MZ.genGear('melee', S.depth);
         MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
-        // misma arma: en vez de venderla, le sumás los filos
-        if (P.melee && P.melee.name === w.name && P.melee.uses != null && w.uses != null) {
-          P.melee.uses += w.uses;
-          MZ.audio.pickup();
-          MZ.say('recarga', { w: w.name, n: P.melee.uses + ' filos' });
-          break;
-        }
-        // recambio rápido: agarrás si es mejor, si estás a piñas, o si tu filo agoniza
-        if (!P.melee || w.atk >= P.melee.atk || P.melee.uses <= 4) {
+        if (!P.melee) {
           P.melee = w;
-          MZ.recalcStats();
-          MZ.audio.pickup();
           MZ.say('lootArma', { w: w.name + ' (' + w.uses + ' filos)' });
         } else {
-          const g = 5 + w.atk * 4;
-          P.gold += g;
-          MZ.audio.gold();
-          MZ.say('lootRepetido', { g });
+          P.melee.uses += w.uses;
+          if (w.atk > P.melee.atk) { // adoptás el filo más fuerte, conservando los usos juntos
+            P.melee.atk = w.atk; P.melee.name = w.name;
+            P.melee.veneno = w.veneno; P.melee.empuje = w.empuje;
+            MZ.say('lootArma', { w: w.name + ' (' + P.melee.uses + ' filos)' });
+          } else {
+            MZ.say('recarga', { w: P.melee.name, n: P.melee.uses + ' filos' });
+          }
         }
+        MZ.recalcStats();
+        MZ.audio.pickup();
         break;
       }
       case 'bow': {
+        // rango acumula: nunca se vende. Mejor atk + suma balas.
         const w = MZ.genGear('ranged', S.depth);
         MZ.codex.discover('arsenal', MZ.codex.weaponId(w));
-        // mismo arco: recargás munición en vez de venderlo
-        if (P.ranged && !P.ranged.aoe && P.ranged.name === w.name && P.ranged.ammo != null && w.ammo != null) {
-          P.ranged.ammo += w.ammo;
-          MZ.audio.pickup();
-          MZ.say('recarga', { w: w.name, n: P.ranged.ammo + ' tiros' });
-          break;
-        }
-        if (!P.ranged || (!P.ranged.aoe && (w.atk >= P.ranged.atk || P.ranged.ammo <= 1))) {
+        if (!P.ranged) {
           P.ranged = w;
-          MZ.audio.pickup();
           MZ.say('lootArma', { w: w.name + ' (' + w.ammo + ' tiros)' });
         } else {
-          const g = 5 + w.atk * 4;
-          P.gold += g;
-          MZ.audio.gold();
-          MZ.say('lootRepetido', { g });
+          P.ranged.ammo += w.ammo;
+          if (w.atk > P.ranged.atk) {
+            P.ranged.atk = w.atk; P.ranged.name = w.name; P.ranged.range = w.range;
+            P.ranged.rapido = w.rapido; P.ranged.rebote = w.rebote; P.ranged.grito = w.grito;
+            MZ.say('lootArma', { w: w.name + ' (' + P.ranged.ammo + ' tiros)' });
+          } else {
+            MZ.say('recarga', { w: P.ranged.name, n: P.ranged.ammo + ' tiros' });
+          }
         }
+        MZ.audio.pickup();
         break;
       }
       case 'bfg': {
-        P.ranged = MZ.genBFG(S.depth);
+        // BFG es su propio tipo: cada una suma una bala al cañón.
+        if (!P.bfg) P.bfg = MZ.genBFG(S.depth);
+        else P.bfg.ammo += 1;
+        MZ.codex.discover('arsenal', 'bfg');
         MZ.audio.boss();
         MZ.fx.flash(0.35, 0x33ff66);
         MZ.say('bfgPickup', null, 4000);
         break;
       }
       case 'armor': {
+        // escudo acumula: nunca se vende. Queda la mejor defensa.
         const w = MZ.genGear('shield', S.depth);
         if (!P.shield || w.def > P.shield.def) {
           P.shield = w;
-          MZ.recalcStats();
-          MZ.audio.pickup();
           MZ.say('lootArma', { w: w.name });
         } else {
-          const g = 5 + w.def * 6;
-          P.gold += g;
-          MZ.audio.gold();
-          MZ.say('lootRepetido', { g });
+          MZ.say('recarga', { w: P.shield.name, n: 'DEF ' + P.shield.def });
         }
+        MZ.recalcStats();
+        MZ.audio.pickup();
         break;
       }
       case 'mate':
@@ -972,7 +968,7 @@ window.MZ = window.MZ || {};
     S.player = {
       x: 0, y: 0, hp: 20, maxHp: 20,
       baseAtk: 1, baseDef: 0, atk: 0, def: 0,
-      melee: null, ranged: null, shield: null, poison: 0, // arrancás a piñas
+      melee: null, ranged: null, bfg: null, shield: null, poison: 0, // arrancás a piñas
       granadas: { frag: 0, molotov: 0, stun: 0 }, aimSel: 'ranged', // lanzables
       gold: 0, kills: 0, streak: 0, steps: 0, vidas: 7, // como los gatos
     };
@@ -1116,10 +1112,11 @@ window.MZ = window.MZ || {};
     const P = S.player;
     const wp = world.toLocal({ x: aimPointer.x, y: aimPointer.y });
     let tx = Math.floor(wp.x / TILE), ty = Math.floor(wp.y / TILE);
-    if (P.aimSel === 'ranged') {
-      const w = P.ranged;
-      if (!w) return { tx, ty, ok: false, kind: 'ranged' };
+    if (P.aimSel === 'ranged' || P.aimSel === 'bfg') {
+      const w = P.aimSel === 'bfg' ? P.bfg : P.ranged;
+      if (!w) return { tx, ty, ok: false, kind: P.aimSel };
       const rng = w.range;
+      // solo enemigos DENTRO del rango y con línea de visión son objetivos válidos
       let best = null, bestD = 1e9;
       for (const e of S.enemies) {
         if (e.dead) continue;
@@ -1128,14 +1125,18 @@ window.MZ = window.MZ || {};
         const dp = Math.abs(e.x - tx) + Math.abs(e.y - ty);
         if (dp < bestD) { bestD = dp; best = e; }
       }
-      if (best) return { tx: best.x, ty: best.y, ok: true, kind: 'ranged', enemy: best };
-      return { tx, ty, ok: false, kind: 'ranged' };
+      if (best) return { tx: best.x, ty: best.y, ok: true, kind: P.aimSel, enemy: best };
+      // sin objetivo en rango: la mira se queda clampeada al borde del alcance (nunca más lejos)
+      const dx0 = tx - P.x, dy0 = ty - P.y;
+      const dC0 = Math.max(Math.abs(dx0), Math.abs(dy0));
+      if (dC0 > rng && dC0 > 0) { const k = rng / dC0; tx = P.x + Math.round(dx0 * k); ty = P.y + Math.round(dy0 * k); }
+      return { tx, ty, ok: false, kind: P.aimSel };
     }
-    // granada: clamp al alcance máximo del tipo
+    // granada: clamp al alcance máximo del tipo (la mira nunca sale del rango)
     const g = MZ.GRENADES[P.aimSel];
     const dx = tx - P.x, dy = ty - P.y;
     const dC = Math.max(Math.abs(dx), Math.abs(dy));
-    if (dC > g.range) { const k = g.range / dC; tx = P.x + Math.round(dx * k); ty = P.y + Math.round(dy * k); }
+    if (dC > g.range && dC > 0) { const k = g.range / dC; tx = P.x + Math.round(dx * k); ty = P.y + Math.round(dy * k); }
     const ok = (P.granadas[P.aimSel] || 0) > 0 && MZ.inBounds(tx, ty) && Math.max(Math.abs(tx - P.x), Math.abs(ty - P.y)) >= 1;
     return { tx, ty, ok, kind: 'grenade' };
   }
@@ -1161,6 +1162,10 @@ window.MZ = window.MZ || {};
       // granada: se lanza al soltar
       if (t && t.kind === 'grenade' && t.ok) {
         if (MZ.throwGrenade(S.player.aimSel, t.tx, t.ty)) { MZ.ui.updateAimbar(); endTurn(); }
+      }
+      // BFG: un disparo devastador al soltar (consume 1 bala)
+      else if (t && t.kind === 'bfg' && t.ok && t.enemy) {
+        MZ.fireBFG(t.enemy); MZ.ui.updateAimbar(); endTurn();
       }
       aimPointer = null; hideReticle();
       return;

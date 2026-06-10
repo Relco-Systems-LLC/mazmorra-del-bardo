@@ -195,10 +195,12 @@ window.MZ = window.MZ || {};
     }
     if (rng.chance(0.7)) drop('potion');
     // armas seguido: el filo se gasta y la munición es corta, hay que reponer
-    if (rng.chance(0.6)) drop('weapon');
-    if (rng.chance(0.35)) drop('weapon');
-    if (depth >= 2 && rng.chance(0.45)) drop('bow');
-    if (depth % 4 === 0 && rng.chance(0.6)) drop('armor');
+    // siempre al menos un arma melee por piso (que nunca te quedes a piñas)
+    drop('weapon');
+    if (rng.chance(0.5)) drop('weapon');
+    if (rng.chance(0.7)) drop('bow');
+    if (depth >= 2 && rng.chance(0.4)) drop('bow');
+    if (rng.chance(0.5)) drop('armor');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');

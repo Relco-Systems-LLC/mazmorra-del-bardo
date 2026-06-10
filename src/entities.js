@@ -75,25 +75,39 @@ window.MZ = window.MZ || {};
   // ---- Equipo con nombre y stats: el loot escala con la profundidad ----
   MZ.GEAR = {
     melee: [
+      { name: 'Palo de amasar', atk: 1 },
       { name: 'Cuchillo de asado', atk: 1 },
+      { name: 'Sartén de teflón', atk: 2 },
       { name: 'Daga ladrona', atk: 2, veneno: true },
+      { name: 'Llave inglesa', atk: 3, empuje: true },
       { name: 'Mazo de feria', atk: 3, empuje: true },
+      { name: 'Cadena de bici', atk: 4 },
       { name: 'Machete tucumano', atk: 4 },
+      { name: 'Caño de escape', atk: 5, empuje: true },
       { name: 'Hacha criolla', atk: 5, empuje: true },
+      { name: 'Sable corvo', atk: 6, veneno: true },
       { name: 'Espada del Bardo', atk: 6 },
+      { name: 'Katana trucha', atk: 7 },
       { name: 'Facón del Más Allá', atk: 8, veneno: true },
+      { name: 'Espadón del Gremio', atk: 9, empuje: true },
     ],
     ranged: [
       { name: 'Gomera de barrio', atk: 1, range: 3 },
+      { name: 'Honda de cuero', atk: 2, range: 3 },
       { name: 'Arco corto', atk: 2, range: 4 },
+      { name: 'Pistola de clavos', atk: 3, range: 4, rapido: true },
       { name: 'Ballesta abandonada', atk: 3, range: 5 },
       { name: 'Ametralladora oxidada', atk: 2, range: 5, rapido: true },
+      { name: 'Arco compuesto', atk: 4, range: 5 },
+      { name: 'Rifle de feria', atk: 4, range: 6 },
       { name: 'Arco del Coliseo', atk: 5, range: 6 },
       { name: 'Ametralladora del Gremio', atk: 3, range: 6, rapido: true },
     ],
     shield: [
       { name: 'Tapa de olla', def: 1 },
+      { name: 'Bandeja de aluminio', def: 1 },
       { name: 'Escudo abollado', def: 2 },
+      { name: 'Cartel de chapa', def: 2 },
       { name: 'Puerta de heladera', def: 3 },
       { name: 'Escudo del Gremio', def: 4 },
     ],
@@ -104,10 +118,13 @@ window.MZ = window.MZ || {};
     melee: [
       { name: 'Termo del Abuelo', atk: 3, curaAlRomper: true },
       { name: 'Puñal Tramposo', atk: 2, traicionero: true },
+      { name: 'Bate con clavos', atk: 4, empuje: true },
+      { name: 'Cuchilla envenenada', atk: 3, veneno: true },
     ],
     ranged: [
       { name: 'Gomera de Baterías', atk: 3, range: 4, rebote: true },
       { name: 'Micrófono del Bardo', atk: 2, range: 3, grito: true },
+      { name: 'Escopeta recortada', atk: 5, range: 3, rapido: true },
     ],
   };
 
@@ -117,12 +134,13 @@ window.MZ = window.MZ || {};
       const g = { kind, ...base };
       const bonus = Math.floor(depth / 7);
       if (bonus > 0) { g.atk += bonus; g.name += ' +' + bonus; }
-      if (kind === 'melee') g.uses = 10 + Math.floor(Math.random() * 5);
-      if (kind === 'ranged') g.ammo = g.grito ? 3 : 4 + Math.floor(Math.random() * 3);
+      if (kind === 'melee') g.uses = 18 + Math.floor(Math.random() * 8);
+      if (kind === 'ranged') g.ammo = g.grito ? 4 : 7 + Math.floor(Math.random() * 4);
       return g;
     }
     const pool = MZ.GEAR[kind];
-    let tier = Math.floor(depth / 5) + (Math.random() < 0.3 ? 1 : 0) - (Math.random() < 0.3 ? 1 : 0);
+    // tier escala con la profundidad (depth/4) para que las armas buenas se alcancen
+    let tier = Math.floor(depth / 4) + (Math.random() < 0.35 ? 1 : 0) - (Math.random() < 0.25 ? 1 : 0);
     tier = Math.max(0, Math.min(pool.length - 1, tier));
     const base = pool[tier];
     const bonus = Math.floor(depth / 7);
@@ -130,10 +148,10 @@ window.MZ = window.MZ || {};
     if (g.atk != null) g.atk += bonus;
     if (g.def != null) g.def += Math.floor(bonus / 2);
     if (bonus > 0) g.name += ' +' + bonus;
-    // economía descartable: filo limitado y munición corta para recambio rápido
-    if (kind === 'melee') g.uses = 12 + tier * 3 + Math.floor(Math.random() * 6);
-    if (kind === 'ranged') g.ammo = g.rapido ? 20 + tier * 4 + Math.floor(Math.random() * 10) // ametralladora: ráfaga, mucha bala
-      : 4 + Math.floor(tier / 2) + Math.floor(Math.random() * 3);
+    // economía descartable, pero con filo/munición generosos para no quedar a piñas
+    if (kind === 'melee') g.uses = 22 + tier * 3 + Math.floor(Math.random() * 10);
+    if (kind === 'ranged') g.ammo = g.rapido ? 30 + tier * 4 + Math.floor(Math.random() * 12) // ametralladora: ráfaga, mucha bala
+      : 8 + tier + Math.floor(Math.random() * 5);
     return g;
   };
 
