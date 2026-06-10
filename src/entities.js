@@ -57,6 +57,8 @@ window.MZ = window.MZ || {};
     tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
     mapa: { sprite: 'mapa', color: 0xe8d8a0, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
+    vidaExtra: { sprite: 'vidaExtra', color: 0xffd700, scale: 0.5 },
+    altarVida: { sprite: 'altarVida', color: 0xff3355, scale: 0.8 },
     granadaFrag: { sprite: 'granadaFrag', color: 0x3a7d44, scale: 0.5 },
     granadaMolotov: { sprite: 'granadaMolotov', color: 0xff7722, scale: 0.5 },
     granadaStun: { sprite: 'granadaStun', color: 0xffe14d, scale: 0.5 },

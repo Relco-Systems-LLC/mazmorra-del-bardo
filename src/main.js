@@ -641,6 +641,45 @@ window.MZ = window.MZ || {};
       return;
     }
 
+    // 1-UP: vida extra directa (como los gatos, una más).
+    if (it.type === 'vidaExtra') {
+      P.vidas = (P.vidas || 0) + 1;
+      MZ.codex.discover('arsenal', 'vidaExtra');
+      MZ.audio.secret();
+      MZ.fx.flash(0.3, 0xffd700);
+      MZ.fx.floatText(p.x, p.y - 8, '+1 🐈', 0xffd700, 16);
+      MZ.say('vidaGanada', { v: P.vidas });
+      if (it.spr) { it.spr.destroy(); it.spr = null; }
+      S.items = S.items.filter(x => x !== it);
+      MZ.ui.updateHUD();
+      return;
+    }
+
+    // Altar de vida (solo pisos de jefe): comprás 1 vida con oro. No se borra si no comprás.
+    if (it.type === 'altarVida') {
+      MZ.codex.discover('arsenal', 'altarVida');
+      const precio = 60 + S.depth * 6;
+      const quitar = () => { if (it.spr) { it.spr.destroy(); it.spr = null; } S.items = S.items.filter(x => x !== it); };
+      MZ.dialog.open({
+        name: 'Altar de Vida', color: 0xff3355,
+        text: 'Un altar antiguo late como un corazón. "Ofrendá ' + precio + ' de oro y te concedo una vida más, como a los gatos." (tenés ' + P.gold + ' de oro y ' + P.vidas + ' vidas)',
+        choices: [
+          {
+            label: 'Ofrendar ' + precio + ' de oro (+1 vida)', fn() {
+              if (P.gold < precio) { MZ.ui.toast('No te alcanza el oro para el altar.', 2500); return null; }
+              P.gold -= precio; P.vidas = (P.vidas || 0) + 1;
+              MZ.audio.secret(); MZ.fx.flash(0.35, 0xff3355);
+              MZ.say('vidaGanada', { v: P.vidas });
+              quitar(); MZ.ui.updateHUD();
+              return null;
+            },
+          },
+          { label: 'Dejarlo (seguir vivo es gratis... por ahora)', fn: null },
+        ],
+      });
+      return;
+    }
+
     MZ.fx.sparkle(p.x, p.y, it.def.color);
     // bestiario: descubrir el objeto al levantarlo
     const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa', granadaFrag: 'granadaFrag', granadaMolotov: 'granadaMolotov', granadaStun: 'granadaStun' };

@@ -796,6 +796,35 @@ window.MZ = window.MZ || {};
         '...OOO....',
       ],
     },
+    vidaExtra: {
+      pal: { G: 0xffd700, g: 0xcc9900, N: 0x1a1a1a, W: 0xfff2b3 },
+      map: [
+        '..GG..GG..',
+        '.GggGGggG.',
+        'GgWgggggGG',
+        'GgNgggNgGG',
+        'GggggggggG',
+        '.GgNNNNgG.',
+        '..GggggG..',
+        '...GggG...',
+        '....GG....',
+      ],
+    },
+    altarVida: {
+      pal: { S: 0xb8860b, s: 0x8a5a1e, R: 0xff3355, r: 0xcc1133, G: 0xffd700, W: 0xfff2b3 },
+      map: [
+        '...RRRR...',
+        '..RWRRWR..',
+        '..RRRRRR..',
+        '...RRRR...',
+        '....RR....',
+        '...GGGG...',
+        '..GSSSSG..',
+        '..SssssS..',
+        '.SSSSSSSS.',
+        '.sSSSSSSs.',
+      ],
+    },
     mapa: {
       pal: { P: 0xe8d8a0, p: 0xc8b070, L: 0x8a5a2b, R: 0xcc3322, X: 0x993322 },
       map: [

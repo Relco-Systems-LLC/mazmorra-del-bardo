@@ -3320,6 +3320,35 @@ window.MZ = window.MZ || {};
         '...OOO....',
       ],
     },
+    vidaExtra: {
+      pal: { G: 0xffd700, g: 0xcc9900, N: 0x1a1a1a, W: 0xfff2b3 },
+      map: [
+        '..GG..GG..',
+        '.GggGGggG.',
+        'GgWgggggGG',
+        'GgNgggNgGG',
+        'GggggggggG',
+        '.GgNNNNgG.',
+        '..GggggG..',
+        '...GggG...',
+        '....GG....',
+      ],
+    },
+    altarVida: {
+      pal: { S: 0xb8860b, s: 0x8a5a1e, R: 0xff3355, r: 0xcc1133, G: 0xffd700, W: 0xfff2b3 },
+      map: [
+        '...RRRR...',
+        '..RWRRWR..',
+        '..RRRRRR..',
+        '...RRRR...',
+        '....RR....',
+        '...GGGG...',
+        '..GSSSSG..',
+        '..SssssS..',
+        '.SSSSSSSS.',
+        '.sSSSSSSs.',
+      ],
+    },
     mapa: {
       pal: { P: 0xe8d8a0, p: 0xc8b070, L: 0x8a5a2b, R: 0xcc3322, X: 0x993322 },
       map: [
@@ -3533,6 +3562,11 @@ window.MZ = window.MZ || {};
       'VENCIDA. ¿La fecha? ¿Quién mira la fecha? Vos no, claro.',
       'Esa poción tenía más años que el dungeon. A llorarla.',
       'Gusto raro... muy raro... uy. UY.',
+    ],
+    vidaGanada: [
+      '🐈 ¡Vida extra! Ahora tenés {v}. Como los gatos, pero con suerte.',
+      '+1 vida. Vas {v}. Alguien allá arriba te quiere (o te odia y quiere verte sufrir más).',
+      'Una vida más: {v} en total. Usala con menos boludez que las otras.',
     ],
     corazon: [
       'Un corazón. +{h} HP. Mejor no preguntar de quién era.',
@@ -4017,6 +4051,8 @@ window.MZ = window.MZ || {};
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
     if (rng.chance(0.2)) drop('mapa');
+    if (rng.chance(0.04)) drop('vidaExtra'); // 1-UP: vida extra, raro, cualquier piso
+    if (isBoss) drop('altarVida'); // altar de vida: solo en pisos de jefe (cada 5)
     // granadas (lanzables): caen seguido para que junten stock
     if (rng.chance(0.22)) drop('granadaFrag');
     if (depth >= 3 && rng.chance(0.16)) drop('granadaMolotov');
@@ -4092,6 +4128,8 @@ window.MZ = window.MZ || {};
     tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
     mapa: { sprite: 'mapa', color: 0xe8d8a0, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
+    vidaExtra: { sprite: 'vidaExtra', color: 0xffd700, scale: 0.5 },
+    altarVida: { sprite: 'altarVida', color: 0xff3355, scale: 0.8 },
     granadaFrag: { sprite: 'granadaFrag', color: 0x3a7d44, scale: 0.5 },
     granadaMolotov: { sprite: 'granadaMolotov', color: 0xff7722, scale: 0.5 },
     granadaStun: { sprite: 'granadaStun', color: 0xffe14d, scale: 0.5 },
@@ -4640,6 +4678,14 @@ window.MZ = window.MZ || {};
         'Lanzable de mayor alcance (5): aturde todo en radio 2, pierden turnos.',
         'Poco daño, mucho control: el flashbang del pozo.',
         'Tirala y aprovechá los turnos gratis para pegar o escapar.' ] },
+      { id: 'vidaExtra', nombre: '1-UP (Vida Extra)', sprite: 'vidaExtra', color: 0xffd700, lore: [
+        'Un gatito dorado que te regala una vida más, como en los clásicos.',
+        'Drop rarísimo de cualquier piso: agarralo apenas lo veas.',
+        'Siete vidas tenías; con esto, ocho. La avaricia felina es sabia.' ] },
+      { id: 'altarVida', nombre: 'Altar de Vida', sprite: 'altarVida', color: 0xff3355, lore: [
+        'Aparece solo en los pisos de jefe (cada cinco niveles).',
+        'Cambia tu oro por una vida extra: caro, pero puede salvarte el run.',
+        'Late como un corazón. No preguntes de quién era.' ] },
       { id: 'mapa', nombre: 'Mapa del Nivel', sprite: 'mapa', color: 0xe8d8a0, lore: [
         'Un pergamino que despliega el minimapa del piso entero.',
         'Marca lo que ya recorriste y lo que te falta por explorar.',
@@ -7330,6 +7376,45 @@ window.MZ = window.MZ || {};
       MZ.say('trampa');
       MZ.codex.discover('arsenal', 'pinchos');
       MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos', 'trampa');
+      return;
+    }
+
+    // 1-UP: vida extra directa (como los gatos, una más).
+    if (it.type === 'vidaExtra') {
+      P.vidas = (P.vidas || 0) + 1;
+      MZ.codex.discover('arsenal', 'vidaExtra');
+      MZ.audio.secret();
+      MZ.fx.flash(0.3, 0xffd700);
+      MZ.fx.floatText(p.x, p.y - 8, '+1 🐈', 0xffd700, 16);
+      MZ.say('vidaGanada', { v: P.vidas });
+      if (it.spr) { it.spr.destroy(); it.spr = null; }
+      S.items = S.items.filter(x => x !== it);
+      MZ.ui.updateHUD();
+      return;
+    }
+
+    // Altar de vida (solo pisos de jefe): comprás 1 vida con oro. No se borra si no comprás.
+    if (it.type === 'altarVida') {
+      MZ.codex.discover('arsenal', 'altarVida');
+      const precio = 60 + S.depth * 6;
+      const quitar = () => { if (it.spr) { it.spr.destroy(); it.spr = null; } S.items = S.items.filter(x => x !== it); };
+      MZ.dialog.open({
+        name: 'Altar de Vida', color: 0xff3355,
+        text: 'Un altar antiguo late como un corazón. "Ofrendá ' + precio + ' de oro y te concedo una vida más, como a los gatos." (tenés ' + P.gold + ' de oro y ' + P.vidas + ' vidas)',
+        choices: [
+          {
+            label: 'Ofrendar ' + precio + ' de oro (+1 vida)', fn() {
+              if (P.gold < precio) { MZ.ui.toast('No te alcanza el oro para el altar.', 2500); return null; }
+              P.gold -= precio; P.vidas = (P.vidas || 0) + 1;
+              MZ.audio.secret(); MZ.fx.flash(0.35, 0xff3355);
+              MZ.say('vidaGanada', { v: P.vidas });
+              quitar(); MZ.ui.updateHUD();
+              return null;
+            },
+          },
+          { label: 'Dejarlo (seguir vivo es gratis... por ahora)', fn: null },
+        ],
+      });
       return;
     }
 

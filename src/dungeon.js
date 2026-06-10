@@ -205,6 +205,8 @@ window.MZ = window.MZ || {};
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
     if (rng.chance(0.2)) drop('mapa');
+    if (rng.chance(0.04)) drop('vidaExtra'); // 1-UP: vida extra, raro, cualquier piso
+    if (isBoss) drop('altarVida'); // altar de vida: solo en pisos de jefe (cada 5)
     // granadas (lanzables): caen seguido para que junten stock
     if (rng.chance(0.22)) drop('granadaFrag');
     if (depth >= 3 && rng.chance(0.16)) drop('granadaMolotov');

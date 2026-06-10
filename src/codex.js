@@ -222,6 +222,14 @@ window.MZ = window.MZ || {};
         'Lanzable de mayor alcance (5): aturde todo en radio 2, pierden turnos.',
         'Poco daño, mucho control: el flashbang del pozo.',
         'Tirala y aprovechá los turnos gratis para pegar o escapar.' ] },
+      { id: 'vidaExtra', nombre: '1-UP (Vida Extra)', sprite: 'vidaExtra', color: 0xffd700, lore: [
+        'Un gatito dorado que te regala una vida más, como en los clásicos.',
+        'Drop rarísimo de cualquier piso: agarralo apenas lo veas.',
+        'Siete vidas tenías; con esto, ocho. La avaricia felina es sabia.' ] },
+      { id: 'altarVida', nombre: 'Altar de Vida', sprite: 'altarVida', color: 0xff3355, lore: [
+        'Aparece solo en los pisos de jefe (cada cinco niveles).',
+        'Cambia tu oro por una vida extra: caro, pero puede salvarte el run.',
+        'Late como un corazón. No preguntes de quién era.' ] },
       { id: 'mapa', nombre: 'Mapa del Nivel', sprite: 'mapa', color: 0xe8d8a0, lore: [
         'Un pergamino que despliega el minimapa del piso entero.',
         'Marca lo que ya recorriste y lo que te falta por explorar.',

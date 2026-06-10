@@ -158,6 +158,11 @@ window.MZ = window.MZ || {};
       'Esa poción tenía más años que el dungeon. A llorarla.',
       'Gusto raro... muy raro... uy. UY.',
     ],
+    vidaGanada: [
+      '🐈 ¡Vida extra! Ahora tenés {v}. Como los gatos, pero con suerte.',
+      '+1 vida. Vas {v}. Alguien allá arriba te quiere (o te odia y quiere verte sufrir más).',
+      'Una vida más: {v} en total. Usala con menos boludez que las otras.',
+    ],
     corazon: [
       'Un corazón. +{h} HP. Mejor no preguntar de quién era.',
       '+{h} HP. Late todavía. Asco, pero funciona.',
