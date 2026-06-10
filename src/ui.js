@@ -36,26 +36,7 @@ window.MZ = window.MZ || {};
         e.stopPropagation();
         MZ.easter.tapHp();
       });
-      // Export/import del save a archivo (backup o pasar la partida a otro dispositivo).
-      $('btn-export').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        MZ.ui.exportSave();
-      });
-      $('btn-import').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        $('import-file').click();
-      });
-      $('import-file').addEventListener('change', async e => {
-        const f = e.target.files[0];
-        if (!f) return;
-        const ok = MZ.save.importData(await f.text());
-        MZ.ui.toast(ok ? 'Save importado. Dale a continuar.' : 'Ese archivo no es un save válido.', 3000);
-        if (ok) MZ.ui.showStart(); // refresca botones y stats
-        e.target.value = '';
-      });
-      // Menú de pausa (save/export en medio de la partida).
+      // Menú de pausa.
       $('btn-pause').addEventListener('pointerdown', e => {
         e.stopPropagation();
         e.preventDefault();
@@ -66,27 +47,61 @@ window.MZ = window.MZ || {};
         e.preventDefault();
         MZ.unpauseGame();
       });
-      $('cta-export-pause').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        MZ.serializeRun();
-        MZ.ui.exportSave();
-      });
       $('cta-exit').addEventListener('pointerdown', e => {
         e.stopPropagation();
         e.preventDefault();
         MZ.exitToMenu();
       });
+
+      // ---- Instalar como app (PWA) ----
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      let installEvt = null;
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        installEvt = e;
+        if (!standalone) this.showInstallBtn();
+      });
+      if (!standalone && isIOS && location.protocol.startsWith('http')) this.showInstallBtn();
+      $('btn-install').addEventListener('pointerdown', async e => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (installEvt) {
+          installEvt.prompt();
+          const r = await installEvt.userChoice;
+          if (r.outcome === 'accepted') {
+            MZ.ui.toast('Instalada. Buscala en tu pantalla de inicio.', 3500);
+            $('btn-install').classList.add('hidden');
+            $('btn-install-sep').classList.add('hidden');
+          }
+          installEvt = null;
+        } else {
+          // iOS no tiene prompt programático: instrucciones
+          MZ.ui.toast('En Safari: botón Compartir → "Agregar a pantalla de inicio".', 5000);
+        }
+      });
+
+      // ---- Buscar actualización: limpia cache del SW y recarga ----
+      $('btn-update').addEventListener('pointerdown', async e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.toast('Actualizando...', 2000);
+        try {
+          if (window.caches) {
+            for (const k of await caches.keys()) await caches.delete(k);
+          }
+          if (navigator.serviceWorker) {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg) await reg.unregister();
+          }
+        } catch (err) { }
+        location.reload();
+      });
     },
 
-    exportSave() {
-      const blob = new Blob([MZ.save.exportData()], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'mazmorra.save';
-      a.click();
-      URL.revokeObjectURL(a.href);
-      MZ.ui.toast('Save exportado (carpeta de descargas).', 3000);
+    showInstallBtn() {
+      $('btn-install').classList.remove('hidden');
+      $('btn-install-sep').classList.remove('hidden');
     },
 
     showPause() {
@@ -125,7 +140,7 @@ window.MZ = window.MZ || {};
       $('start-stats').innerHTML = (d.runs > 0
         ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>Pasos caminados: ${d.totalSteps}`
         : '')
-        + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos: exportá tu save antes de cerrar.');
+        + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;

@@ -100,17 +100,15 @@
   <div class="cta hidden" id="cta-continue" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">CONTINUAR</div>
   <div class="cta" id="cta-new">TOC&Aacute; PARA ENTRAR</div>
   <div class="sub" style="margin-top:12px">
-    <span id="btn-export" style="text-decoration:underline">&#128190; exportar save</span>
-    &nbsp;&middot;&nbsp;
-    <span id="btn-import" style="text-decoration:underline">&#128194; importar save</span>
-    <input type="file" id="import-file" accept=".save,.json,.txt" style="display:none" />
+    <span id="btn-install" class="hidden" style="text-decoration:underline">&#128241; instalar como app</span>
+    <span id="btn-install-sep" class="hidden">&nbsp;&middot;&nbsp;</span>
+    <span id="btn-update" style="text-decoration:underline">&#8635; buscar actualizaci&oacute;n</span>
   </div>
 </div>
 <div id="screen-pause" class="screen hidden">
   <h1 style="font-size:24px">PAUSA</h1>
   <div class="sub">la partida se guarda sola, tranquilo</div>
   <div class="cta" id="cta-resume" style="border-color:#00ffc8;text-shadow:0 0 8px #00ffc8;box-shadow:0 0 16px rgba(0,255,200,.35)">SEGUIR JUGANDO</div>
-  <div class="cta" id="cta-export-pause">&#128190; EXPORTAR SAVE</div>
   <div class="cta" id="cta-exit" style="border-color:#ff4d6d;text-shadow:0 0 8px #ff4d6d;box-shadow:0 0 16px rgba(255,77,109,.35)">SALIR AL MEN&Uacute;</div>
 </div>
 <div id="screen-death" class="screen hidden">
@@ -3115,45 +3113,81 @@ window.MZ = window.MZ || {};
 
 </script>
 <script>
-// Persistencia: localStorage (única DB — IndexedDB no anda en file:// en Chrome)
-// + export/import a archivo como backup y para pasar la partida entre dispositivos.
+// Persistencia: IndexedDB como principal con localStorage de fallback (y espejo).
+// Como PWA (https) IndexedDB anda perfecto; en file:// o navegadores raros queda localStorage.
 window.MZ = window.MZ || {};
 (() => {
   const KEY = 'mazmorra_bardo_v1';
+  const DB = 'mazmorra_bardo';
+  const STORE = 'kv';
   const defaults = { bestDepth: 0, totalKills: 0, totalGold: 0, deaths: 0, runs: 0, morena: 0, loreCap: 0, totalSteps: 0, run: null };
   let data = { ...defaults };
+  let db = null;
+
+  function openIdb() {
+    return new Promise(res => {
+      // si IDB se cuelga (navegadores raros, modo privado), no frenamos el boot
+      const guard = setTimeout(() => res(null), 1500);
+      try {
+        const req = indexedDB.open(DB, 1);
+        req.onupgradeneeded = () => req.result.createObjectStore(STORE);
+        req.onsuccess = () => { clearTimeout(guard); res(req.result); };
+        req.onerror = () => { clearTimeout(guard); res(null); };
+      } catch (e) { clearTimeout(guard); res(null); }
+    });
+  }
+
+  function idbGet() {
+    return new Promise(res => {
+      const guard = setTimeout(() => res(null), 1500);
+      try {
+        const rq = db.transaction(STORE).objectStore(STORE).get(KEY);
+        rq.onsuccess = () => { clearTimeout(guard); res(rq.result || null); };
+        rq.onerror = () => { clearTimeout(guard); res(null); };
+      } catch (e) { clearTimeout(guard); res(null); }
+    });
+  }
+
+  function lsGet() {
+    try { return localStorage.getItem(KEY); } catch (e) { return null; }
+  }
+
+  function parse(raw) {
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+  }
 
   MZ.save = {
     get data() { return data; },
-    ok: false, // true si la DB anda (si no: solo memoria, exportá a archivo)
+    ok: false, // true si al menos un storage anda
 
-    load() {
-      try {
-        localStorage.setItem(KEY + '_t', '1');
-        this.ok = localStorage.getItem(KEY + '_t') === '1';
-        localStorage.removeItem(KEY + '_t');
-        const raw = localStorage.getItem(KEY);
-        if (raw) data = { ...defaults, ...JSON.parse(raw) };
-      } catch (e) { this.ok = false; }
+    async load() {
+      db = await openIdb();
+      // El más completo gana: IDB primero, localStorage como fallback/migración.
+      const fromIdb = parse(db ? await idbGet() : null);
+      const fromLs = parse(lsGet());
+      const best = fromIdb || fromLs;
+      if (best) data = { ...defaults, ...best };
+      this.ok = !!db || lsGet() !== null || this.canLs();
+      // migrar al IDB lo que estaba solo en localStorage
+      if (!fromIdb && fromLs) this.store();
       return data;
     },
 
-    store() {
-      try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { }
-    },
-
-    exportData() {
-      return JSON.stringify(data, null, 1);
-    },
-
-    importData(text) {
+    canLs() {
       try {
-        const obj = JSON.parse(text);
-        if (!obj || typeof obj !== 'object') return false;
-        data = { ...defaults, ...obj };
-        this.store();
+        localStorage.setItem(KEY + '_t', '1');
+        localStorage.removeItem(KEY + '_t');
         return true;
       } catch (e) { return false; }
+    },
+
+    store() {
+      const raw = JSON.stringify(data);
+      if (db) {
+        try { db.transaction(STORE, 'readwrite').objectStore(STORE).put(raw, KEY); } catch (e) { }
+      }
+      try { localStorage.setItem(KEY, raw); } catch (e) { }
     },
   };
 })();
@@ -4111,26 +4145,7 @@ window.MZ = window.MZ || {};
         e.stopPropagation();
         MZ.easter.tapHp();
       });
-      // Export/import del save a archivo (backup o pasar la partida a otro dispositivo).
-      $('btn-export').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        MZ.ui.exportSave();
-      });
-      $('btn-import').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        $('import-file').click();
-      });
-      $('import-file').addEventListener('change', async e => {
-        const f = e.target.files[0];
-        if (!f) return;
-        const ok = MZ.save.importData(await f.text());
-        MZ.ui.toast(ok ? 'Save importado. Dale a continuar.' : 'Ese archivo no es un save válido.', 3000);
-        if (ok) MZ.ui.showStart(); // refresca botones y stats
-        e.target.value = '';
-      });
-      // Menú de pausa (save/export en medio de la partida).
+      // Menú de pausa.
       $('btn-pause').addEventListener('pointerdown', e => {
         e.stopPropagation();
         e.preventDefault();
@@ -4141,27 +4156,61 @@ window.MZ = window.MZ || {};
         e.preventDefault();
         MZ.unpauseGame();
       });
-      $('cta-export-pause').addEventListener('pointerdown', e => {
-        e.stopPropagation();
-        e.preventDefault();
-        MZ.serializeRun();
-        MZ.ui.exportSave();
-      });
       $('cta-exit').addEventListener('pointerdown', e => {
         e.stopPropagation();
         e.preventDefault();
         MZ.exitToMenu();
       });
+
+      // ---- Instalar como app (PWA) ----
+      const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      let installEvt = null;
+      window.addEventListener('beforeinstallprompt', e => {
+        e.preventDefault();
+        installEvt = e;
+        if (!standalone) this.showInstallBtn();
+      });
+      if (!standalone && isIOS && location.protocol.startsWith('http')) this.showInstallBtn();
+      $('btn-install').addEventListener('pointerdown', async e => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (installEvt) {
+          installEvt.prompt();
+          const r = await installEvt.userChoice;
+          if (r.outcome === 'accepted') {
+            MZ.ui.toast('Instalada. Buscala en tu pantalla de inicio.', 3500);
+            $('btn-install').classList.add('hidden');
+            $('btn-install-sep').classList.add('hidden');
+          }
+          installEvt = null;
+        } else {
+          // iOS no tiene prompt programático: instrucciones
+          MZ.ui.toast('En Safari: botón Compartir → "Agregar a pantalla de inicio".', 5000);
+        }
+      });
+
+      // ---- Buscar actualización: limpia cache del SW y recarga ----
+      $('btn-update').addEventListener('pointerdown', async e => {
+        e.stopPropagation();
+        e.preventDefault();
+        MZ.ui.toast('Actualizando...', 2000);
+        try {
+          if (window.caches) {
+            for (const k of await caches.keys()) await caches.delete(k);
+          }
+          if (navigator.serviceWorker) {
+            const reg = await navigator.serviceWorker.getRegistration();
+            if (reg) await reg.unregister();
+          }
+        } catch (err) { }
+        location.reload();
+      });
     },
 
-    exportSave() {
-      const blob = new Blob([MZ.save.exportData()], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'mazmorra.save';
-      a.click();
-      URL.revokeObjectURL(a.href);
-      MZ.ui.toast('Save exportado (carpeta de descargas).', 3000);
+    showInstallBtn() {
+      $('btn-install').classList.remove('hidden');
+      $('btn-install-sep').classList.remove('hidden');
     },
 
     showPause() {
@@ -4200,7 +4249,7 @@ window.MZ = window.MZ || {};
       $('start-stats').innerHTML = (d.runs > 0
         ? `Récord: nivel ${d.bestDepth} · Muertes: ${d.deaths}<br>Bajas históricas: ${d.totalKills} · Oro juntado: ${d.totalGold}<br>Pasos caminados: ${d.totalSteps}`
         : '')
-        + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos: exportá tu save antes de cerrar.');
+        + (MZ.save.ok ? '' : '<br>⚠ Este navegador no guarda datos entre sesiones: instalá la app para no perder el progreso.');
       const cont = $('cta-continue');
       if (d.run) {
         cont.textContent = 'CONTINUAR — NIVEL ' + d.run.depth;

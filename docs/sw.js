@@ -1,6 +1,6 @@
 // Service worker cache-first: tras la primera carga, el juego anda 100% offline.
-// 20260610152547 lo reemplaza build.sh con el timestamp, para invalidar cache al republicar.
-const CACHE = 'mazmorra-20260610152547';
+// 20260610155622 lo reemplaza build.sh con el timestamp, para invalidar cache al republicar.
+const CACHE = 'mazmorra-20260610155622';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
