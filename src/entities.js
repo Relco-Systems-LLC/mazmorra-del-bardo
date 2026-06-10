@@ -55,6 +55,7 @@ window.MZ = window.MZ || {};
     pinchos: { sprite: 'pinchos', color: 0x607d8b, scale: 0.7 },
     heart: { sprite: 'corazon', color: 0xff3355, scale: 0.45 },
     tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
+    mapa: { sprite: 'mapa', color: 0xe8d8a0, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
   };
 

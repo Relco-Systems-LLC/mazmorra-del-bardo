@@ -66,7 +66,8 @@ window.MZ = window.MZ || {};
     // mercado negro: todo a mitad de precio
     const k = MZ.state.evento === 'mercado' ? 0.5 : 1;
     const cPocion = Math.ceil(15 * k), cEspada = Math.ceil((30 + d * 2) * k),
-      cChaleco = Math.ceil((40 + d * 2) * k), cGomera = Math.ceil((25 + d) * k);
+      cChaleco = Math.ceil((40 + d * 2) * k), cGomera = Math.ceil((25 + d) * k),
+      cMapa = Math.ceil((20 + d) * k);
     const choices = [];
     choices.push({
       label: `Poción (+12 HP, cura veneno) — ${cPocion} oro`,
@@ -77,6 +78,16 @@ window.MZ = window.MZ || {};
         p.poison = 0;
         MZ.audio.pickup(); MZ.ui.updateHUD();
         return mercaderMenu(npc, 'Salud. Si te cae mal, yo no te vendí nada.');
+      },
+    });
+    if (!MZ.state.mapaActivo) choices.push({
+      label: `🗺 Mapa del nivel (minimapa) — ${cMapa} oro`,
+      fn() {
+        if (p.gold < cMapa) return mercaderMenu(npc, 'El mapa cuesta, pibe. Sin oro andás a ciegas nomás.');
+        p.gold -= cMapa;
+        MZ.ui.updateHUD();
+        MZ.activarMapa();
+        return mercaderMenu(npc, 'Mapa desplegado. Dibujado por mí, así que no te confíes mucho de las medidas.');
       },
     });
     if (!npc.soldSword) choices.push({

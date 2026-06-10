@@ -146,17 +146,22 @@ window.MZ = window.MZ || {};
       return null;
     }
 
-    // Enemigos: escalan en cantidad y aparecen tipos nuevos al bajar.
+    // Enemigos: regla 80/20 — 80% de tu nivel (débiles), 20% adelantados (fuertes).
     const enemies = [];
-    const avail = Object.keys(MZ.ENEMY_DEFS).filter(k => {
+    const weak = Object.keys(MZ.ENEMY_DEFS).filter(k => {
       const d = MZ.ENEMY_DEFS[k];
-      return !d.rare && d.minDepth <= depth;
+      return !d.rare && !d.static && d.minDepth <= depth;
+    });
+    const strong = Object.keys(MZ.ENEMY_DEFS).filter(k => {
+      const d = MZ.ENEMY_DEFS[k];
+      return !d.rare && !d.static && d.minDepth > depth && d.minDepth <= depth + 8;
     });
     const count = isBoss ? rng.int(2, 3) : Math.min(4 + Math.floor(depth * 0.7), 14);
     for (let i = 0; i < count; i++) {
       const c = takeCell();
       if (!c) break;
-      enemies.push({ type: rng.pick(avail), x: c.x, y: c.y });
+      const usaFuerte = strong.length && rng.chance(0.2);
+      enemies.push({ type: rng.pick(usaFuerte ? strong : weak), x: c.x, y: c.y });
     }
     if (isBoss) {
       const arena = rooms[1], ac = center(arena);
@@ -197,6 +202,7 @@ window.MZ = window.MZ || {};
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
+    if (rng.chance(0.2)) drop('mapa');
     if (rng.chance(0.012)) drop('mateLegendario');
     if (secret) items.push({ type: 'chest', x: secret.room.x, y: secret.room.y, amount: 40 + depth * 3 });
 

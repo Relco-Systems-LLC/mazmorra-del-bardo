@@ -185,6 +185,17 @@ window.MZ = window.MZ || {};
     S.items.push(it);
   }
 
+  // Activa el minimapa del nivel actual (lo usa el ítem y el mercader).
+  MZ.activarMapa = function () {
+    if (S.mapaActivo) { MZ.ui.toast('Ya tenés el mapa de este nivel desplegado.', 2500); return; }
+    S.mapaActivo = true;
+    MZ.codex.discover('arsenal', 'mapa');
+    MZ.audio.secret();
+    MZ.ui.toast('🗺 Mapa del nivel: minimapa activado.', 3000);
+    MZ.ui.updateMinimap();
+    serializeRun();
+  };
+
   // Para drops de monstruos (lo usa combat.js).
   MZ.spawnItemAt = function (type, x, y, amount) {
     if (!S.level || MZ.itemAt(x, y)) return;
@@ -210,6 +221,7 @@ window.MZ = window.MZ || {};
       })),
       cracks: S.brokenCracks.slice(),
       evento: S.evento || null,
+      mapaActivo: !!S.mapaActivo,
       explored: Array.from(S.explored).join(''),
       quests: JSON.parse(JSON.stringify(MZ.quests.run)),
     };
@@ -268,8 +280,10 @@ window.MZ = window.MZ || {};
     S.turnos = 0;
     if (restore) {
       S.evento = restore.evento || null;
+      S.mapaActivo = !!restore.mapaActivo; // el mapa es por-nivel, se guarda
     } else {
       S.evento = MZ.eventos.sortear(S.depth, L.isBoss);
+      S.mapaActivo = false; // bajar de nivel resetea el mapa
       if (S.player) { S.player.efecto = null; S.player.efectoTurnos = 0; }
     }
 
@@ -499,6 +513,7 @@ window.MZ = window.MZ || {};
       if (S.explored[i] && (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS)) seen++;
     }
     S.mapPct = L.floorTotal ? Math.round((seen / L.floorTotal) * 100) : 0;
+    MZ.ui.updateMinimap();
   }
   MZ.updateVisibility = updateVisibility;
 
@@ -581,7 +596,7 @@ window.MZ = window.MZ || {};
 
     MZ.fx.sparkle(p.x, p.y, it.def.color);
     // bestiario: descubrir el objeto al levantarlo
-    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg' };
+    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa' };
     if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
     switch (it.type) {
       case 'gold':
@@ -742,6 +757,9 @@ window.MZ = window.MZ || {};
         MZ.quests.ringFound();
         MZ.audio.secret();
         MZ.ui.toast('El anillo de Rodrigo. Tiene algo grabado adentro... Llevaselo.', 3500);
+        break;
+      case 'mapa':
+        MZ.activarMapa();
         break;
       case 'altar': {
         if (Math.random() < 0.5) {

@@ -246,6 +246,42 @@ window.MZ = window.MZ || {};
       });
     },
 
+    // ---- Minimapa: revela el layout; marca lo recorrido vs lo que falta ----
+    updateMinimap() {
+      const S = MZ.state;
+      const el = $('minimap');
+      if (!el) return;
+      if (!S || !S.playing || !S.mapaActivo || !S.level) { el.classList.add('hidden'); return; }
+      el.classList.remove('hidden');
+      const L = S.level, P = S.player;
+      const ctx = el.getContext('2d');
+      const cell = Math.floor(el.width / L.w); // ~4px en grilla 26
+      ctx.clearRect(0, 0, el.width, el.height);
+      const T = MZ.T;
+      for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) {
+        const i = y * L.w + x;
+        const t = L.tiles[i];
+        let col = null;
+        if (t === T.STAIRS) col = '#00ffc8';
+        else if (t === T.FLOOR) col = S.explored[i] ? '#7fe9ff' : '#26414d'; // recorrido vs falta
+        else if (t === T.WALL || t === T.CRACK) {
+          // solo dibujo paredes lindantes a piso, para que se lea el contorno
+          let borde = false;
+          for (let j = -1; j <= 1 && !borde; j++) for (let k = -1; k <= 1; k++) {
+            const nt = L.tiles[(y + j) * L.w + (x + k)];
+            if (nt === T.FLOOR || nt === T.STAIRS) borde = true;
+          }
+          if (borde) col = '#10202a';
+        }
+        if (col) { ctx.fillStyle = col; ctx.fillRect(x * cell, y * cell, cell, cell); }
+      }
+      // jugador
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(P.x * cell - 1, P.y * cell - 1, cell + 2, cell + 2);
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(P.x * cell, P.y * cell, cell, cell);
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -313,6 +349,7 @@ window.MZ = window.MZ || {};
       $('screen-death').classList.add('hidden');
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
+      $('minimap').classList.add('hidden');
     },
 
     showDeath(quote, statsHtml) {
@@ -321,6 +358,7 @@ window.MZ = window.MZ || {};
       $('screen-death').classList.remove('hidden');
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
+      $('minimap').classList.add('hidden');
       deathShownAt = Date.now();
     },
 

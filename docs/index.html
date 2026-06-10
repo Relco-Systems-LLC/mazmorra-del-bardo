@@ -62,6 +62,12 @@
     position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); right: 10px;
     color: #555; font-size: 11px; pointer-events: none; z-index: 5;
   }
+  #minimap {
+    position: fixed; top: calc(env(safe-area-inset-top, 0px) + 40px); right: 8px;
+    width: 104px; height: 104px; z-index: 5; pointer-events: none;
+    background: rgba(0,0,8,.6); border: 1px solid rgba(0,255,255,.4);
+    border-radius: 6px; box-shadow: 0 0 12px rgba(0,255,255,.2); image-rendering: pixelated;
+  }
   #dialog {
     position: fixed; left: 8px; right: 8px; bottom: calc(env(safe-area-inset-bottom, 0px) + 28px);
     z-index: 12; background: rgba(8, 8, 20, .96); border: 1px solid rgba(177, 76, 255, .6);
@@ -89,6 +95,7 @@
 <div id="toast"></div>
 <div id="equip" class="hidden"></div>
 <div id="fps"></div>
+<canvas id="minimap" class="hidden" width="104" height="104"></canvas>
 <div id="dialog" class="hidden">
   <div id="dlg-name"></div>
   <div id="dlg-text"></div>
@@ -3208,6 +3215,21 @@ window.MZ = window.MZ || {};
         '..SSSSSS..',
       ],
     },
+    mapa: {
+      pal: { P: 0xe8d8a0, p: 0xc8b070, L: 0x8a5a2b, R: 0xcc3322, X: 0x993322 },
+      map: [
+        'LPPPPPPPPL',
+        'LPpPPpPPPL',
+        'LPPLLPPpPL',
+        'LpPPLPPPPL',
+        'LPPpPLLPPL',
+        'LPPPPpPRXL',
+        'LpPPpPPXRL',
+        'LPPPpPPpPL',
+        'LpPPPpPPPL',
+        'LPPPPPPpPL',
+      ],
+    },
     anillo: {
       pal: { G: 0xffd700, D: 0x00e5ff, W: 0xccf6ff },
       map: [
@@ -3831,17 +3853,22 @@ window.MZ = window.MZ || {};
       return null;
     }
 
-    // Enemigos: escalan en cantidad y aparecen tipos nuevos al bajar.
+    // Enemigos: regla 80/20 — 80% de tu nivel (débiles), 20% adelantados (fuertes).
     const enemies = [];
-    const avail = Object.keys(MZ.ENEMY_DEFS).filter(k => {
+    const weak = Object.keys(MZ.ENEMY_DEFS).filter(k => {
       const d = MZ.ENEMY_DEFS[k];
-      return !d.rare && d.minDepth <= depth;
+      return !d.rare && !d.static && d.minDepth <= depth;
+    });
+    const strong = Object.keys(MZ.ENEMY_DEFS).filter(k => {
+      const d = MZ.ENEMY_DEFS[k];
+      return !d.rare && !d.static && d.minDepth > depth && d.minDepth <= depth + 8;
     });
     const count = isBoss ? rng.int(2, 3) : Math.min(4 + Math.floor(depth * 0.7), 14);
     for (let i = 0; i < count; i++) {
       const c = takeCell();
       if (!c) break;
-      enemies.push({ type: rng.pick(avail), x: c.x, y: c.y });
+      const usaFuerte = strong.length && rng.chance(0.2);
+      enemies.push({ type: rng.pick(usaFuerte ? strong : weak), x: c.x, y: c.y });
     }
     if (isBoss) {
       const arena = rooms[1], ac = center(arena);
@@ -3882,6 +3909,7 @@ window.MZ = window.MZ || {};
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');
     if (rng.chance(0.1)) drop('tequila');
+    if (rng.chance(0.2)) drop('mapa');
     if (rng.chance(0.012)) drop('mateLegendario');
     if (secret) items.push({ type: 'chest', x: secret.room.x, y: secret.room.y, amount: 40 + depth * 3 });
 
@@ -3951,6 +3979,7 @@ window.MZ = window.MZ || {};
     pinchos: { sprite: 'pinchos', color: 0x607d8b, scale: 0.7 },
     heart: { sprite: 'corazon', color: 0xff3355, scale: 0.45 },
     tequila: { sprite: 'tequila', color: 0xffe680, scale: 0.5 },
+    mapa: { sprite: 'mapa', color: 0xe8d8a0, scale: 0.5 },
     altar: { sprite: 'altar', color: 0x00ffc8, scale: 0.75 },
   };
 
@@ -4450,6 +4479,10 @@ window.MZ = window.MZ || {};
         'Oro y un poco de cura para el que se anima a abrirlo.',
         'Ojo: 15% de las veces tiene dientes y se llama Mimic.',
         'La codicia y el riesgo viven en la misma cajita.' ] },
+      { id: 'mapa', nombre: 'Mapa del Nivel', sprite: 'mapa', color: 0xe8d8a0, lore: [
+        'Un pergamino que despliega el minimapa del piso entero.',
+        'Marca lo que ya recorriste y lo que te falta por explorar.',
+        'Lo vende Don Olivera o cae de los bichos; sirve solo para el nivel actual.' ] },
       { id: 'anillo', nombre: 'Anillo de Rodrigo', sprite: 'anillo', color: 0x00e5ff, lore: [
         'El anillo de casamiento que Rodrigo perdió allá abajo.',
         'Tiene un grabado comprometedor adentro: leelo antes de devolverlo.',
@@ -4575,7 +4608,8 @@ window.MZ = window.MZ || {};
     // mercado negro: todo a mitad de precio
     const k = MZ.state.evento === 'mercado' ? 0.5 : 1;
     const cPocion = Math.ceil(15 * k), cEspada = Math.ceil((30 + d * 2) * k),
-      cChaleco = Math.ceil((40 + d * 2) * k), cGomera = Math.ceil((25 + d) * k);
+      cChaleco = Math.ceil((40 + d * 2) * k), cGomera = Math.ceil((25 + d) * k),
+      cMapa = Math.ceil((20 + d) * k);
     const choices = [];
     choices.push({
       label: `Poción (+12 HP, cura veneno) — ${cPocion} oro`,
@@ -4586,6 +4620,16 @@ window.MZ = window.MZ || {};
         p.poison = 0;
         MZ.audio.pickup(); MZ.ui.updateHUD();
         return mercaderMenu(npc, 'Salud. Si te cae mal, yo no te vendí nada.');
+      },
+    });
+    if (!MZ.state.mapaActivo) choices.push({
+      label: `🗺 Mapa del nivel (minimapa) — ${cMapa} oro`,
+      fn() {
+        if (p.gold < cMapa) return mercaderMenu(npc, 'El mapa cuesta, pibe. Sin oro andás a ciegas nomás.');
+        p.gold -= cMapa;
+        MZ.ui.updateHUD();
+        MZ.activarMapa();
+        return mercaderMenu(npc, 'Mapa desplegado. Dibujado por mí, así que no te confíes mucho de las medidas.');
       },
     });
     if (!npc.soldSword) choices.push({
@@ -5615,6 +5659,42 @@ window.MZ = window.MZ || {};
       });
     },
 
+    // ---- Minimapa: revela el layout; marca lo recorrido vs lo que falta ----
+    updateMinimap() {
+      const S = MZ.state;
+      const el = $('minimap');
+      if (!el) return;
+      if (!S || !S.playing || !S.mapaActivo || !S.level) { el.classList.add('hidden'); return; }
+      el.classList.remove('hidden');
+      const L = S.level, P = S.player;
+      const ctx = el.getContext('2d');
+      const cell = Math.floor(el.width / L.w); // ~4px en grilla 26
+      ctx.clearRect(0, 0, el.width, el.height);
+      const T = MZ.T;
+      for (let y = 0; y < L.h; y++) for (let x = 0; x < L.w; x++) {
+        const i = y * L.w + x;
+        const t = L.tiles[i];
+        let col = null;
+        if (t === T.STAIRS) col = '#00ffc8';
+        else if (t === T.FLOOR) col = S.explored[i] ? '#7fe9ff' : '#26414d'; // recorrido vs falta
+        else if (t === T.WALL || t === T.CRACK) {
+          // solo dibujo paredes lindantes a piso, para que se lea el contorno
+          let borde = false;
+          for (let j = -1; j <= 1 && !borde; j++) for (let k = -1; k <= 1; k++) {
+            const nt = L.tiles[(y + j) * L.w + (x + k)];
+            if (nt === T.FLOOR || nt === T.STAIRS) borde = true;
+          }
+          if (borde) col = '#10202a';
+        }
+        if (col) { ctx.fillStyle = col; ctx.fillRect(x * cell, y * cell, cell, cell); }
+      }
+      // jugador
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(P.x * cell - 1, P.y * cell - 1, cell + 2, cell + 2);
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(P.x * cell, P.y * cell, cell, cell);
+    },
+
     showInstallBtn() {
       $('btn-install').classList.remove('hidden');
       $('btn-install-sep').classList.remove('hidden');
@@ -5682,6 +5762,7 @@ window.MZ = window.MZ || {};
       $('screen-death').classList.add('hidden');
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
+      $('minimap').classList.add('hidden');
     },
 
     showDeath(quote, statsHtml) {
@@ -5690,6 +5771,7 @@ window.MZ = window.MZ || {};
       $('screen-death').classList.remove('hidden');
       $('hud').classList.add('hidden');
       $('equip').classList.add('hidden');
+      $('minimap').classList.add('hidden');
       deathShownAt = Date.now();
     },
 
@@ -6407,6 +6489,17 @@ window.MZ = window.MZ || {};
     S.items.push(it);
   }
 
+  // Activa el minimapa del nivel actual (lo usa el ítem y el mercader).
+  MZ.activarMapa = function () {
+    if (S.mapaActivo) { MZ.ui.toast('Ya tenés el mapa de este nivel desplegado.', 2500); return; }
+    S.mapaActivo = true;
+    MZ.codex.discover('arsenal', 'mapa');
+    MZ.audio.secret();
+    MZ.ui.toast('🗺 Mapa del nivel: minimapa activado.', 3000);
+    MZ.ui.updateMinimap();
+    serializeRun();
+  };
+
   // Para drops de monstruos (lo usa combat.js).
   MZ.spawnItemAt = function (type, x, y, amount) {
     if (!S.level || MZ.itemAt(x, y)) return;
@@ -6432,6 +6525,7 @@ window.MZ = window.MZ || {};
       })),
       cracks: S.brokenCracks.slice(),
       evento: S.evento || null,
+      mapaActivo: !!S.mapaActivo,
       explored: Array.from(S.explored).join(''),
       quests: JSON.parse(JSON.stringify(MZ.quests.run)),
     };
@@ -6490,8 +6584,10 @@ window.MZ = window.MZ || {};
     S.turnos = 0;
     if (restore) {
       S.evento = restore.evento || null;
+      S.mapaActivo = !!restore.mapaActivo; // el mapa es por-nivel, se guarda
     } else {
       S.evento = MZ.eventos.sortear(S.depth, L.isBoss);
+      S.mapaActivo = false; // bajar de nivel resetea el mapa
       if (S.player) { S.player.efecto = null; S.player.efectoTurnos = 0; }
     }
 
@@ -6721,6 +6817,7 @@ window.MZ = window.MZ || {};
       if (S.explored[i] && (L.tiles[i] === T.FLOOR || L.tiles[i] === T.STAIRS)) seen++;
     }
     S.mapPct = L.floorTotal ? Math.round((seen / L.floorTotal) * 100) : 0;
+    MZ.ui.updateMinimap();
   }
   MZ.updateVisibility = updateVisibility;
 
@@ -6803,7 +6900,7 @@ window.MZ = window.MZ || {};
 
     MZ.fx.sparkle(p.x, p.y, it.def.color);
     // bestiario: descubrir el objeto al levantarlo
-    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg' };
+    const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa' };
     if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
     switch (it.type) {
       case 'gold':
@@ -6964,6 +7061,9 @@ window.MZ = window.MZ || {};
         MZ.quests.ringFound();
         MZ.audio.secret();
         MZ.ui.toast('El anillo de Rodrigo. Tiene algo grabado adentro... Llevaselo.', 3500);
+        break;
+      case 'mapa':
+        MZ.activarMapa();
         break;
       case 'altar': {
         if (Math.random() < 0.5) {

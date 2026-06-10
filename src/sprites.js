@@ -712,6 +712,21 @@ window.MZ = window.MZ || {};
         '..SSSSSS..',
       ],
     },
+    mapa: {
+      pal: { P: 0xe8d8a0, p: 0xc8b070, L: 0x8a5a2b, R: 0xcc3322, X: 0x993322 },
+      map: [
+        'LPPPPPPPPL',
+        'LPpPPpPPPL',
+        'LPPLLPPpPL',
+        'LpPPLPPPPL',
+        'LPPpPLLPPL',
+        'LPPPPpPRXL',
+        'LpPPpPPXRL',
+        'LPPPpPPpPL',
+        'LpPPPpPPPL',
+        'LPPPPPPpPL',
+      ],
+    },
     anillo: {
       pal: { G: 0xffd700, D: 0x00e5ff, W: 0xccf6ff },
       map: [

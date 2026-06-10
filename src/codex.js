@@ -206,6 +206,10 @@ window.MZ = window.MZ || {};
         'Oro y un poco de cura para el que se anima a abrirlo.',
         'Ojo: 15% de las veces tiene dientes y se llama Mimic.',
         'La codicia y el riesgo viven en la misma cajita.' ] },
+      { id: 'mapa', nombre: 'Mapa del Nivel', sprite: 'mapa', color: 0xe8d8a0, lore: [
+        'Un pergamino que despliega el minimapa del piso entero.',
+        'Marca lo que ya recorriste y lo que te falta por explorar.',
+        'Lo vende Don Olivera o cae de los bichos; sirve solo para el nivel actual.' ] },
       { id: 'anillo', nombre: 'Anillo de Rodrigo', sprite: 'anillo', color: 0x00e5ff, lore: [
         'El anillo de casamiento que Rodrigo perdió allá abajo.',
         'Tiene un grabado comprometedor adentro: leelo antes de devolverlo.',
