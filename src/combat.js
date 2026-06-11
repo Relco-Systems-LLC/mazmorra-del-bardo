@@ -38,11 +38,11 @@ window.MZ = window.MZ || {};
     const crit = Math.random() < 0.12;
     let dmg = P.atk + (Math.random() < 0.5 ? 0 : 1);
     if (P.efecto === 'berserk') dmg *= 2;
-    // Puñal Tramposo: x4 por la espalda, pero a veces te corta a vos
+    // Púa Traicionera: x4 por la espalda, pero a veces te corta a vos
     if (P.melee && P.melee.traicionero) {
       if (!e.awake) dmg *= 4;
       if (Math.random() < 0.1) {
-        MZ.hurtPlayer(2, 'tu propio Puñal Tramposo', 'vos mismo');
+        MZ.hurtPlayer(2, 'tu propia Púa Traicionera', 'vos mismo');
         if (P.hp <= 0) return;
       }
     }
@@ -82,7 +82,7 @@ window.MZ = window.MZ || {};
     }
   };
 
-  // Micrófono del Bardo: grito AoE que empuja todo lejos del blanco.
+  // Micrófono del Cantante: grito AoE que empuja todo lejos del blanco.
   function gritar(target) {
     const S = MZ.state, P = S.player, w = P.ranged;
     const cx = target.x, cy = target.y;
@@ -106,7 +106,7 @@ window.MZ = window.MZ || {};
     }
   }
 
-  // La Bestia 9000 (slot propio P.bfg): revienta todo a la vista. Consume 1 bala.
+  // El Lanzacohetes del Buhonero (slot propio P.bfg): revienta todo a la vista. Consume 1 tiro.
   MZ.fireBFG = function (target) {
     const S = MZ.state, P = S.player, w = P.bfg;
     if (!w) return;
@@ -283,19 +283,19 @@ window.MZ = window.MZ || {};
     let gold = (e.def.gold || 2) + Math.floor(S.depth * 0.7) + Math.floor(Math.random() * 4);
     if (e.boss) gold += 30 + S.depth * 2;
     if (e.stolen) gold += e.stolen * 2; // el Pombero devuelve el doble si lo cazás
-    // fiesta en el Tiger y Rey Midas duplican el botín (apilable, jugátela)
+    // fiesta en la previa y Rey del Merch duplican el botín (apilable, jugátela)
     gold *= (S.evento === 'fiesta' ? 2 : 1) * (P.efecto === 'midas' ? 2 : 1);
     P.gold += gold;
     P.kills++;
     P.streak++;
     MZ.fx.floatText(p.x, p.y - MZ.TILE, '+' + gold, 0xffd700, 13);
 
-    // La Bestia 9000: 5% en cualquier kill desde el nivel 1; 10% cerca de
+    // El Lanzacohetes: 5% en cualquier kill desde el nivel 1; 10% cerca de
     // un jefe vivo (el momento exacto). Ninguna arma es imposible.
     const bossCerca = !e.boss && S.enemies.some(b =>
       b.boss && !b.dead && Math.max(Math.abs(b.x - e.x), Math.abs(b.y - e.y)) <= 5);
     if (!e.boss && Math.random() < (bossCerca ? 0.10 : 0.05)) {
-      // la Bestia no se pierde por un casillero ocupado: busca lugar al lado
+      // el Lanzacohetes no se pierde por un casillero ocupado: busca lugar al lado
       const spots = [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]];
       for (const [ox, oy] of spots) {
         const x = e.x + ox, y = e.y + oy;
@@ -422,7 +422,7 @@ window.MZ = window.MZ || {};
 
   MZ.enemiesTurn = function () {
     const S = MZ.state, P = S.player;
-    // Fiesta en el Tiger: nadie pelea, todos bailan (se mueven al azar)
+    // Fiesta en la previa: nadie pelea, todos bailan (se mueven al azar)
     if (S.evento === 'fiesta') {
       for (const e of S.enemies) {
         if (e.dead || e.def.static) continue;

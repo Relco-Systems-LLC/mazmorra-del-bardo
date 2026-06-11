@@ -37,7 +37,7 @@ window.MZ = window.MZ || {};
       MZ.ui.updateHUD();
     },
 
-    // Cheat AoE2: 7 taps al nivel = HOW DO YOU TURN THIS ON (la Bestia, una por run)
+    // Cheat AoE2: 7 taps al nivel = HOW DO YOU TURN THIS ON (el Lanzacohetes, uno por run)
     tapDepth() {
       const S = MZ.state;
       if (!S.playing || !S.player) return;

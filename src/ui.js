@@ -357,7 +357,7 @@ window.MZ = window.MZ || {};
         const ic = P.ranged.rapido ? '🔫' : '🏹';
         chips.push({ sel: 'ranged', label: ic + (P.ranged.ammo != null ? ' ●' + P.ranged.ammo : ''), active: S.aimMode && P.aimSel === 'ranged' });
       }
-      // La Bestia 9000 (slot propio)
+      // El Lanzacohetes (slot propio)
       if (P.bfg) {
         chips.push({ sel: 'bfg', label: '💚 ●' + P.bfg.ammo, active: S.aimMode && P.aimSel === 'bfg' });
       }
