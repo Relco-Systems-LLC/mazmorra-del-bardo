@@ -47,7 +47,7 @@ window.MZ = window.MZ || {};
       depthTaps = 0;
       S.player.cheatCobra = true;
       S.player.bfg = MZ.genBFG(S.depth);
-      MZ.ui.toast('🚗 HOW DO YOU TURN THIS ON — La Bestia 9000 en tus manos.', 4500);
+      MZ.ui.toast('🚗 HOW DO YOU TURN THIS ON — El Lanzacohetes del Buhonero en tus manos.', 4500);
       MZ.audio.boss();
       MZ.fx.flash(0.35, 0x33ff66);
       MZ.ui.updateHUD();

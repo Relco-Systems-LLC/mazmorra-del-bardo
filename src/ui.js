@@ -125,7 +125,7 @@ window.MZ = window.MZ || {};
           e.preventDefault();
           MZ.ui.toast(isIOS
             ? 'Mantené apretado el ícono de la app en tu pantalla de inicio → "Eliminar app".'
-            : 'Mantené apretado el ícono de la app → "Desinstalar" (o Ajustes → Apps → Mazmorra).', 6000);
+            : 'Mantené apretado el ícono de la app → "Desinstalar" (o en los ajustes de apps del teléfono).', 6000);
         });
       }
 
@@ -150,14 +150,17 @@ window.MZ = window.MZ || {};
     // ---- Pantalla de stats: números de carrera, historia y censo de NPCs ----
     showStats() {
       const d = MZ.save.data;
-      // Hitos de la historia: capítulos del Bardo, romance, familia, final
+      // Hitos de la historia: capítulos del Plomo, sellos, romance, familia, final
+      const caps = MZ.CAPS_TOTAL || 8;
       const hitos = [
-        ['Historia del Bardo', Math.min(d.loreCap || 0, 7), 7],
+        ['Historia de la Gira', Math.min(d.loreCap || 0, caps), caps],
+        ['Sellos del Pasaporte', MZ.sellos ? MZ.sellos.count() : 0, 5],
         ['Romance con Morena', Math.min(d.morena || 0, 3), 3],
         ['Visitas a la Nona', Math.min(d.nona || 0, 3), 3],
         ['Tato encontrado', d.nietoVisto ? 1 : 0, 1],
         ['La Nona ya sabe', d.nonaSabe ? 1 : 0, 1],
-        ['El Bardo Fundador', d.fundadorVisto ? 1 : 0, 1],
+        ['El Mánager', d.fundadorVisto ? 1 : 0, 1],
+        ['El Último Acorde', d.finalBueno ? 1 : 0, 1],
       ];
       const done = hitos.reduce((a, h) => a + h[1], 0);
       const total = hitos.reduce((a, h) => a + h[2], 0);
@@ -183,7 +186,7 @@ window.MZ = window.MZ || {};
         choices: [{ label: 'Volver', fn: statsNode }],
       });
       const statsNode = () => ({
-        name: 'Tu Carrera en la Mazmorra', color: 0x00e5ff,
+        name: 'Tu Carrera en la Gira', color: 0x00e5ff,
         text: statsText,
         choices: [
           { label: '🏆 Ver logros (' + MZ.logros.count() + '/' + MZ.logros.defs.length + ')', fn: logrosNode },
@@ -228,7 +231,7 @@ window.MZ = window.MZ || {};
           return { label: cat.t + ' (' + got + '/' + defs.length + ')', fn: () => lista(cat.key) };
         });
         choices.push({ label: 'Cerrar', fn: null });
-        return { name: 'Bestiario del Bardo', color: 0xff8800, text: 'Completado: ' + pct + '% (' + c.got + '/' + c.total + ')\nTodo lo que ves, hablás o agarrás queda registrado acá.', choices };
+        return { name: 'Bestiario de Gira', color: 0xff8800, text: 'Completado: ' + pct + '% (' + c.got + '/' + c.total + ')\nTodo lo que ves, hablás o agarrás queda registrado acá.', choices };
       }
       MZ.dialog.open(raiz());
     },
@@ -317,7 +320,7 @@ window.MZ = window.MZ || {};
       if (P.bfg) eq.push('💚 ' + P.bfg.name + ' ●' + P.bfg.ammo);
       if (P.shield) eq.push('🛡 ' + P.shield.name);
       if (P.efecto) {
-        const nom = { berserk: 'BERSERK', midas: 'MIDAS', fantasmal: 'FANTASMAL ' + Math.max(0, P.efectoTurnos), iman: 'IMÁN' }[P.efecto];
+        const nom = { berserk: 'MOSH', midas: 'REY DEL MERCH', fantasmal: 'BACKSTAGE ' + Math.max(0, P.efectoTurnos), iman: 'IMÁN' }[P.efecto];
         if (nom) eq.push('✨ ' + nom);
       }
       const gr = P.granadas || {};

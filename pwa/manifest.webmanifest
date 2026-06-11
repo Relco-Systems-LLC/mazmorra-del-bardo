@@ -1,7 +1,7 @@
 {
-  "name": "Mazmorra del Bardo",
+  "name": "Mazmorra del Tour",
   "short_name": "Mazmorra",
-  "description": "Roguelike de bolsillo con niveles infinitos y bardeo argentino.",
+  "description": "Roguelike de bolsillo: la gira que nunca terminó. Bardeo argentino incluido.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

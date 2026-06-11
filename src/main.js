@@ -578,7 +578,7 @@ window.MZ = window.MZ || {};
     // eventos y efectos de altar que actúan por turno
     S.turnos = (S.turnos || 0) + 1;
     if (S.playing && S.evento === 'niebla' && S.turnos % 10 === 0) {
-      MZ.poisonPlayer(2, 'la niebla venenosa');
+      MZ.poisonPlayer(2, 'el humo del escenario');
       if (!S.playing) return;
     }
     // berserk: si hay un enemigo pegado, tus puños deciden solos
@@ -637,7 +637,7 @@ window.MZ = window.MZ || {};
     if (it.type === 'pinchos') {
       MZ.say('trampa');
       MZ.codex.discover('arsenal', 'pinchos');
-      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'los pinchos', 'trampa');
+      MZ.hurtPlayer(2 + Math.floor(S.depth / 4), 'las púas', 'trampa');
       return;
     }
 
@@ -661,8 +661,8 @@ window.MZ = window.MZ || {};
       const precio = 60 + S.depth * 6;
       const quitar = () => { if (it.spr) { it.spr.destroy(); it.spr = null; } S.items = S.items.filter(x => x !== it); };
       MZ.dialog.open({
-        name: 'Altar de Vida', color: 0xff3355,
-        text: 'Un altar antiguo late como un corazón. "Ofrendá ' + precio + ' de oro y te concedo una vida más, como a los gatos." (tenés ' + P.gold + ' de oro y ' + P.vidas + ' vidas)',
+        name: 'Altar del Bis', color: 0xff3355,
+        text: 'Un altar antiguo late como un corazón y el público invisible pide otra. "Ofrendá ' + precio + ' de oro y te concedo una vida más, como a los gatos." (tenés ' + P.gold + ' de oro y ' + P.vidas + ' vidas)',
         choices: [
           {
             label: 'Ofrendar ' + precio + ' de oro (+1 vida)', fn() {
@@ -715,7 +715,7 @@ window.MZ = window.MZ || {};
         // ruleta rusa de kiosco: 75% cura, 25% vencida y te envenena
         if (Math.random() < 0.25) {
           MZ.say('pocionMala');
-          MZ.poisonPlayer(4, 'una poción vencida');
+          MZ.poisonPlayer(4, 'una hierba del hostel');
         } else {
           const heal = 10 + Math.floor(S.depth / 3);
           P.hp = Math.min(P.maxHp, P.hp + heal);
