@@ -8,12 +8,12 @@ window.MZ = window.MZ || {};
   const LOGROS = [
     { id: 'sangre', t: 'Primera Sangre', d: 'Matá tu primer monstruo' },
     { id: 'kills100', t: 'Centurión', d: '100 bajas históricas' },
-    { id: 'kills1000', t: 'Genocida de Utilería', d: '1000 bajas históricas' },
+    { id: 'kills1000', t: 'Genocida de Gira', d: '1000 bajas históricas' },
     { id: 'nivel5', t: 'Turista', d: 'Llegá al nivel 5' },
-    { id: 'nivel10', t: 'Inquilino', d: 'Llegá al nivel 10' },
+    { id: 'nivel10', t: 'Mochilero', d: 'Llegá al nivel 10' },
     { id: 'nivel20', t: 'Residente Permanente', d: 'Llegá al nivel 20' },
     { id: 'nivel30', t: 'Leyenda del Subsuelo', d: 'Llegá al nivel 30' },
-    { id: 'nivel50', t: 'La Última Función', d: 'Llegá al nivel 50' },
+    { id: 'nivel50', t: 'El Show Final', d: 'Llegá al nivel 50' },
     { id: 'oro1000', t: 'Tesorero', d: '1000 de oro juntado histórico' },
     { id: 'oro10000', t: 'Magnate del Pozo', d: '10000 de oro histórico' },
     { id: 'muertes10', t: 'Cliente Frecuente', d: 'Morí 10 veces' },
@@ -22,14 +22,17 @@ window.MZ = window.MZ || {};
     { id: 'rataBlanca', t: 'Mujer Amante', d: 'Encontrá a la Rata Blanca' },
     { id: 'disco', t: 'Fiebre de Sábado', d: 'Activá el modo disco' },
     { id: 'mateLeg', t: 'Cebador Sagrado', d: 'Tomá el Mate Legendario' },
-    { id: 'morena', t: 'Corazón de Bruja', d: 'Enamorá a Morena' },
-    { id: 'nona', t: 'Nieto Postizo', d: 'Visitá 3 veces a la Nona' },
+    { id: 'morena', t: 'Corazón de Corista', d: 'Enamorá a Morena' },
+    { id: 'nona', t: 'Nieto Postizo', d: 'Visitá 3 veces a la Nona del Hostel' },
     { id: 'nieto', t: 'Reencuentro', d: 'Encontrá al nieto de la Nona' },
-    { id: 'lore', t: 'Memoria del Teatro', d: 'Escuchá toda la historia del Bardo' },
+    { id: 'lore', t: 'Memoria de Gira', d: 'Escuchá toda la historia del Plomo' },
     { id: 'racha10', t: 'Intocable', d: 'Racha de 10 sin recibir daño' },
-    { id: 'tequila', t: 'Spring Break', d: 'Tomate un tequila' },
+    { id: 'tequila', t: 'Modo Pattaya', d: 'Tomate un tequila' },
     { id: 'pasos5000', t: 'Maratonista de Catacumba', d: '5000 pasos históricos' },
     { id: 'jefe5', t: 'Matajefes', d: 'Matá 5 jefes (histórico)' },
+    { id: 'sellos5', t: 'Pasaporte Completo', d: 'Juntá los 5 sellos de la gira' },
+    { id: 'finalBueno', t: 'El Último Acorde', d: 'Exigí el Show Final con el pasaporte completo' },
+    { id: 'gatoLogro', t: 'Michi de Hostel', d: 'Acariciá al gato' },
   ];
 
   MZ.logros = {
@@ -75,7 +78,7 @@ window.MZ = window.MZ || {};
       if (d.bestDepth >= 50) this.unlock('nivel50');
       if ((d.morena || 0) >= 3) this.unlock('morena');
       if ((d.nona || 0) >= 3) this.unlock('nona');
-      if ((d.loreCap || 0) >= 7) this.unlock('lore');
+      if ((d.loreCap || 0) >= (MZ.CAPS_TOTAL || 8)) this.unlock('lore');
       if ((d.jefesMuertos || 0) >= 5) this.unlock('jefe5');
       if (S && S.player && S.player.streak >= 10) this.unlock('racha10');
       // eventos puntuales
@@ -92,10 +95,10 @@ window.MZ = window.MZ || {};
   // Las almas se ganan al morir: profundidad y bajas del run.
   const MEJORAS = [
     { id: 'vida', t: 'Sangre de Gólem', d: '+2 HP máximo inicial', max: 10, base: 25 },
-    { id: 'fuerza', t: 'Puños del Mundial', d: '+1 ATK base inicial', max: 5, base: 60 },
-    { id: 'cuero', t: 'Piel de Vampiro', d: '+1 DEF base inicial', max: 3, base: 90 },
-    { id: 'viatico', t: 'Viático del Gremio', d: '+30 de oro inicial', max: 5, base: 30 },
-    { id: 'cuchillo', t: 'Cuchillo Heredado', d: 'Empezás con el cuchillo de asado', max: 1, base: 50 },
+    { id: 'fuerza', t: 'Puños de Mosh', d: '+1 ATK base inicial', max: 5, base: 60 },
+    { id: 'cuero', t: 'Piel de Gira', d: '+1 DEF base inicial', max: 3, base: 90 },
+    { id: 'viatico', t: 'Viático de la Productora', d: '+30 de oro inicial', max: 5, base: 30 },
+    { id: 'cuchillo', t: 'Púa Heredada', d: 'Empezás con la púa afilada del abuelo', max: 1, base: 50 },
     { id: 'petaca', t: 'Petaca de Tequila', d: 'Empezás con un tequila encima (auto al 30% HP)', max: 1, base: 80 },
   ];
 
@@ -128,7 +131,7 @@ window.MZ = window.MZ || {};
       P.baseAtk += this.nivel('fuerza');
       P.baseDef += this.nivel('cuero');
       P.gold += this.nivel('viatico') * 30;
-      if (this.nivel('cuchillo')) P.melee = { kind: 'melee', name: 'Cuchillo heredado', atk: 1 };
+      if (this.nivel('cuchillo')) P.melee = { kind: 'melee', name: 'Púa heredada', atk: 1 };
       if (this.nivel('petaca')) P.petaca = true;
     },
 
