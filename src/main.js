@@ -684,13 +684,21 @@ window.MZ = window.MZ || {};
     // bestiario: descubrir el objeto al levantarlo
     const ARS = { potion: 'potion', mate: 'mate', mateLegendario: 'mateLegendario', tequila: 'tequila', heart: 'heart', altar: 'altar', anillo: 'anillo', chest: 'cofre', armor: 'escudo', bfg: 'bfg', mapa: 'mapa', granadaFrag: 'granadaFrag', granadaMolotov: 'granadaMolotov', granadaStun: 'granadaStun' };
     if (ARS[it.type]) MZ.codex.discover('arsenal', ARS[it.type]);
-    // granadas: van al stock (no reemplazan arma)
+    // granadas: van al stock (no reemplazan arma), con tope global de 2 en mano
     const gk = MZ.GRENADE_BY_ITEM[it.type];
     if (gk) {
-      const got = 1 + (Math.random() < 0.4 ? 1 : 0);
-      P.granadas[gk] = (P.granadas[gk] || 0) + got;
-      MZ.audio.pickup();
-      MZ.fx.floatText(p.x, p.y - 8, '+' + got + ' ' + MZ.GRENADES[gk].icon, MZ.GRENADES[gk].color, 13);
+      const want = 1 + (Math.random() < 0.4 ? 1 : 0);
+      const got = MZ.addGrenade(P, gk, want);
+      if (got <= 0) {
+        // manos llenas: se vende sola por unas monedas
+        const g = 4 + Math.floor(S.depth / 2);
+        P.gold += g;
+        MZ.audio.gold();
+        MZ.fx.floatText(p.x, p.y - 8, 'manos llenas +' + g, 0xffd700, 12);
+      } else {
+        MZ.audio.pickup();
+        MZ.fx.floatText(p.x, p.y - 8, '+' + got + ' ' + MZ.GRENADES[gk].icon, MZ.GRENADES[gk].color, 13);
+      }
       if (it.spr) { it.spr.destroy(); it.spr = null; }
       S.items = S.items.filter(x => x !== it);
       MZ.ui.updateHUD();
@@ -768,13 +776,21 @@ window.MZ = window.MZ || {};
         break;
       }
       case 'bfg': {
-        // BFG es su propio tipo: cada una suma una bala al cañón.
-        if (!P.bfg) P.bfg = MZ.genBFG(S.depth);
-        else P.bfg.ammo += 1;
-        MZ.codex.discover('arsenal', 'bfg');
-        MZ.audio.boss();
-        MZ.fx.flash(0.35, 0x33ff66);
-        MZ.say('bfgPickup', null, 4000);
+        // BFG es su propio tipo: máximo 1 (una sola bala en el cañón).
+        if (!P.bfg) {
+          P.bfg = MZ.genBFG(S.depth);
+          MZ.codex.discover('arsenal', 'bfg');
+          MZ.audio.boss();
+          MZ.fx.flash(0.35, 0x33ff66);
+          MZ.say('bfgPickup', null, 4000);
+        } else {
+          // ya tenés una cargada: se vende sola
+          const g = 25 + S.depth;
+          P.gold += g;
+          MZ.audio.gold();
+          MZ.fx.floatText(p.x, p.y - 8, '+' + g, 0xffd700, 13);
+          MZ.say('lootRepetido', { g });
+        }
         break;
       }
       case 'armor': {

@@ -4,20 +4,20 @@ window.MZ = window.MZ || {};
   MZ.T = { WALL: 0, FLOOR: 1, CRACK: 2, STAIRS: 3 };
   const T = MZ.T;
 
-  // Paleta neón que rota cada 5 niveles, para que bajar se sienta fresco.
+  // Un tema por ACTO (10 niveles): cada parada de la gira tiene su paleta.
   MZ.THEMES = [
-    { wall: 0x00e5ff, floor: 0x0a2e33, accent: 0x00ffc8, name: 'cian' },
-    { wall: 0xb14cff, floor: 0x221038, accent: 0xff4cf0, name: 'violeta' },
-    { wall: 0xff3355, floor: 0x330a14, accent: 0xff9933, name: 'rojo' },
-    { wall: 0x7fff00, floor: 0x132c0a, accent: 0xc8ff00, name: 'ácido' },
-    { wall: 0xffc400, floor: 0x332305, accent: 0xffea00, name: 'dorado' },
+    { wall: 0x00e5ff, floor: 0x0a2e33, accent: 0x00ffc8, name: 'la previa' },
+    { wall: 0xff4cf0, floor: 0x2a0a28, accent: 0xb14cff, name: 'neón' },
+    { wall: 0xff9933, floor: 0x33170a, accent: 0x00e5ff, name: 'playa' },
+    { wall: 0xffc400, floor: 0x332305, accent: 0xff6622, name: 'la ruta' },
+    { wall: 0x7fff00, floor: 0x0e2208, accent: 0xc8ff00, name: 'la mansión' },
   ];
 
   MZ.themeFor = function (depth) {
     if (depth === 42) return { wall: 0xffd700, floor: 0x33290a, accent: 0xffffff, name: '42' };
     // niveles de jefe: infierno Doom (rojo sangre, piso negro-rojizo, fuego)
     if (depth % 5 === 0) return { wall: 0xff1a1a, floor: 0x1a0505, accent: 0xff7700, name: 'infierno', hell: true };
-    return MZ.THEMES[Math.floor((depth - 1) / 5) % MZ.THEMES.length];
+    return MZ.THEMES[Math.floor((depth - 1) / 10) % MZ.THEMES.length];
   };
 
   MZ.genLevel = function (runSeed, depth) {
@@ -195,11 +195,12 @@ window.MZ = window.MZ || {};
     }
     if (rng.chance(0.7)) drop('potion');
     // armas seguido: el filo se gasta y la munición es corta, hay que reponer
-    // siempre al menos un arma melee por piso (que nunca te quedes a piñas)
+    // siempre al menos un arma melee por piso (que nunca te quedes a piñas),
+    // pero el grueso del loot de armas es a distancia
     drop('weapon');
-    if (rng.chance(0.5)) drop('weapon');
-    if (rng.chance(0.7)) drop('bow');
-    if (depth >= 2 && rng.chance(0.4)) drop('bow');
+    if (rng.chance(0.25)) drop('weapon');
+    if (rng.chance(0.85)) drop('bow');
+    if (depth >= 2 && rng.chance(0.55)) drop('bow');
     if (rng.chance(0.5)) drop('armor');
     if (depth === 42) { drop('weapon'); drop('armor'); }
     if (rng.chance(0.08)) drop('mate');

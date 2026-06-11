@@ -235,8 +235,11 @@ estos valores:
 - Jugador arranca: 20 HP, ATK 1 (piñas), DEF 0, **7 vidas**.
 - Spawn: **80% débil / 20% fuerte** (minDepth en depth+1..+8). `count = min(4+depth*0.7, 14)`.
 - Boss cada 5; bosses con HP/atk reforzados y empuje.
-- Drops: arma ~30%+ (común, se gastan), poción 70%, mapa 20% (drop) / 30% (mercader/piso),
-  granadas ~16–22%, corazón ~14%, BFG 5% por kill (10% cerca de boss vivo).
+- Drops: melee 1 garantizada/piso + 25% extra; a distancia 85% + 55% extra (desde piso 2) —
+  el grueso del loot de armas es a distancia. Poción 70%, mapa 20% (drop) / 30% (mercader/piso),
+  granadas ~16–22% con **tope global de 2 en mano** (`MZ.GRENADE_MAX`/`MZ.addGrenade`; lo que
+  sobra se vende solo), corazón ~14%, BFG 5% por kill (10% cerca de boss vivo) con **máximo 1**
+  (sin acumular balas; repetida se vende sola).
 - Iniciativa: 50%. Poción vencida: 25%. Mimic: 15% de los cofres. Romance: 5%/piso.
 - Granadas: frag alc 4/radio 1, molotov alc 3/fuego 3 turnos, stun alc 5/radio 2/2 turnos.
 
